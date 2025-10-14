@@ -79,14 +79,16 @@ WSGI_APPLICATION = 'admin_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'car_sales_pe',
+        'NAME': 'car_Sales_pe',
         'USER': 'postgres',
         'PASSWORD': '123456',
         'HOST': 'localhost',
         'PORT': '5432',
+        'OPTIONS': {
+            'client_encoding': 'UTF8',
+        },
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

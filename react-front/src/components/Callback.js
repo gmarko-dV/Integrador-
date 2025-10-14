@@ -1,8 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import { useNavigate } from 'react-router-dom';
 
 const Callback = () => {
-  const { isLoading, error } = useAuth0();
+  const { isLoading, error, isAuthenticated } = useAuth0();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      // Redirigir al dashboard después de un breve delay para mostrar el mensaje
+      setTimeout(() => {
+        navigate('/');
+      }, 1500);
+    }
+  }, [isLoading, isAuthenticated, navigate]);
 
   if (isLoading) {
     return (

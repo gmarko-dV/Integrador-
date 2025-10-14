@@ -4,6 +4,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -23,6 +25,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/plate-search/**").permitAll()
                 .requestMatchers("/login/oauth2/code/**").permitAll()
                 .anyRequest().authenticated()
             )
