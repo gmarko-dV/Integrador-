@@ -17,13 +17,39 @@ const Dashboard = () => {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-      <nav className="navbar">
-        <div className="container">
-          <div className="navbar-content">
-            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 'bold' }}>
-              Mi App con Auth0
-            </h1>
+    <div className="checkauto-homepage">
+      {/* Header/Navigation */}
+      <header className="checkauto-header">
+        <div className="header-container">
+          <div className="logo-section">
+            <div className="logo-icon">
+              <div className="car-icon"></div>
+            </div>
+            <h1 className="logo-text">CHECKAUTO<span className="tm">™</span></h1>
+          </div>
+          
+          <nav className="main-nav">
+            <a href="#inicio" className="nav-link">Inicio</a>
+            <a href="#buscar" className="nav-link">Buscar Placas</a>
+            <a href="#ventas" className="nav-link">Vender Auto</a>
+            <a href="#comprar" className="nav-link">Comprar Auto</a>
+            <a href="#contacto" className="nav-link dropdown">
+              Contacto <span className="dropdown-arrow">▼</span>
+            </a>
+          </nav>
+
+          <div className="header-social">
+            <div className="social-item">
+              <span className="social-icon instagram"></span>
+              <span className="social-text">checkauto.pe</span>
+            </div>
+            <div className="social-item">
+              <span className="social-icon tiktok"></span>
+              <span className="social-text">@checkauto.pe</span>
+            </div>
+          </div>
+
+          <div className="header-auth">
             {isAuthenticated ? (
               <Profile />
             ) : (
@@ -31,109 +57,102 @@ const Dashboard = () => {
             )}
           </div>
         </div>
-      </nav>
+      </header>
 
-      <main className="container" style={{ padding: '40px 20px' }}>
-        {isAuthenticated ? (
-          <div className="dashboard-grid">
-            {/* Welcome Card */}
-            <div className="card welcome-card">
-              <div className="welcome-content">
-                <div className="welcome-text">
-                  <h2 style={{ marginTop: 0, fontSize: '28px', color: '#374151' }}>
-                    ¡Bienvenido, {user.name}!
-                  </h2>
-                  <p className="welcome-subtitle">
-                    Has iniciado sesión correctamente. Aquí tienes acceso a todas las funcionalidades.
-                  </p>
+      {/* Main Content */}
+      <main className="checkauto-main">
+        <div className="hero-section">
+          <div className="hero-content">
+            <h1 className="hero-title">
+              El Portal Oficial de Compra, Venta y Consulta de Vehículos en Perú
+            </h1>
+            <p className="hero-subtitle">
+              En CHECKAUTO® encontrarás miles de autos nuevos y usados a lo largo de todas las ciudades y regiones del Perú. 
+              ¿Estás listo para comprar, vender o verificar la información de tu vehículo?
+            </p>
+            
+            {isAuthenticated && (
+              <div className="authenticated-content">
+                <div className="welcome-message">
+                  <h2>¡Bienvenido, {user.name}!</h2>
+                  <p>Ahora puedes acceder a todas las funcionalidades de compra, venta y consulta de vehículos.</p>
                 </div>
-                <div className="welcome-avatar">
-                  <img 
-                    src={user.picture} 
-                    alt={user.name}
-                    className="welcome-avatar-img"
-                  />
+                <PlateSearch />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Features Section */}
+        <section className="features-section">
+          <div className="features-container">
+            <h2 className="features-title">¿Por qué elegir CHECKAUTO?</h2>
+            <div className="features-list">
+              <div className="feature-item-simple">
+                <span className="feature-icon">🔍</span>
+                <div className="feature-content">
+                  <h3>Consulta Instantánea</h3>
+                  <p>Obtén información completa de cualquier vehículo registrado en el Perú en segundos.</p>
+                </div>
+              </div>
+              <div className="feature-item-simple">
+                <span className="feature-icon">💰</span>
+                <div className="feature-content">
+                  <h3>Compra y Venta</h3>
+                  <p>Miles de autos nuevos y usados disponibles en todas las ciudades del Perú.</p>
+                </div>
+              </div>
+              <div className="feature-item-simple">
+                <span className="feature-icon">📊</span>
+                <div className="feature-content">
+                  <h3>Datos Oficiales</h3>
+                  <p>Información verificada directamente desde las bases de datos oficiales del gobierno.</p>
+                </div>
+              </div>
+              <div className="feature-item-simple">
+                <span className="feature-icon">🛡️</span>
+                <div className="feature-content">
+                  <h3>Seguro y Confidencial</h3>
+                  <p>Tu información está protegida con los más altos estándares de seguridad.</p>
                 </div>
               </div>
             </div>
+          </div>
+        </section>
 
-            {/* Quick Actions */}
-            <div className="card">
-              <h3>Acciones Rápidas</h3>
-              <div className="quick-actions">
-                <button className="action-btn">
-                  <span className="action-icon">📊</span>
-                  Ver Estadísticas
-                </button>
-                <button className="action-btn">
-                  <span className="action-icon">⚙️</span>
-                  Configuración
-                </button>
-                <button className="action-btn">
-                  <span className="action-icon">📝</span>
-                  Crear Nuevo
-                </button>
-                <button className="action-btn">
-                  <span className="action-icon">📁</span>
-                  Mis Archivos
-                </button>
-              </div>
-            </div>
-
-            {/* User Info Card */}
-            <div className="card">
-              <h3>Información del Usuario</h3>
-              <div className="user-details">
-                <div className="detail-item">
-                  <strong>Nombre:</strong> {user.name}
-                </div>
-                <div className="detail-item">
-                  <strong>Email:</strong> {user.email}
-                </div>
-                <div className="detail-item">
-                  <strong>ID:</strong> {user.sub}
-                </div>
-                <div className="detail-item">
-                  <strong>Última actualización:</strong> {new Date(user.updated_at).toLocaleString()}
-                </div>
-              </div>
-            </div>
-
-            {/* Búsqueda de Placas */}
-            <div className="card plate-search-card">
-              <PlateSearch />
-            </div>
-
-            {/* Backend Info */}
-            <div className="card backend-info-card">
+        {!isAuthenticated && (
+          <section className="status-section">
+            <div className="status-container">
               <h3>Estado de los Servicios</h3>
               <BackendInfo />
             </div>
-          </div>
-        ) : (
-          <div className="card">
-            <h2 style={{ marginTop: 0, fontSize: '28px', color: '#374151' }}>
-              Dashboard Principal
-            </h2>
-            <div className="status-info">
-              <strong>¡Bienvenido!</strong> Inicia sesión para acceder a tu dashboard personalizado.
-            </div>
-            <div className="login-features">
-              <h3>¿Qué puedes hacer al iniciar sesión?</h3>
-              <ul className="features-list">
-                <li>📊 Acceder a estadísticas personalizadas</li>
-                <li>⚙️ Configurar tu perfil y preferencias</li>
-                <li>📝 Crear y gestionar contenido</li>
-                <li>📁 Organizar tus archivos</li>
-                <li>🔒 Acceso seguro a todas las funcionalidades</li>
-              </ul>
-            </div>
-            <div className="backend-info">
-              <BackendInfo />
-            </div>
-          </div>
+          </section>
         )}
       </main>
+
+      <footer className="checkauto-footer">
+        <div className="footer-container">
+          <div className="footer-content">
+            <div className="footer-logo">
+              <div className="car-icon"></div>
+              <span>CHECKAUTO™</span>
+            </div>
+            <div className="footer-links">
+              <a href="#privacy">Privacidad</a>
+              <a href="#terms">Términos</a>
+              <a href="#help">Ayuda</a>
+              <a href="#contact">Contacto</a>
+            </div>
+            <div className="footer-social">
+              <span>checkauto.pe</span>
+              <span>@checkauto.pe</span>
+            </div>
+          </div>
+          <div className="footer-bottom">
+            <p>&copy; 2024 CHECKAUTO. Todos los derechos reservados.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

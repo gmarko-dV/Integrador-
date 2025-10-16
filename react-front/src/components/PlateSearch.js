@@ -12,8 +12,9 @@ const PlateSearch = () => {
   const [searchHistory, setSearchHistory] = useState([]);
 
   const validatePlate = (plate) => {
-    // Validación básica para placas peruanas (formato: 3 letras + 3-4 números)
-    const plateRegex = /^[A-Z]{3}[0-9]{3,4}$/;
+    // Validación ampliada para placas peruanas
+    // Acepta: ABC123, ABC1234, T3V213, A1B2C3, etc.
+    const plateRegex = /^[A-Z0-9]{6,7}$/;
     return plateRegex.test(plate.toUpperCase());
   };
 
@@ -28,7 +29,7 @@ const PlateSearch = () => {
     const formattedPlate = plateNumber.toUpperCase().trim();
     
     if (!validatePlate(formattedPlate)) {
-      setError('Formato de placa inválido. Debe ser 3 letras seguidas de 3-4 números (ej: ABC123)');
+      setError('Formato de placa inválido. Debe tener entre 6-7 caracteres alfanuméricos (ej: ABC123, T3V213)');
       return;
     }
 
@@ -103,7 +104,7 @@ const PlateSearch = () => {
               type="text"
               value={plateNumber}
               onChange={(e) => setPlateNumber(e.target.value.toUpperCase())}
-              placeholder="Ej: ABC123 o B6U175"
+              placeholder="Ej: ABC123, T3V213, B6U175"
               className="plate-input"
               maxLength="7"
               disabled={isLoading}

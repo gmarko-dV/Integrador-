@@ -1,6 +1,6 @@
-# Proyecto Integrador - Sistema de Búsqueda de Placas de Vehículos
+# CHECKAUTO™ - Sistema de Consulta de Placas de Vehículos
 
-Este proyecto implementa un sistema completo de búsqueda de placas de vehículos peruanos con autenticación Auth0, integrando múltiples backends y una API SOAP externa.
+**CHECKAUTO™** es el portal oficial de consulta de placas de vehículos en Perú. Este proyecto implementa un sistema completo de búsqueda de placas de vehículos peruanos con autenticación Auth0, integrando múltiples backends y una API SOAP externa.
 
 ## 🚀 Funcionalidades Principales
 
@@ -42,8 +42,9 @@ Este proyecto implementa un sistema completo de búsqueda de placas de vehículo
 ### Frontend
 - **React 18** con Hooks
 - **Auth0 React SDK** para autenticación
-- **CSS3** con diseño responsivo
+- **CSS3** con diseño moderno y responsivo inspirado en portales automotrices
 - **JavaScript ES6+**
+- **Diseño tipo "Peruautos"** con fondo de carretera y efectos visuales
 
 ### Backend Spring Boot
 - **Spring Boot 3.x**

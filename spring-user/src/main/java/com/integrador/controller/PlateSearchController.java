@@ -110,14 +110,14 @@ public class PlateSearchController {
     @GetMapping("/plate-search/validate/{plate}")
     public ResponseEntity<Map<String, Object>> validatePlate(@PathVariable String plate) {
         try {
-            boolean isValid = plate != null && plate.matches("^[A-Z]{3}[0-9]{3,4}$");
+            boolean isValid = plate != null && plate.matches("^[A-Z0-9]{6,7}$");
             
             Map<String, Object> response = new HashMap<>();
             response.put("valid", isValid);
             response.put("plate", plate.toUpperCase());
             
             if (!isValid) {
-                response.put("message", "Formato de placa inválido. Debe ser 3 letras seguidas de 3-4 números (ej: ABC123)");
+                response.put("message", "Formato de placa inválido. Debe tener entre 6-7 caracteres alfanuméricos (ej: ABC123, T3V213)");
             }
             
             return ResponseEntity.ok(response);
