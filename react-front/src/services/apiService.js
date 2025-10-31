@@ -24,7 +24,12 @@ export const djangoApi = axios.create({
 export const setupAuthInterceptor = (getAccessTokenSilently) => {
   const interceptor = async (config) => {
     try {
-      const token = await getAccessTokenSilently();
+      // Obtener ID token (JWT firmado, no encriptado) - sin audience
+      const token = await getAccessTokenSilently({
+        authorizationParams: {
+          scope: 'openid profile email'
+        }
+      });
       config.headers.Authorization = `Bearer ${token}`;
     } catch (error) {
       console.error('Error obteniendo token:', error);

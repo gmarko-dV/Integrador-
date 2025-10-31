@@ -1,44 +1,105 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
+import './Callback.css';
 
 const Callback = () => {
-  const { isLoading, error, isAuthenticated } = useAuth0();
-  const navigate = useNavigate();
 
+  const { isLoading, error, isAuthenticated } = useAuth0();
+  const [searchParams] = useSearchParams();
+  const urlError = searchParams.get('error');
+  const code = searchParams.get('code');
+  const [hasRedirected, setHasRedirected] = useState(false);
+  
   useEffect(() => {
+    if (hasRedirected) return;
+    
+    if (urlError || error) return;
+    
     if (!isLoading && isAuthenticated) {
-      // Redirigir al dashboard después de un breve delay para mostrar el mensaje
+      setHasRedirected(true);
       setTimeout(() => {
-        navigate('/');
-      }, 1500);
+        window.location.href = '/';
+      }, 500);
+      return;
     }
-  }, [isLoading, isAuthenticated, navigate]);
+    
+    if (code && isLoading) return;
+    
+    if (!isLoading && !isAuthenticated && !code && !urlError && !error) {
+      const timer = setTimeout(() => {
+        if (!hasRedirected) {
+          setHasRedirected(true);
+          window.location.href = '/';
+        }
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, isAuthenticated, code, urlError, error, hasRedirected]);
 
   if (isLoading) {
     return (
-      <div className="loading">
-        <div className="spinner"></div>
+      <div className="callback-loading">
         <p>Procesando login...</p>
       </div>
     );
   }
 
-  if (error) {
+  // Detectar error de dominio no permitido
+  const hasAccessDeniedError = urlError === 'access_denied' || 
+                               (error && !isLoading && (
+                                 error.error === 'access_denied' || 
+                                 error.statusCode === 400 ||
+                                 error.statusCode === 403
+                               ));
+
+  // Mostrar error de acceso denegado
+  if (hasAccessDeniedError && !isLoading) {
     return (
-      <div className="loading">
-        <div className="status-error">
-          <strong>Error:</strong> {error.message}
-        </div>
+      <div className="callback-error callback-error-access-denied">
+        <h2>⚠️ Acceso Denegado</h2>
+        <p className="callback-error-message">
+          Solo se permiten correos institucionales de <strong>TECSUP</strong>.
+        </p>
+        <p className="callback-error-description">
+          Por favor, inicia sesión con una cuenta que termine en <strong>@tecsup.edu.pe</strong>
+        </p>
+        <button 
+          onClick={() => window.location.href = '/'}
+          className="callback-error-button"
+        >
+          Volver al Inicio
+        </button>
       </div>
     );
   }
 
-  return (
-    <div className="loading">
-      <div className="status-success">
-        <strong>¡Login exitoso!</strong> Redirigiendo al dashboard...
+  // Mostrar otros errores
+  if (error && !hasAccessDeniedError) {
+    return (
+      <div className="callback-error callback-error-other">
+        <h2>Error de Autenticación</h2>
+        <p className="callback-error-message">
+          {error.message || error.error_description || 'Error al procesar el login'}
+        </p>
+        <button 
+          onClick={() => window.location.href = '/'}
+          className="callback-error-button"
+        >
+          Volver al Inicio
+        </button>
       </div>
+    );
+  }
+
+  if (hasRedirected && isAuthenticated) {
+    return null;
+  }
+
+  return (
+    <div className="callback-success">
+      <p><strong>¡Login exitoso!</strong></p>
+      <p>Redirigiendo...</p>
     </div>
   );
 };

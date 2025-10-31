@@ -152,3 +152,35 @@ REST_FRAMEWORK = {
     ),
 }
 
+# Dominio institucional permitido para registro/autenticación
+INSTITUTIONAL_EMAIL_DOMAIN = 'tecsup.edu.pe'
+
+# Configuración de logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'auth_app': {
+            'handlers': ['console'],
+            'level': 'DEBUG',  # Cambiar a DEBUG para ver más detalles
+            'propagate': False,
+        },
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
+}
+
