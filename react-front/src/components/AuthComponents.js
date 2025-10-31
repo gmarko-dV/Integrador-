@@ -1,14 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import './AuthComponents.css';
 
 const LoginButton = () => {
   const { loginWithRedirect } = useAuth0();
 
+  const handleLogin = () => {
+    loginWithRedirect({
+      authorizationParams: {
+        prompt: 'login',
+        screen_hint: 'signup'
+      }
+    });
+  };
+
   return (
-    <button 
-      onClick={() => loginWithRedirect()}
-      className="btn btn-primary"
-    >
+    <button onClick={handleLogin} className="login-button">
       Iniciar Sesión
     </button>
   );
@@ -20,7 +27,7 @@ const LogoutButton = () => {
   return (
     <button 
       onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-      className="btn btn-danger"
+      className="logout-button"
     >
       Cerrar Sesión
     </button>
@@ -49,72 +56,45 @@ const Profile = () => {
   }, [isMenuOpen]);
 
   if (isLoading) {
-    return <div className="loading">Cargando...</div>;
+    return <span className="profile-loading">Cargando...</span>;
   }
 
   if (!isAuthenticated) {
-    return <div>No estás autenticado</div>;
+    return null;
   }
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  const closeMenu = () => {
-    setIsMenuOpen(false);
-  };
-
   return (
-    <div className="user-profile" ref={menuRef}>
-      <div className="user-avatar-container" onClick={toggleMenu}>
+    <div className="profile-container" ref={menuRef}>
+      <div 
+        onClick={() => setIsMenuOpen(!isMenuOpen)}
+        className={`profile-toggle ${isMenuOpen ? 'active' : ''}`}
+      >
         <img 
-          className="user-avatar" 
           src={user.picture} 
           alt={user.name}
-          title="Ver perfil"
+          className="profile-avatar"
         />
-        <span className="user-name">{user.name}</span>
-        <span className="dropdown-arrow">▼</span>
+        <span className="profile-name">{user.name || user.email}</span>
+        <span className="profile-arrow">▼</span>
       </div>
       
       {isMenuOpen && (
-        <div className="user-dropdown">
-          <div className="dropdown-header">
+        <div className="profile-dropdown">
+          <div className="profile-dropdown-header">
             <img 
-              className="dropdown-avatar" 
               src={user.picture} 
-              alt={user.name} 
+              alt={user.name}
+              className="profile-dropdown-avatar"
             />
-            <div className="dropdown-user-info">
-              <h4>{user.name}</h4>
-              <p>{user.email}</p>
+            <div className="profile-dropdown-name">
+              {user.name}
+            </div>
+            <div className="profile-dropdown-email">
+              {user.email}
             </div>
           </div>
           
-          <div className="dropdown-divider"></div>
-          
-          <div className="dropdown-menu">
-            <button className="dropdown-item" onClick={closeMenu}>
-              <span className="menu-icon">👤</span>
-              Mi Perfil
-            </button>
-            <button className="dropdown-item" onClick={closeMenu}>
-              <span className="menu-icon">⚙️</span>
-              Configuración
-            </button>
-            <button className="dropdown-item" onClick={closeMenu}>
-              <span className="menu-icon">📊</span>
-              Estadísticas
-            </button>
-            <button className="dropdown-item" onClick={closeMenu}>
-              <span className="menu-icon">❓</span>
-              Ayuda
-            </button>
-          </div>
-          
-          <div className="dropdown-divider"></div>
-          
-          <div className="dropdown-menu">
+          <div className="profile-dropdown-divider">
             <LogoutButton />
           </div>
         </div>

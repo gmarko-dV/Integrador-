@@ -1,0 +1,75 @@
+/* Estilos para Callback */
+
+.callback-loading {
+  text-align: center;
+  margin-top: 100px;
+  font-size: 18px;
+  color: #666;
+}
+
+.callback-error {
+  max-width: 500px;
+  margin: 50px auto;
+  padding: 30px;
+  text-align: center;
+  border-radius: 8px;
+}
+
+.callback-error-access-denied {
+  background-color: #fff3cd;
+  border: 2px solid #ffc107;
+}
+
+.callback-error-other {
+  background-color: #f8d7da;
+  border: 2px solid #f5c6cb;
+}
+
+.callback-error h2 {
+  margin-top: 0;
+}
+
+.callback-error-access-denied h2 {
+  color: #856404;
+}
+
+.callback-error-other h2 {
+  color: #721c24;
+}
+
+.callback-error-message {
+  font-size: 16px;
+  margin: 15px 0;
+}
+
+.callback-error-description {
+  font-size: 14px;
+  color: #666;
+}
+
+.callback-error-button {
+  margin-top: 20px;
+  padding: 12px 24px;
+  font-size: 16px;
+  background-color: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.callback-error-button:hover {
+  background-color: #0052a3;
+}
+
+.callback-success {
+  text-align: center;
+  margin-top: 100px;
+  font-size: 18px;
+  color: #28a745;
+}
+
+.callback-success p {
+  margin: 5px 0;
+}
+
