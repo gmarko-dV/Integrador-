@@ -32,6 +32,8 @@ public class AnuncioController {
             @RequestPart("kilometraje") String kilometraje,
             @RequestPart("precio") String precio,
             @RequestPart("descripcion") String descripcion,
+            @RequestPart(value = "emailContacto", required = false) String emailContacto,
+            @RequestPart(value = "telefonoContacto", required = false) String telefonoContacto,
             @RequestPart("imagen1") MultipartFile imagen1,
             @RequestPart("imagen2") MultipartFile imagen2) {
         
@@ -106,8 +108,12 @@ public class AnuncioController {
             request.setKilometraje(Integer.parseInt(kilometraje));
             request.setPrecio(new java.math.BigDecimal(precio));
             request.setDescripcion(descripcion);
+            request.setEmailContacto(emailContacto);
+            request.setTelefonoContacto(telefonoContacto);
             
             System.out.println("Datos recibidos - Modelo: " + modelo + ", Año: " + anio);
+            System.out.println("Email contacto: " + emailContacto);
+            System.out.println("Teléfono contacto: " + telefonoContacto);
             
             // Preparar lista de imágenes
             List<MultipartFile> imagenes = List.of(imagen1, imagen2);

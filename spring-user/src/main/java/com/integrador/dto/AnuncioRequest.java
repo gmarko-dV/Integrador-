@@ -8,6 +8,8 @@ public class AnuncioRequest {
     private Integer kilometraje;
     private BigDecimal precio;
     private String descripcion;
+    private String emailContacto;
+    private String telefonoContacto;
     
     // Constructores
     public AnuncioRequest() {}
@@ -60,6 +62,22 @@ public class AnuncioRequest {
     
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
+    }
+    
+    public String getEmailContacto() {
+        return emailContacto;
+    }
+    
+    public void setEmailContacto(String emailContacto) {
+        this.emailContacto = emailContacto;
+    }
+    
+    public String getTelefonoContacto() {
+        return telefonoContacto;
+    }
+    
+    public void setTelefonoContacto(String telefonoContacto) {
+        this.telefonoContacto = telefonoContacto;
     }
 }
 

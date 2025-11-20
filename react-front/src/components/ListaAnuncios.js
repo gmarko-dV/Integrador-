@@ -233,6 +233,29 @@ const ListaAnuncios = () => {
                   ? `${anuncio.descripcion.substring(0, 100)}...`
                   : anuncio.descripcion}
               </p>
+              {(anuncio.emailContacto || anuncio.telefonoContacto) && (
+                <div className="anuncio-contacto">
+                  <div className="contacto-title">📞 Contacto:</div>
+                  <div className="contacto-info">
+                    {anuncio.emailContacto && (
+                      <div className="contacto-item">
+                        <span className="contacto-label">Email:</span>
+                        <a href={`mailto:${anuncio.emailContacto}`} className="contacto-link">
+                          {anuncio.emailContacto}
+                        </a>
+                      </div>
+                    )}
+                    {anuncio.telefonoContacto && (
+                      <div className="contacto-item">
+                        <span className="contacto-label">Teléfono:</span>
+                        <a href={`tel:${anuncio.telefonoContacto}`} className="contacto-link">
+                          {anuncio.telefonoContacto}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
               <div className="anuncio-footer">
                 <div className="anuncio-precio">
                   {formatearPrecio(anuncio.precio)}

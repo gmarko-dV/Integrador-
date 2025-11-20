@@ -39,6 +39,12 @@ public class Anuncio {
     @Column(name = "descripcion", columnDefinition = "TEXT", nullable = false)
     private String descripcion;
     
+    @Column(name = "email_contacto", length = 255)
+    private String emailContacto;
+    
+    @Column(name = "telefono_contacto", length = 20)
+    private String telefonoContacto;
+    
     @OneToMany(mappedBy = "anuncio", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Imagen> imagenes = new ArrayList<>();
     
@@ -171,6 +177,22 @@ public class Anuncio {
     
     public void setActivo(Boolean activo) {
         this.activo = activo;
+    }
+    
+    public String getEmailContacto() {
+        return emailContacto;
+    }
+    
+    public void setEmailContacto(String emailContacto) {
+        this.emailContacto = emailContacto;
+    }
+    
+    public String getTelefonoContacto() {
+        return telefonoContacto;
+    }
+    
+    public void setTelefonoContacto(String telefonoContacto) {
+        this.telefonoContacto = telefonoContacto;
     }
 }
 

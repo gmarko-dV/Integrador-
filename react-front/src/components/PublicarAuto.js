@@ -19,6 +19,8 @@ const PublicarAuto = () => {
     kilometraje: '',
     precio: '',
     descripcion: '',
+    emailContacto: '',
+    telefonoContacto: '',
   });
   const [imagen1, setImagen1] = useState(null);
   const [imagen2, setImagen2] = useState(null);
@@ -86,6 +88,18 @@ const PublicarAuto = () => {
     }
     if (!formData.descripcion.trim()) {
       setError('La descripción es requerida');
+      setLoading(false);
+      return;
+    }
+    const emailContacto = formData.emailContacto?.trim() || '';
+    const telefonoContacto = formData.telefonoContacto?.trim() || '';
+    if (!emailContacto && !telefonoContacto) {
+      setError('Debes proporcionar al menos un método de contacto (email o teléfono)');
+      setLoading(false);
+      return;
+    }
+    if (emailContacto && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailContacto)) {
+      setError('El formato del email no es válido');
       setLoading(false);
       return;
     }
@@ -157,6 +171,14 @@ const PublicarAuto = () => {
       formDataToSend.append('kilometraje', formData.kilometraje);
       formDataToSend.append('precio', formData.precio);
       formDataToSend.append('descripcion', formData.descripcion);
+      const emailContacto = formData.emailContacto?.trim() || '';
+      const telefonoContacto = formData.telefonoContacto?.trim() || '';
+      if (emailContacto) {
+        formDataToSend.append('emailContacto', emailContacto);
+      }
+      if (telefonoContacto) {
+        formDataToSend.append('telefonoContacto', telefonoContacto);
+      }
       formDataToSend.append('imagen1', imagen1);
       formDataToSend.append('imagen2', imagen2);
 
@@ -173,6 +195,8 @@ const PublicarAuto = () => {
           kilometraje: '',
           precio: '',
           descripcion: '',
+          emailContacto: '',
+          telefonoContacto: '',
         });
         setImagen1(null);
         setImagen2(null);
@@ -320,6 +344,30 @@ const PublicarAuto = () => {
               placeholder="Describe tu vehículo..."
               rows="4"
               required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="emailContacto">Email de Contacto</label>
+            <input
+              type="email"
+              id="emailContacto"
+              name="emailContacto"
+              value={formData.emailContacto}
+              onChange={handleInputChange}
+              placeholder="Ej: vendedor@ejemplo.com"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="telefonoContacto">Teléfono de Contacto</label>
+            <input
+              type="tel"
+              id="telefonoContacto"
+              name="telefonoContacto"
+              value={formData.telefonoContacto}
+              onChange={handleInputChange}
+              placeholder="Ej: +51 987 654 321"
             />
           </div>
 

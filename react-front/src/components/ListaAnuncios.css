@@ -194,6 +194,51 @@
   min-height: 45px;
 }
 
+.anuncio-contacto {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-left: 3px solid #4a90e2;
+}
+
+.contacto-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.contacto-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.contacto-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.contacto-label {
+  font-weight: 500;
+  color: #666;
+  min-width: 60px;
+}
+
+.contacto-link {
+  color: #4a90e2;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.contacto-link:hover {
+  color: #357abd;
+  text-decoration: underline;
+}
+
 .anuncio-footer {
   display: flex;
   justify-content: space-between;

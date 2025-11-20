@@ -58,6 +58,8 @@ public class AnuncioService {
         anuncio.setKilometraje(request.getKilometraje());
         anuncio.setPrecio(request.getPrecio());
         anuncio.setDescripcion(request.getDescripcion());
+        anuncio.setEmailContacto(request.getEmailContacto());
+        anuncio.setTelefonoContacto(request.getTelefonoContacto());
         // Generar título automáticamente: "Modelo Año"
         String titulo = request.getModelo() + " " + request.getAnio();
         anuncio.setTitulo(titulo);
