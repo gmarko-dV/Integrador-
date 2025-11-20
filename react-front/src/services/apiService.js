@@ -20,25 +20,76 @@ export const djangoApi = axios.create({
   },
 });
 
+// Variable para almacenar la función getIdTokenClaims
+let getIdTokenClaimsFn = null;
+let interceptorIdSpring = null;
+let interceptorIdDjango = null;
+
 // Interceptor para agregar el token de Auth0 a las peticiones
-export const setupAuthInterceptor = (getAccessTokenSilently) => {
+export const setupAuthInterceptor = (getIdTokenClaims) => {
+  // Guardar la función para uso futuro
+  getIdTokenClaimsFn = getIdTokenClaims;
+  
+  // Remover interceptores anteriores si existen
+  if (interceptorIdSpring !== null) {
+    springApi.interceptors.request.eject(interceptorIdSpring);
+  }
+  if (interceptorIdDjango !== null) {
+    djangoApi.interceptors.request.eject(interceptorIdDjango);
+  }
+  
   const interceptor = async (config) => {
     try {
-      // Obtener ID token (JWT firmado, no encriptado) - sin audience
-      const token = await getAccessTokenSilently({
-        authorizationParams: {
-          scope: 'openid profile email'
+      // Si es FormData, eliminar Content-Type para que Axios lo establezca automáticamente
+      if (config.data instanceof FormData) {
+        delete config.headers['Content-Type'];
+      }
+      
+      if (getIdTokenClaimsFn) {
+        // Obtener ID token (siempre JWS firmado, no JWE encriptado)
+        // Los ID tokens son JWS y pueden ser validados por Spring Boot
+        const claims = await getIdTokenClaimsFn();
+        if (claims && claims.__raw) {
+          const token = claims.__raw;
+          config.headers.Authorization = `Bearer ${token}`;
+          console.log('ID Token agregado a la petición:', config.url);
+          console.log('Token (primeros 50 caracteres):', token.substring(0, Math.min(50, token.length)) + '...');
+        } else {
+          console.warn('No se pudo obtener el ID token para:', config.url);
         }
-      });
-      config.headers.Authorization = `Bearer ${token}`;
+      } else {
+        console.warn('getIdTokenClaims no está disponible');
+      }
     } catch (error) {
-      console.error('Error obteniendo token:', error);
+      console.error('Error obteniendo ID token en interceptor:', error);
+      console.error('Detalles:', {
+        error: error.error,
+        error_description: error.error_description,
+        message: error.message
+      });
+      // No lanzar el error para que la petición continúe (pero fallará con 401)
     }
     return config;
   };
 
-  springApi.interceptors.request.use(interceptor);
-  djangoApi.interceptors.request.use(interceptor);
+  interceptorIdSpring = springApi.interceptors.request.use(interceptor);
+  interceptorIdDjango = djangoApi.interceptors.request.use(interceptor);
+  
+  console.log('Interceptor de autenticación configurado (usando ID token)');
+};
+
+// Función para obtener el ID token manualmente si es necesario
+export const getToken = async () => {
+  if (getIdTokenClaimsFn) {
+    try {
+      const claims = await getIdTokenClaimsFn();
+      return claims?.__raw || null;
+    } catch (error) {
+      console.error('Error obteniendo ID token:', error);
+      return null;
+    }
+  }
+  return null;
 };
 
 // Servicios de autenticación

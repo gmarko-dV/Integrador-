@@ -8,10 +8,14 @@ const AuthProvider = ({ children }) => {
     <Auth0Provider
       domain="dev-gmarko.us.auth0.com"
       clientId="q4z3HBJ8q0yVsUGCI9zyXskGA26Kus4b"
-      redirectUri={window.location.origin + '/callback'}
+      authorizationParams={{
+        redirect_uri: window.location.origin + '/callback',
+        // No usar audience si no hay un API configurado en Auth0
+        // audience: 'q4z3HBJ8q0yVsUGCI9zyXskGA26Kus4b',
+        scope: 'openid profile email offline_access' // offline_access para refresh tokens
+      }}
       useRefreshTokens={true}
       cacheLocation="localstorage"
-      audience="q4z3HBJ8q0yVsUGCI9zyXskGA26Kus4b" // API Identifier - necesario para obtener access tokens
     >
       {children}
     </Auth0Provider>

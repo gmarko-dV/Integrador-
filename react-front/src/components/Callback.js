@@ -11,6 +11,23 @@ const Callback = () => {
   const code = searchParams.get('code');
   const [hasRedirected, setHasRedirected] = useState(false);
   
+  // Debug: ver qué errores tenemos (debe estar antes de cualquier return)
+  useEffect(() => {
+    if (urlError) {
+      console.log('Error en URL:', urlError);
+      console.log('Todos los parámetros de URL:', Object.fromEntries(searchParams.entries()));
+    }
+    if (error) {
+      console.log('Error de Auth0:', error);
+      console.log('Detalles del error:', {
+        error: error.error,
+        error_description: error.error_description,
+        message: error.message,
+        statusCode: error.statusCode
+      });
+    }
+  }, [urlError, error, searchParams]);
+  
   useEffect(() => {
     if (hasRedirected) return;
     
@@ -44,14 +61,16 @@ const Callback = () => {
       </div>
     );
   }
-
+  
   // Detectar error de dominio no permitido
-  const hasAccessDeniedError = urlError === 'access_denied' || 
-                               (error && !isLoading && (
-                                 error.error === 'access_denied' || 
-                                 error.statusCode === 400 ||
-                                 error.statusCode === 403
-                               ));
+  // Solo mostrar este error si realmente es un error de acceso denegado relacionado con dominio
+  const hasAccessDeniedError = 
+    (urlError === 'access_denied' && searchParams.get('error_description')?.includes('dominio')) ||
+    (urlError === 'access_denied' && searchParams.get('error_description')?.includes('institucional')) ||
+    (error && error.error === 'access_denied' && 
+     (error.error_description?.toLowerCase().includes('dominio') || 
+      error.error_description?.toLowerCase().includes('institucional') ||
+      error.message?.toLowerCase().includes('dominio')));
 
   // Mostrar error de acceso denegado
   if (hasAccessDeniedError && !isLoading) {

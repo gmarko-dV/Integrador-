@@ -1,18 +1,21 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { LoginButton, Profile } from './AuthComponents';
 import BackendInfo from './BackendInfo';
 import PlateSearch from './PlateSearch';
+import PublicarAuto from './PublicarAuto';
+import ListaAnuncios from './ListaAnuncios';
 import { authService, setupAuthInterceptor } from '../services/apiService';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const { isAuthenticated, isLoading, user, getAccessTokenSilently } = useAuth0();
+  const { isAuthenticated, isLoading, user, getIdTokenClaims } = useAuth0();
+  const [activeTab, setActiveTab] = useState('anuncios');
 
   // Sincronizar usuario con Django cuando se autentica
   useEffect(() => {
-    if (isAuthenticated && getAccessTokenSilently) {
-      setupAuthInterceptor(getAccessTokenSilently);
+    if (isAuthenticated && getIdTokenClaims) {
+      setupAuthInterceptor(getIdTokenClaims);
       
       // Esperar un momento para que el interceptor esté configurado
       // Llamar automáticamente al endpoint de profile para crear el usuario en Django
@@ -37,7 +40,7 @@ const Dashboard = () => {
       
       syncUser();
     }
-  }, [isAuthenticated, getAccessTokenSilently]);
+  }, [isAuthenticated, getIdTokenClaims]);
 
   if (isLoading) {
     return (
@@ -69,14 +72,37 @@ const Dashboard = () => {
                 Bienvenido, <strong>{user?.name || user?.email}</strong>
               </p>
             </div>
-            <PlateSearch />
+            <div className="dashboard-tabs">
+              <button
+                className={`tab-button ${activeTab === 'anuncios' ? 'active' : ''}`}
+                onClick={() => setActiveTab('anuncios')}
+              >
+                🚗 Ver Anuncios
+              </button>
+              <button
+                className={`tab-button ${activeTab === 'buscar' ? 'active' : ''}`}
+                onClick={() => setActiveTab('buscar')}
+              >
+                🔍 Buscar Placa
+              </button>
+              <button
+                className={`tab-button ${activeTab === 'publicar' ? 'active' : ''}`}
+                onClick={() => setActiveTab('publicar')}
+              >
+                ➕ Publicar Auto
+              </button>
+            </div>
+            {activeTab === 'anuncios' && <ListaAnuncios />}
+            {activeTab === 'buscar' && <PlateSearch />}
+            {activeTab === 'publicar' && <PublicarAuto />}
           </div>
         ) : (
           <>
+            <ListaAnuncios />
             <div className="dashboard-login-card">
               <h3>Inicia sesión para continuar</h3>
               <p>
-                Necesitas iniciar sesión con tu cuenta de TECSUP para buscar placas de vehículos.
+                Necesitas iniciar sesión con tu cuenta de TECSUP para buscar placas de vehículos o publicar tu auto.
               </p>
               <LoginButton />
             </div>

@@ -9,7 +9,10 @@ const LoginButton = () => {
     loginWithRedirect({
       authorizationParams: {
         prompt: 'login',
-        screen_hint: 'signup'
+        screen_hint: 'signup',
+        // No usar audience si no hay un API configurado
+        // audience: 'q4z3HBJ8q0yVsUGCI9zyXskGA26Kus4b',
+        scope: 'openid profile email offline_access' // offline_access para refresh tokens
       }
     });
   };
@@ -35,9 +38,41 @@ const LogoutButton = () => {
 };
 
 const Profile = () => {
-  const { user, isAuthenticated, isLoading } = useAuth0();
+  const { user, isAuthenticated, isLoading, getUser } = useAuth0();
+  const [userProfile, setUserProfile] = useState(user);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  
+  // Obtener perfil completo del usuario desde Auth0
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (isAuthenticated && getUser) {
+        try {
+          const fullUser = await getUser();
+          console.log('Perfil completo del usuario:', fullUser);
+          setUserProfile(fullUser);
+        } catch (error) {
+          console.error('Error obteniendo perfil completo:', error);
+          // Usar el usuario básico si falla
+          setUserProfile(user);
+        }
+      } else {
+        setUserProfile(user);
+      }
+    };
+    
+    fetchUserProfile();
+  }, [isAuthenticated, getUser, user]);
+  
+  // Debug: ver qué información del usuario tenemos
+  useEffect(() => {
+    if (userProfile) {
+      console.log('Información del usuario (actualizada):', userProfile);
+      console.log('Imagen de perfil:', userProfile.picture);
+      console.log('Nombre:', userProfile.name);
+      console.log('Email:', userProfile.email);
+    }
+  }, [userProfile]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -69,28 +104,48 @@ const Profile = () => {
         onClick={() => setIsMenuOpen(!isMenuOpen)}
         className={`profile-toggle ${isMenuOpen ? 'active' : ''}`}
       >
-        <img 
-          src={user.picture} 
-          alt={user.name}
-          className="profile-avatar"
-        />
-        <span className="profile-name">{user.name || user.email}</span>
+        {userProfile?.picture ? (
+          <img 
+            src={userProfile.picture} 
+            alt={userProfile.name || 'Usuario'}
+            className="profile-avatar"
+            onError={(e) => {
+              console.error('Error cargando imagen de perfil:', userProfile.picture);
+              e.target.style.display = 'none';
+            }}
+          />
+        ) : (
+          <div className="profile-avatar-placeholder">
+            {userProfile?.name ? userProfile.name.charAt(0).toUpperCase() : userProfile?.email ? userProfile.email.charAt(0).toUpperCase() : 'U'}
+          </div>
+        )}
+        <span className="profile-name">{userProfile?.name || userProfile?.email || 'Usuario'}</span>
         <span className="profile-arrow">▼</span>
       </div>
       
       {isMenuOpen && (
         <div className="profile-dropdown">
           <div className="profile-dropdown-header">
-            <img 
-              src={user.picture} 
-              alt={user.name}
-              className="profile-dropdown-avatar"
-            />
+            {userProfile?.picture ? (
+              <img 
+                src={userProfile.picture} 
+                alt={userProfile.name || 'Usuario'}
+                className="profile-dropdown-avatar"
+                onError={(e) => {
+                  console.error('Error cargando imagen de perfil en dropdown:', userProfile.picture);
+                  e.target.style.display = 'none';
+                }}
+              />
+            ) : (
+              <div className="profile-dropdown-avatar-placeholder">
+                {userProfile?.name ? userProfile.name.charAt(0).toUpperCase() : userProfile?.email ? userProfile.email.charAt(0).toUpperCase() : 'U'}
+              </div>
+            )}
             <div className="profile-dropdown-name">
-              {user.name}
+              {userProfile?.name || 'Usuario'}
             </div>
             <div className="profile-dropdown-email">
-              {user.email}
+              {userProfile?.email || ''}
             </div>
           </div>
           
