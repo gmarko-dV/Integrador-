@@ -128,7 +128,6 @@ class PlateApiService {
     return plateRegex.test(plate.toUpperCase());
   }
 
-  // NOTA: Los datos mock han sido eliminados.
   // Ahora el frontend usa únicamente el backend Spring Boot
   // que consulta la API real de placas de Perú.
 }
