@@ -6,13 +6,13 @@ import BackendInfo from './BackendInfo';
 import PlateSearch from './PlateSearch';
 import PublicarAuto from './PublicarAuto';
 import ListaAnuncios from './ListaAnuncios';
-import Notificaciones from './Notificaciones';
+import AnunciosPreview from './AnunciosPreview';
 import { authService, setupAuthInterceptor } from '../services/apiService';
 import './Dashboard.css';
 
 const Dashboard = () => {
   const { isAuthenticated, isLoading, user, getIdTokenClaims, loginWithRedirect } = useAuth0();
-  const [activeTab, setActiveTab] = useState('anuncios');
+  const [activeTab, setActiveTab] = useState(null); // null = mostrar hero, 'anuncios', 'buscar', 'publicar' = mostrar solo esa sección
   const [portadaImage, setPortadaImage] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,12 +31,14 @@ const Dashboard = () => {
     };
   }, []);
 
-  // Verificar si hay parámetros en la URL para activar una pestaña específica
+  // Verificar si hay parámetros en la URL para activar una sección específica
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const tab = searchParams.get('tab');
     if (tab && ['anuncios', 'buscar', 'publicar'].includes(tab)) {
       setActiveTab(tab);
+    } else {
+      setActiveTab(null);
     }
   }, [location.search]);
 
@@ -157,8 +159,75 @@ const Dashboard = () => {
           </div>
 
           <nav className="main-nav">
-            <a href="#inicio" className="nav-link">Inicio</a>
-            <a href="#buscar" className="nav-link">Buscar Autos</a>
+            <a 
+              href="#inicio" 
+              className="nav-link"
+              onClick={(e) => {
+                e.preventDefault();
+                setActiveTab(null);
+                navigate('/');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            >
+              Inicio
+            </a>
+            {isAuthenticated ? (
+              <>
+                <a 
+                  href="#anuncios" 
+                  className={`nav-link ${activeTab === 'anuncios' ? 'active' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setActiveTab('anuncios');
+                    navigate('/?tab=anuncios');
+                    setTimeout(() => {
+                      const contentSection = document.querySelector('.content-section');
+                      if (contentSection) {
+                        contentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }, 100);
+                  }}
+                >
+                  Ver Anuncios
+                </a>
+                <a 
+                  href="#buscar-placa" 
+                  className={`nav-link ${activeTab === 'buscar' ? 'active' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setActiveTab('buscar');
+                    navigate('/?tab=buscar');
+                    setTimeout(() => {
+                      const contentSection = document.querySelector('.content-section');
+                      if (contentSection) {
+                        contentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }, 100);
+                  }}
+                >
+                  Buscar Placa
+                </a>
+                <a 
+                  href="#publicar" 
+                  className={`nav-link ${activeTab === 'publicar' ? 'active' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setActiveTab('publicar');
+                    navigate('/?tab=publicar');
+                    setTimeout(() => {
+                      const contentSection = document.querySelector('.content-section');
+                      if (contentSection) {
+                        contentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }, 100);
+                  }}
+                >
+                  Publicar Auto
+                </a>
+              </>
+            ) : (
+              <a href="#buscar" className="nav-link">Buscar Autos</a>
+            )}
             <div className="nav-link dropdown">
               Contacto <span className="dropdown-arrow">▼</span>
             </div>
@@ -172,34 +241,37 @@ const Dashboard = () => {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <main className="hero-section">
-        <div className="hero-content">
-          <h1 className="hero-title">
-            El portal confiable para la compra y venta de autos nuevos y usados en Perú.
-          </h1>
-          <p className="hero-subtitle">
-            En CheckAuto® encontrarás miles de vehículos disponibles en todas las ciudades del país, con precios competitivos y herramientas como nuestro buscador de placas para verificar la información del auto antes de decidir. ¿Listo para comprar o vender tu vehículo en Perú?
-          </p>
+      {/* Hero Section - Solo se muestra si no hay una sección activa */}
+      {!activeTab && (
+        <main className="hero-section">
+          <div className="hero-content">
+            <h1 className="hero-title">
+              El portal confiable para la compra y venta de autos nuevos y usados en Perú.
+            </h1>
+            <p className="hero-subtitle">
+              En CheckAuto® encontrarás miles de vehículos disponibles en todas las ciudades del país, con precios competitivos y herramientas como nuestro buscador de placas para verificar la información del auto antes de decidir. ¿Listo para comprar o vender tu vehículo en Perú?
+            </p>
 
-          {/* Action Buttons */}
-          <div className="hero-actions">
-            <button className="btn-buscar-autos" onClick={handleSearch}>
-              <span className="btn-icon">🔍</span>
-              Buscar Autos
-            </button>
-            <button className="btn-publicar-anuncio" onClick={handlePublicar}>
-              Publicar Anuncio
-            </button>
+            {/* Action Buttons */}
+            <div className="hero-actions">
+              <button className="btn-buscar-autos" onClick={handleSearch}>
+                <span className="btn-icon">🔍</span>
+                Buscar Autos
+              </button>
+              <button className="btn-publicar-anuncio" onClick={handlePublicar}>
+                Publicar Anuncio
+              </button>
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      )}
 
-      {/* Vehicle Types Section */}
-      <section className="vehicle-types-section">
-        <div className="vehicle-types-container">
-          <h2 className="vehicle-types-title">BUSCAR POR TIPO DE VEHÍCULO</h2>
-          <div className="vehicle-types-grid">
+      {/* Vehicle Types Section - Solo se muestra si no hay una sección activa */}
+      {!activeTab && (
+        <section className="vehicle-types-section">
+          <div className="vehicle-types-container">
+            <h2 className="vehicle-types-title">BUSCAR POR TIPO DE VEHÍCULO</h2>
+            <div className="vehicle-types-grid">
             <div className="vehicle-type-card" onClick={() => handleTipoVehiculoClick('Hatchback')}>
               <img 
                 src={`${process.env.PUBLIC_URL}/vehiculos/hatchback.png`} 
@@ -257,77 +329,71 @@ const Dashboard = () => {
           </div>
         </div>
       </section>
+      )}
 
-      {/* Content Section */}
-      <div className="content-section">
-        {isAuthenticated ? (
-          <div className="authenticated-content">
-            <div className="dashboard-welcome">
-              <p>
-                Bienvenido, <strong>{user?.name || user?.email}</strong>
-              </p>
+      {/* Anuncios Preview - Solo se muestra si no hay una sección activa */}
+      {!activeTab && (
+        <AnunciosPreview limite={6} />
+      )}
+
+      {/* Content Section - Solo se muestra si hay una sección activa */}
+      {activeTab && (
+        <div className={`content-section ${activeTab === 'buscar' ? 'buscar-section' : activeTab === 'publicar' ? 'publicar-section' : ''}`}>
+          {isAuthenticated ? (
+            <div className="authenticated-content">
+              {activeTab === 'anuncios' && <ListaAnuncios />}
+              {activeTab === 'buscar' && <PlateSearch />}
+              {activeTab === 'publicar' && <PublicarAuto />}
             </div>
-            <Notificaciones />
-            <div className="dashboard-tabs">
-              <button
-                className={`tab-button ${activeTab === 'anuncios' ? 'active' : ''}`}
-                onClick={() => setActiveTab('anuncios')}
-              >
-                🚗 Ver Anuncios
-              </button>
-              <button
-                className={`tab-button ${activeTab === 'buscar' ? 'active' : ''}`}
-                onClick={() => setActiveTab('buscar')}
-              >
-                🔍 Buscar Placa
-              </button>
-              <button
-                className={`tab-button ${activeTab === 'publicar' ? 'active' : ''}`}
-                onClick={() => setActiveTab('publicar')}
-              >
-                ➕ Publicar Auto
-              </button>
+          ) : (
+            <div className="unauthenticated-content">
+              <div className="dashboard-login-card">
+                <h3>Inicia sesión para continuar</h3>
+                <p>
+                  Necesitas iniciar sesión con tu cuenta de TECSUP para acceder a esta sección.
+                </p>
+                <LoginButton />
+              </div>
             </div>
-            {activeTab === 'anuncios' && <ListaAnuncios />}
-            {activeTab === 'buscar' && <PlateSearch />}
-            {activeTab === 'publicar' && <PublicarAuto />}
+          )}
+        </div>
+      )}
+
+      {/* Contenido adicional para usuarios no autenticados cuando no hay sección activa */}
+      {!activeTab && !isAuthenticated && (
+        <div className="content-section">
+          <div className="dashboard-login-card">
+            <h3>Inicia sesión para continuar</h3>
+            <p>
+              Necesitas iniciar sesión con tu cuenta de TECSUP para buscar placas de vehículos o publicar tu auto.
+            </p>
+            <LoginButton />
           </div>
-        ) : (
-          <>
-            <ListaAnuncios />
-            <div className="dashboard-login-card">
-              <h3>Inicia sesión para continuar</h3>
-              <p>
-                Necesitas iniciar sesión con tu cuenta de TECSUP para buscar placas de vehículos o publicar tu auto.
-              </p>
-              <LoginButton />
-            </div>
 
-            <div className="dashboard-features">
-              <div className="dashboard-feature-card">
-                <div className="dashboard-feature-icon">🔍</div>
-                <h4>Consulta Rápida</h4>
-                <p>Busca información de vehículos en segundos</p>
-              </div>
-              <div className="dashboard-feature-card">
-                <div className="dashboard-feature-icon">📊</div>
-                <h4>Datos Oficiales</h4>
-                <p>Información verificada del gobierno</p>
-              </div>
-              <div className="dashboard-feature-card">
-                <div className="dashboard-feature-icon">🛡️</div>
-                <h4>Seguro</h4>
-                <p>Tu información está protegida</p>
-              </div>
+          <div className="dashboard-features">
+            <div className="dashboard-feature-card">
+              <div className="dashboard-feature-icon">🔍</div>
+              <h4>Consulta Rápida</h4>
+              <p>Busca información de vehículos en segundos</p>
             </div>
+            <div className="dashboard-feature-card">
+              <div className="dashboard-feature-icon">📊</div>
+              <h4>Datos Oficiales</h4>
+              <p>Información verificada del gobierno</p>
+            </div>
+            <div className="dashboard-feature-card">
+              <div className="dashboard-feature-icon">🛡️</div>
+              <h4>Seguro</h4>
+              <p>Tu información está protegida</p>
+            </div>
+          </div>
 
-            <div className="dashboard-services">
-              <h3>Estado de los Servicios</h3>
-              <BackendInfo />
-            </div>
-          </>
-        )}
-      </div>
+          <div className="dashboard-services">
+            <h3>Estado de los Servicios</h3>
+            <BackendInfo />
+          </div>
+        </div>
+      )}
 
       <footer className="dashboard-footer">
         <p>© 2024 checkAuto. Todos los derechos reservados.</p>

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import Notificaciones from './Notificaciones';
 import './AuthComponents.css';
 
 const LoginButton = () => {
@@ -147,6 +148,10 @@ const Profile = () => {
             <div className="profile-dropdown-email">
               {userProfile?.email || ''}
             </div>
+          </div>
+          
+          <div className="profile-dropdown-divider">
+            <Notificaciones />
           </div>
           
           <div className="profile-dropdown-divider">

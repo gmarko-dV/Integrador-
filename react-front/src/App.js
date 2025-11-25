@@ -4,6 +4,7 @@ import AuthProvider from './components/AuthProvider';
 import Dashboard from './components/Dashboard';
 import Callback from './components/Callback';
 import ListaAnunciosPage from './components/ListaAnunciosPage';
+import DetalleAnuncio from './components/DetalleAnuncio';
 import './App.css';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/callback" element={<Callback />} />
             <Route path="/anuncios" element={<ListaAnunciosPage />} />
+            <Route path="/anuncio/:idAnuncio" element={<DetalleAnuncio />} />
           </Routes>
         </div>
       </Router>

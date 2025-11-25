@@ -96,6 +96,19 @@
   color: #0066cc;
 }
 
+.nav-link:focus {
+  color: #0066cc;
+  outline: none;
+}
+
+.nav-link:active {
+  color: #0066cc;
+}
+
+.nav-link.active {
+  color: #0066cc !important;
+}
+
 .dropdown-arrow {
   font-size: 0.7rem;
   margin-left: 0.25rem;
@@ -331,11 +344,13 @@
   padding: 3rem 2rem;
   position: relative;
   z-index: 1;
+  border: none !important;
 }
 
 .authenticated-content {
   max-width: 1200px;
   margin: 0 auto;
+  border: none !important;
 }
 
 .dashboard-welcome {

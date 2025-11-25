@@ -1,36 +1,44 @@
 .notificaciones-container {
   background: white;
   border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  margin: 0;
+  box-shadow: none;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .notificaciones-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #e0e0e0;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .notificaciones-header h3 {
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 1rem;
   color: #333;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-weight: 600;
 }
 
 .notificaciones-badge {
   background: #ff4444;
   color: white;
   border-radius: 50%;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.85rem;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
   font-weight: bold;
+  margin-left: 0.4rem;
   min-width: 24px;
   text-align: center;
 }
@@ -39,10 +47,10 @@
   background: #0066cc;
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.75rem;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 600;
   transition: background 0.3s;
 }
@@ -54,8 +62,9 @@
 .notificaciones-loading,
 .notificaciones-empty {
   text-align: center;
-  padding: 2rem;
+  padding: 1rem;
   color: #666;
+  font-size: 0.9rem;
 }
 
 .notificaciones-error {
@@ -87,11 +96,12 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 1rem;
+  padding: 0.75rem;
   border-radius: 6px;
-  border-left: 4px solid #0066cc;
+  border-left: 3px solid #0066cc;
   background: #f5f5f5;
   transition: all 0.3s;
+  margin-bottom: 0.5rem;
 }
 
 .notificacion-item.no-leida {
@@ -111,8 +121,8 @@
 }
 
 .notificacion-titulo {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.1rem;
+  margin: 0 0 0.4rem 0;
+  font-size: 0.95rem;
   color: #0066cc;
   font-weight: 600;
 }
@@ -122,11 +132,11 @@
 }
 
 .notificacion-comprador {
-  margin: 0.5rem 0;
-  padding: 0.5rem;
+  margin: 0.4rem 0;
+  padding: 0.4rem;
   background: rgba(0, 102, 204, 0.1);
   border-radius: 4px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .comprador-label {
@@ -144,10 +154,11 @@
 }
 
 .notificacion-mensaje {
-  margin: 0.5rem 0;
-  font-size: 1rem;
+  margin: 0.4rem 0;
+  font-size: 0.9rem;
   color: #333;
   font-weight: 500;
+  line-height: 1.4;
 }
 
 .notificacion-item.no-leida .notificacion-mensaje {
@@ -155,8 +166,8 @@
 }
 
 .notificacion-fecha {
-  margin: 0;
-  font-size: 0.85rem;
+  margin: 0.3rem 0 0 0;
+  font-size: 0.75rem;
   color: #666;
 }
 
@@ -164,15 +175,16 @@
   background: #4caf50;
   color: white;
   border: none;
-  padding: 0.5rem 0.75rem;
+  padding: 0.4rem 0.6rem;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: bold;
   transition: background 0.3s;
-  margin-left: 1rem;
-  min-width: 36px;
-  height: 36px;
+  margin-left: 0.5rem;
+  min-width: 32px;
+  height: 32px;
+  flex-shrink: 0;
 }
 
 .marcar-leida-btn:hover {

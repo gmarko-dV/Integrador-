@@ -117,16 +117,19 @@ const Notificaciones = () => {
   return (
     <div className="notificaciones-container">
       <div className="notificaciones-header">
-        <h3>🔔 Notificaciones</h3>
+        <h3>
+          🔔 Notificaciones
+          {cantidadNoLeidas > 0 && (
+            <span className="notificaciones-badge">{cantidadNoLeidas}</span>
+          )}
+        </h3>
         {cantidadNoLeidas > 0 && (
-          <span className="notificaciones-badge">{cantidadNoLeidas}</span>
-        )}
-        {notificaciones.length > 0 && (
           <button 
             className="marcar-todas-leidas-btn"
             onClick={marcarTodasComoLeidas}
+            title="Marcar todas como leídas"
           >
-            Marcar todas como leídas
+            ✓ Todas
           </button>
         )}
       </div>
