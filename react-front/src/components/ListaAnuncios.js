@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import anuncioService from '../services/anuncioApiService';
 import './ListaAnuncios.css';
 
 const ListaAnuncios = () => {
   const { isAuthenticated, getIdTokenClaims } = useAuth0();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const tipoVehiculo = searchParams.get('tipo');
   const [anuncios, setAnuncios] = useState([]);
+  const [anunciosFiltrados, setAnunciosFiltrados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null);
@@ -16,6 +21,19 @@ const ListaAnuncios = () => {
     cargarAnuncios();
     obtenerUserId();
   }, [isAuthenticated, getIdTokenClaims]);
+
+  useEffect(() => {
+    if (tipoVehiculo && anuncios.length > 0) {
+      // Filtrar anuncios por tipo de vehículo usando el campo tipoVehiculo
+      const filtrados = anuncios.filter(anuncio => {
+        const anuncioTipo = (anuncio.tipoVehiculo || '').trim();
+        return anuncioTipo.toLowerCase() === tipoVehiculo.toLowerCase();
+      });
+      setAnunciosFiltrados(filtrados);
+    } else {
+      setAnunciosFiltrados(anuncios);
+    }
+  }, [tipoVehiculo, anuncios]);
 
   const obtenerUserId = async () => {
     if (isAuthenticated && getIdTokenClaims) {
@@ -133,10 +151,16 @@ const ListaAnuncios = () => {
     );
   }
 
-  if (anuncios.length === 0) {
+  const anunciosAMostrar = tipoVehiculo ? anunciosFiltrados : anuncios;
+
+  if (anunciosAMostrar.length === 0) {
     return (
       <div className="lista-anuncios-empty">
-        <p>No hay anuncios disponibles en este momento.</p>
+        <p>
+          {tipoVehiculo 
+            ? `No hay anuncios disponibles para ${tipoVehiculo} en este momento.`
+            : 'No hay anuncios disponibles en este momento.'}
+        </p>
       </div>
     );
   }
@@ -144,11 +168,36 @@ const ListaAnuncios = () => {
   return (
     <div className="lista-anuncios-container">
       <div className="lista-anuncios-header">
-        <h2>🚗 Vehículos en Venta</h2>
-        <p>{anuncios.length} {anuncios.length === 1 ? 'anuncio disponible' : 'anuncios disponibles'}</p>
+        {tipoVehiculo && (
+          <button 
+            onClick={() => navigate('/')} 
+            className="btn-volver"
+            style={{
+              marginBottom: '1rem',
+              padding: '0.5rem 1rem',
+              background: '#0066cc',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '0.9rem',
+              fontWeight: '600'
+            }}
+          >
+            ← Volver al inicio
+          </button>
+        )}
+        <h2>
+          {tipoVehiculo ? `🚗 Vehículos ${tipoVehiculo} en Venta` : '🚗 Vehículos en Venta'}
+        </h2>
+        <p>
+          {anunciosAMostrar.length} {anunciosAMostrar.length === 1 ? 'anuncio disponible' : 'anuncios disponibles'}
+          {tipoVehiculo && anuncios.length > anunciosAMostrar.length && 
+            ` (de ${anuncios.length} total)`}
+        </p>
       </div>
       <div className="lista-anuncios-grid">
-        {anuncios.map((anuncio) => {
+        {anunciosAMostrar.map((anuncio) => {
           const tieneMultiplesImagenes = anuncio.imagenes && anuncio.imagenes.length > 1;
           const imagenMostrada = obtenerImagenActual(anuncio);
           const indiceActual = imagenActual[anuncio.idAnuncio] || 0;

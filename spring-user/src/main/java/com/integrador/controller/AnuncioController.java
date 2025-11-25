@@ -32,6 +32,7 @@ public class AnuncioController {
             @RequestPart("kilometraje") String kilometraje,
             @RequestPart("precio") String precio,
             @RequestPart("descripcion") String descripcion,
+            @RequestPart("tipoVehiculo") String tipoVehiculo,
             @RequestPart(value = "emailContacto", required = false) String emailContacto,
             @RequestPart(value = "telefonoContacto", required = false) String telefonoContacto,
             @RequestPart("imagen1") MultipartFile imagen1,
@@ -108,6 +109,7 @@ public class AnuncioController {
             request.setKilometraje(Integer.parseInt(kilometraje));
             request.setPrecio(new java.math.BigDecimal(precio));
             request.setDescripcion(descripcion);
+            request.setTipoVehiculo(tipoVehiculo);
             request.setEmailContacto(emailContacto);
             request.setTelefonoContacto(telefonoContacto);
             

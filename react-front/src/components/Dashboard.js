@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import { useNavigate } from 'react-router-dom';
 import { LoginButton, Profile } from './AuthComponents';
 import BackendInfo from './BackendInfo';
 import PlateSearch from './PlateSearch';
@@ -12,6 +13,7 @@ const Dashboard = () => {
   const { isAuthenticated, isLoading, user, getIdTokenClaims } = useAuth0();
   const [activeTab, setActiveTab] = useState('anuncios');
   const [portadaImage, setPortadaImage] = useState(null);
+  const navigate = useNavigate();
 
   // Cargar imagen de portada
   useEffect(() => {
@@ -69,6 +71,10 @@ const Dashboard = () => {
       // Redirigir a login si no está autenticado
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  };
+
+  const handleTipoVehiculoClick = (tipoVehiculo) => {
+    navigate(`/anuncios?tipo=${encodeURIComponent(tipoVehiculo)}`);
   };
 
   if (isLoading) {
@@ -140,6 +146,69 @@ const Dashboard = () => {
           </div>
         </div>
       </main>
+
+      {/* Vehicle Types Section */}
+      <section className="vehicle-types-section">
+        <div className="vehicle-types-container">
+          <h2 className="vehicle-types-title">BUSCAR POR TIPO DE VEHÍCULO</h2>
+          <div className="vehicle-types-grid">
+            <div className="vehicle-type-card" onClick={() => handleTipoVehiculoClick('Hatchback')}>
+              <img 
+                src={`${process.env.PUBLIC_URL}/vehiculos/hatchback.png`} 
+                alt="Hatchback" 
+                className="vehicle-type-image"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+              <h3 className="vehicle-type-name">Hatchback</h3>
+            </div>
+            <div className="vehicle-type-card" onClick={() => handleTipoVehiculoClick('Sedan')}>
+              <img 
+                src={`${process.env.PUBLIC_URL}/vehiculos/sedan.png`} 
+                alt="Sedan" 
+                className="vehicle-type-image"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+              <h3 className="vehicle-type-name">Sedan</h3>
+            </div>
+            <div className="vehicle-type-card" onClick={() => handleTipoVehiculoClick('Coupé')}>
+              <img 
+                src={`${process.env.PUBLIC_URL}/vehiculos/coupe.png`} 
+                alt="Coupé" 
+                className="vehicle-type-image"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+              <h3 className="vehicle-type-name">Coupé</h3>
+            </div>
+            <div className="vehicle-type-card" onClick={() => handleTipoVehiculoClick('SUV')}>
+              <img 
+                src={`${process.env.PUBLIC_URL}/vehiculos/suv.png`} 
+                alt="SUV" 
+                className="vehicle-type-image"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+              <h3 className="vehicle-type-name">SUV</h3>
+            </div>
+            <div className="vehicle-type-card" onClick={() => handleTipoVehiculoClick('Station Wagon')}>
+              <img 
+                src={`${process.env.PUBLIC_URL}/vehiculos/station-wagon.png`} 
+                alt="Station Wagon" 
+                className="vehicle-type-image"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+              <h3 className="vehicle-type-name">Station Wagon</h3>
+            </div>
+            <div className="vehicle-type-card" onClick={() => handleTipoVehiculoClick('Deportivo')}>
+              <img 
+                src={`${process.env.PUBLIC_URL}/vehiculos/deportivo.png`} 
+                alt="Deportivo" 
+                className="vehicle-type-image"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+              <h3 className="vehicle-type-name">Deportivo</h3>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Content Section */}
       <div className="content-section">

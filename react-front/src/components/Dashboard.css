@@ -235,6 +235,95 @@
   font-size: 1.2rem;
 }
 
+/* Vehicle Types Section */
+.vehicle-types-section {
+  background: white;
+  padding: 4rem 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.vehicle-types-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.vehicle-types-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 3rem;
+  position: relative;
+  padding: 0 2rem;
+}
+
+.vehicle-types-title::before,
+.vehicle-types-title::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.vehicle-types-title::before {
+  left: -100%;
+  margin-left: -2rem;
+}
+
+.vehicle-types-title::after {
+  right: -100%;
+  margin-right: -2rem;
+}
+
+.vehicle-types-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.vehicle-type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 200px;
+  user-select: none;
+}
+
+.vehicle-type-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 102, 204, 0.2);
+  border-color: #0066cc;
+}
+
+.vehicle-type-image {
+  width: 100%;
+  max-width: 180px;
+  height: auto;
+  object-fit: contain;
+  margin-bottom: 1rem;
+  background: white;
+}
+
+.vehicle-type-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  text-align: center;
+}
+
 /* Content Section */
 .content-section {
   background: white;
@@ -462,5 +551,28 @@
   .btn-publicar-header {
     padding: 0.5rem 1rem;
     font-size: 0.8rem;
+  }
+
+  .vehicle-types-title {
+    font-size: 1.5rem;
+    padding: 0 1rem;
+  }
+
+  .vehicle-types-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+  }
+
+  .vehicle-type-card {
+    min-height: 150px;
+    padding: 1rem;
+  }
+
+  .vehicle-type-image {
+    max-width: 120px;
+  }
+
+  .vehicle-type-name {
+    font-size: 0.9rem;
   }
 }

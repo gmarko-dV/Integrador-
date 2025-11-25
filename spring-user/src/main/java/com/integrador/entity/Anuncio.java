@@ -45,6 +45,9 @@ public class Anuncio {
     @Column(name = "telefono_contacto", length = 20)
     private String telefonoContacto;
     
+    @Column(name = "tipo_vehiculo", length = 50)
+    private String tipoVehiculo;
+    
     @OneToMany(mappedBy = "anuncio", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Imagen> imagenes = new ArrayList<>();
     
@@ -193,6 +196,14 @@ public class Anuncio {
     
     public void setTelefonoContacto(String telefonoContacto) {
         this.telefonoContacto = telefonoContacto;
+    }
+    
+    public String getTipoVehiculo() {
+        return tipoVehiculo;
+    }
+    
+    public void setTipoVehiculo(String tipoVehiculo) {
+        this.tipoVehiculo = tipoVehiculo;
     }
 }
 

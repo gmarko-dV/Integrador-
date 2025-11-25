@@ -10,6 +10,7 @@ public class AnuncioRequest {
     private String descripcion;
     private String emailContacto;
     private String telefonoContacto;
+    private String tipoVehiculo;
     
     // Constructores
     public AnuncioRequest() {}
@@ -78,6 +79,14 @@ public class AnuncioRequest {
     
     public void setTelefonoContacto(String telefonoContacto) {
         this.telefonoContacto = telefonoContacto;
+    }
+    
+    public String getTipoVehiculo() {
+        return tipoVehiculo;
+    }
+    
+    public void setTipoVehiculo(String tipoVehiculo) {
+        this.tipoVehiculo = tipoVehiculo;
     }
 }
 

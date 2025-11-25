@@ -21,6 +21,7 @@ const PublicarAuto = () => {
     descripcion: '',
     emailContacto: '',
     telefonoContacto: '',
+    tipoVehiculo: '',
   });
   const [imagen1, setImagen1] = useState(null);
   const [imagen2, setImagen2] = useState(null);
@@ -88,6 +89,11 @@ const PublicarAuto = () => {
     }
     if (!formData.descripcion.trim()) {
       setError('La descripción es requerida');
+      setLoading(false);
+      return;
+    }
+    if (!formData.tipoVehiculo) {
+      setError('Debes seleccionar una categoría de vehículo');
       setLoading(false);
       return;
     }
@@ -171,6 +177,7 @@ const PublicarAuto = () => {
       formDataToSend.append('kilometraje', formData.kilometraje);
       formDataToSend.append('precio', formData.precio);
       formDataToSend.append('descripcion', formData.descripcion);
+      formDataToSend.append('tipoVehiculo', formData.tipoVehiculo);
       const emailContacto = formData.emailContacto?.trim() || '';
       const telefonoContacto = formData.telefonoContacto?.trim() || '';
       if (emailContacto) {
@@ -197,6 +204,7 @@ const PublicarAuto = () => {
           descripcion: '',
           emailContacto: '',
           telefonoContacto: '',
+          tipoVehiculo: '',
         });
         setImagen1(null);
         setImagen2(null);
@@ -332,6 +340,33 @@ const PublicarAuto = () => {
               step="0.01"
               required
             />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="tipoVehiculo">Categoría de Vehículo *</label>
+            <select
+              id="tipoVehiculo"
+              name="tipoVehiculo"
+              value={formData.tipoVehiculo}
+              onChange={handleInputChange}
+              required
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                fontSize: '1rem',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                backgroundColor: 'white'
+              }}
+            >
+              <option value="">Selecciona una categoría</option>
+              <option value="Hatchback">Hatchback</option>
+              <option value="Sedan">Sedan</option>
+              <option value="Coupé">Coupé</option>
+              <option value="SUV">SUV</option>
+              <option value="Station Wagon">Station Wagon</option>
+              <option value="Deportivo">Deportivo</option>
+            </select>
           </div>
 
           <div className="form-group">
