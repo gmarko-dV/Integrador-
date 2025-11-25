@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { LoginButton, Profile } from './AuthComponents';
 import BackendInfo from './BackendInfo';
 import PlateSearch from './PlateSearch';
 import PublicarAuto from './PublicarAuto';
 import ListaAnuncios from './ListaAnuncios';
+import Notificaciones from './Notificaciones';
 import { authService, setupAuthInterceptor } from '../services/apiService';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const { isAuthenticated, isLoading, user, getIdTokenClaims } = useAuth0();
+  const { isAuthenticated, isLoading, user, getIdTokenClaims, loginWithRedirect } = useAuth0();
   const [activeTab, setActiveTab] = useState('anuncios');
   const [portadaImage, setPortadaImage] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Cargar imagen de portada
   useEffect(() => {
@@ -28,6 +30,15 @@ const Dashboard = () => {
       setPortadaImage(null);
     };
   }, []);
+
+  // Verificar si hay parámetros en la URL para activar una pestaña específica
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const tab = searchParams.get('tab');
+    if (tab && ['anuncios', 'buscar', 'publicar'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [location.search]);
 
   // Sincronizar usuario con Django cuando se autentica
   useEffect(() => {
@@ -60,16 +71,56 @@ const Dashboard = () => {
   }, [isAuthenticated, getIdTokenClaims]);
 
   const handleSearch = () => {
-    setActiveTab('anuncios');
-    // Aquí puedes agregar lógica de búsqueda
+    if (isAuthenticated) {
+      // Si está autenticado, navegar a la página principal con la pestaña de buscar placa activa
+      navigate('/?tab=buscar');
+      setActiveTab('buscar');
+      // Hacer scroll suave hacia la sección de contenido
+      setTimeout(() => {
+        const contentSection = document.querySelector('.content-section');
+        if (contentSection) {
+          contentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    } else {
+      // Si no está autenticado, redirigir al login
+      loginWithRedirect({
+        authorizationParams: {
+          prompt: 'login',
+          screen_hint: 'signup',
+          scope: 'openid profile email offline_access'
+        },
+        appState: {
+          returnTo: '/?tab=buscar'
+        }
+      });
+    }
   };
 
   const handlePublicar = () => {
     if (isAuthenticated) {
+      // Si está autenticado, navegar a la página principal con la pestaña de publicar activa
+      navigate('/?tab=publicar');
       setActiveTab('publicar');
+      // Hacer scroll suave hacia la sección de contenido
+      setTimeout(() => {
+        const contentSection = document.querySelector('.content-section');
+        if (contentSection) {
+          contentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
     } else {
-      // Redirigir a login si no está autenticado
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Si no está autenticado, redirigir al login
+      loginWithRedirect({
+        authorizationParams: {
+          prompt: 'login',
+          screen_hint: 'signup',
+          scope: 'openid profile email offline_access'
+        },
+        appState: {
+          returnTo: '/?tab=publicar'
+        }
+      });
     }
   };
 
@@ -116,9 +167,6 @@ const Dashboard = () => {
           <div className="header-right">
             <div className="header-actions">
               {isAuthenticated ? <Profile /> : <LoginButton />}
-              <button className="btn-publicar-header" onClick={handlePublicar}>
-                PUBLICAR
-              </button>
             </div>
           </div>
         </div>
@@ -219,6 +267,7 @@ const Dashboard = () => {
                 Bienvenido, <strong>{user?.name || user?.email}</strong>
               </p>
             </div>
+            <Notificaciones />
             <div className="dashboard-tabs">
               <button
                 className={`tab-button ${activeTab === 'anuncios' ? 'active' : ''}`}

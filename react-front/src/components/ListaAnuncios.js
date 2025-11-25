@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import anuncioService from '../services/anuncioApiService';
+import notificacionService from '../services/notificacionService';
+import { setupAuthInterceptor } from '../services/apiService';
 import './ListaAnuncios.css';
 
 const ListaAnuncios = () => {
@@ -16,10 +18,19 @@ const ListaAnuncios = () => {
   const [userId, setUserId] = useState(null);
   const [eliminando, setEliminando] = useState(null);
   const [imagenActual, setImagenActual] = useState({}); // { idAnuncio: indiceImagen }
+  const [contactando, setContactando] = useState(null); // { idAnuncio: true/false }
+  const [mostrarModalContacto, setMostrarModalContacto] = useState(false);
+  const [anuncioSeleccionado, setAnuncioSeleccionado] = useState(null);
+  const [mensajeContacto, setMensajeContacto] = useState('');
 
   useEffect(() => {
     cargarAnuncios();
     obtenerUserId();
+    
+    // Configurar el interceptor de autenticación
+    if (isAuthenticated && getIdTokenClaims) {
+      setupAuthInterceptor(getIdTokenClaims);
+    }
   }, [isAuthenticated, getIdTokenClaims]);
 
   useEffect(() => {
@@ -109,6 +120,81 @@ const ListaAnuncios = () => {
 
   const esMiAnuncio = (anuncio) => {
     return isAuthenticated && userId && anuncio.idUsuario === userId;
+  };
+
+  const abrirModalContacto = (anuncio) => {
+    if (!isAuthenticated) {
+      alert('Debes iniciar sesión para contactar al vendedor');
+      return;
+    }
+
+    if (esMiAnuncio(anuncio)) {
+      alert('No puedes contactarte contigo mismo');
+      return;
+    }
+
+    setAnuncioSeleccionado(anuncio);
+    setMensajeContacto(`Hola, estoy interesado en tu vehículo: ${anuncio.titulo || `${anuncio.modelo} ${anuncio.anio}`}. Me gustaría obtener más información.`);
+    setMostrarModalContacto(true);
+  };
+
+  const cerrarModalContacto = () => {
+    setMostrarModalContacto(false);
+    setAnuncioSeleccionado(null);
+    setMensajeContacto('');
+  };
+
+  const handleEnviarMensaje = async () => {
+    if (!mensajeContacto.trim()) {
+      alert('Por favor, escribe un mensaje');
+      return;
+    }
+
+    if (!anuncioSeleccionado) {
+      return;
+    }
+
+    try {
+      setContactando({ ...contactando, [anuncioSeleccionado.idAnuncio]: true });
+      
+      const response = await notificacionService.contactarVendedor(
+        anuncioSeleccionado.idUsuario,
+        anuncioSeleccionado.idAnuncio,
+        mensajeContacto.trim()
+      );
+
+      if (response.success) {
+        alert('¡Mensaje enviado exitosamente! El vendedor recibirá tu mensaje.');
+        cerrarModalContacto();
+      } else {
+        alert('Error al enviar el mensaje: ' + (response.error || 'Error desconocido'));
+      }
+    } catch (err) {
+      console.error('Error al enviar mensaje:', err);
+      console.error('Error completo:', {
+        message: err.message,
+        response: err.response,
+        request: err.request,
+        config: err.config
+      });
+      
+      let errorMessage = 'Error al enviar el mensaje';
+      
+      if (err.response) {
+        // El servidor respondió con un código de error
+        errorMessage = err.response.data?.error || err.response.data?.message || `Error ${err.response.status}: ${err.response.statusText}`;
+      } else if (err.request) {
+        // La petición se hizo pero no hubo respuesta
+        errorMessage = 'No se pudo conectar con el servidor. Verifica que el backend esté corriendo en http://localhost:8080';
+      } else {
+        // Algo más pasó
+        errorMessage = err.message || 'Error desconocido';
+      }
+      
+      alert('Error al enviar el mensaje: ' + errorMessage);
+    } finally {
+      setContactando({ ...contactando, [anuncioSeleccionado?.idAnuncio]: false });
+    }
   };
 
   const cambiarImagen = (idAnuncio, direccion, totalImagenes) => {
@@ -284,7 +370,7 @@ const ListaAnuncios = () => {
               </p>
               {(anuncio.emailContacto || anuncio.telefonoContacto) && (
                 <div className="anuncio-contacto">
-                  <div className="contacto-title">📞 Contacto:</div>
+                  <div className="contacto-title">📞 Contacto Directo:</div>
                   <div className="contacto-info">
                     {anuncio.emailContacto && (
                       <div className="contacto-item">
@@ -313,8 +399,8 @@ const ListaAnuncios = () => {
                   {formatearFecha(anuncio.fechaCreacion)}
                 </div>
               </div>
-              {esMiAnuncio(anuncio) && (
-                <div className="anuncio-actions">
+              <div className="anuncio-actions">
+                {esMiAnuncio(anuncio) ? (
                   <button
                     className="anuncio-delete-button"
                     onClick={() => handleEliminar(anuncio.idAnuncio)}
@@ -322,13 +408,82 @@ const ListaAnuncios = () => {
                   >
                     {eliminando === anuncio.idAnuncio ? 'Eliminando...' : '🗑️ Eliminar'}
                   </button>
-                </div>
-              )}
+                ) : (
+                  isAuthenticated ? (
+                    <button
+                      className="anuncio-contactar-button"
+                      onClick={() => abrirModalContacto(anuncio)}
+                      disabled={contactando && contactando[anuncio.idAnuncio]}
+                    >
+                      {contactando && contactando[anuncio.idAnuncio] 
+                        ? 'Enviando...' 
+                        : 'Contactar'}
+                    </button>
+                  ) : (
+                    <button
+                      className="anuncio-contactar-button anuncio-contactar-button-disabled"
+                      onClick={() => alert('Debes iniciar sesión para contactar al vendedor')}
+                    >
+                      Contactar
+                    </button>
+                  )
+                )}
+              </div>
             </div>
           </div>
         );
         })}
       </div>
+
+      {/* Modal de Contacto */}
+      {mostrarModalContacto && anuncioSeleccionado && (
+        <div className="modal-overlay" onClick={cerrarModalContacto}>
+          <div className="modal-contacto" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>💬 Enviar Mensaje al Vendedor</h3>
+              <button className="modal-close" onClick={cerrarModalContacto}>×</button>
+            </div>
+            <div className="modal-body">
+              <div className="anuncio-info-modal">
+                <h4>{anuncioSeleccionado.titulo || `${anuncioSeleccionado.modelo} ${anuncioSeleccionado.anio}`}</h4>
+                <p className="anuncio-precio-modal">{formatearPrecio(anuncioSeleccionado.precio)}</p>
+              </div>
+              <div className="mensaje-form-group">
+                <label htmlFor="mensaje-contacto">Tu mensaje:</label>
+                <textarea
+                  id="mensaje-contacto"
+                  className="mensaje-textarea"
+                  rows="6"
+                  value={mensajeContacto}
+                  onChange={(e) => setMensajeContacto(e.target.value)}
+                  placeholder="Escribe tu mensaje aquí. Por ejemplo: Hola, estoy interesado en este vehículo, ¿podrías darme más información?"
+                />
+                <p className="mensaje-hint">
+                  El vendedor recibirá una notificación con tu mensaje
+                </p>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button
+                className="btn-cancelar"
+                onClick={cerrarModalContacto}
+                disabled={contactando && contactando[anuncioSeleccionado.idAnuncio]}
+              >
+                Cancelar
+              </button>
+              <button
+                className="btn-enviar"
+                onClick={handleEnviarMensaje}
+                disabled={contactando && contactando[anuncioSeleccionado.idAnuncio] || !mensajeContacto.trim()}
+              >
+                {contactando && contactando[anuncioSeleccionado.idAnuncio] 
+                  ? 'Enviando...' 
+                  : '📤 Enviar Mensaje'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
