@@ -1,0 +1,174 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Reportes y Estadísticas - Anuncios{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'auth_app/css/reportes.css' %}">
+<style>
+    /* Asegurar que el fondo sea dark */
+    body {
+        background: #0f172a !important;
+        color: #f1f5f9 !important;
+    }
+    
+    #content {
+        background: #0f172a !important;
+        color: #f1f5f9 !important;
+    }
+    
+    /* Ajustar breadcrumbs y header si es necesario */
+    #header {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border-bottom: 1px solid #334155;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="stats-container">
+    <div class="stat-card">
+        <h3>Total de Anuncios</h3>
+        <div class="value">{{ total_anuncios }}</div>
+    </div>
+    <div class="stat-card active">
+        <h3>Anuncios Activos</h3>
+        <div class="value">{{ anuncios_activos }}</div>
+    </div>
+    <div class="stat-card inactive">
+        <h3>Anuncios Inactivos</h3>
+        <div class="value">{{ anuncios_inactivos }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Precio Promedio</h3>
+        <div class="value">S/ {{ precio_promedio|floatformat:2 }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Precio Máximo</h3>
+        <div class="value">S/ {{ precio_maximo|floatformat:2 }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Precio Mínimo</h3>
+        <div class="value">S/ {{ precio_minimo|floatformat:2 }}</div>
+    </div>
+</div>
+
+<div class="table-container">
+    <h2>Anuncios por Tipo de Vehículo</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Tipo de Vehículo</th>
+                <th>Total</th>
+                <th>Precio Promedio</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in por_tipo %}
+            <tr>
+                <td>{{ item.tipo_vehiculo|default:"Sin tipo" }}</td>
+                <td><strong>{{ item.total }}</strong></td>
+                <td>S/ {{ item.precio_promedio|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">No hay datos disponibles</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="table-container">
+    <h2>Top 10 Usuarios con Más Anuncios</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Usuario ID</th>
+                <th>Total Anuncios</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in top_usuarios %}
+            <tr>
+                <td><code>{{ usuario.id_usuario|truncatechars:30 }}</code></td>
+                <td><strong>{{ usuario.total }}</strong></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="2">No hay datos disponibles</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="table-container">
+    <h2>Anuncios por Mes (Últimos 6 Meses)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Mes</th>
+                <th>Total Anuncios</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for mes in ultimos_6_meses %}
+            <tr>
+                <td>{{ mes.mes }}</td>
+                <td><strong>{{ mes.total }}</strong></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="2">No hay datos disponibles</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="table-container">
+    <h2>Anuncios Recientes</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Título</th>
+                <th>Modelo</th>
+                <th>Precio</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for anuncio in anuncios_recientes %}
+            <tr>
+                <td>{{ anuncio.id_anuncio }}</td>
+                <td>{{ anuncio.titulo|default:anuncio.modelo }}</td>
+                <td>{{ anuncio.modelo }}</td>
+                <td><strong>S/ {{ anuncio.precio|floatformat:2 }}</strong></td>
+                <td>
+                    {% if anuncio.activo %}
+                        <span class="badge badge-success">Activo</span>
+                    {% else %}
+                        <span class="badge badge-danger">Inactivo</span>
+                    {% endif %}
+                </td>
+                <td>{{ anuncio.fecha_creacion|date:"d/m/Y H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No hay anuncios recientes</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div style="margin-top: 30px; text-align: center;">
+    <a href="{% url 'admin:auth_app_anuncio_changelist' %}" class="button">Gestión de Anuncios</a>
+    <a href="{% url 'admin:index' %}" class="button" style="margin-left: 10px;">Actualizar Reportes</a>
+</div>
+{% endblock %}
+
