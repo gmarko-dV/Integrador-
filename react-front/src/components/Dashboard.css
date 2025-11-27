@@ -41,12 +41,12 @@
 .header-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 100%;
-  gap: 2rem;
+  gap: 1rem;
   width: 100%;
 }
 
@@ -75,21 +75,25 @@
 .main-nav {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1.5rem;
   flex: 1;
   justify-content: center;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .nav-link {
   color: white;
   text-decoration: none;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 500;
   transition: color 0.3s;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .nav-link:hover {
@@ -339,12 +343,33 @@
 
 /* Content Section */
 .content-section {
-  background: white;
+  background: transparent;
   color: #333;
   padding: 3rem 2rem;
   position: relative;
   z-index: 1;
   border: none !important;
+}
+
+.content-section-anuncios-page {
+  background: white;
+}
+
+.anuncios-section {
+  background: transparent;
+}
+
+.publicar-section {
+  padding: 0 !important;
+  background: transparent !important;
+  margin: 0 !important;
+}
+
+.publicar-content {
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
 }
 
 .authenticated-content {

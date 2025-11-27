@@ -113,7 +113,20 @@ public class AnuncioService {
     }
     
     public List<Anuncio> obtenerAnunciosPorUsuario(String idUsuario) {
-        return anuncioRepository.findByIdUsuario(idUsuario);
+        System.out.println("=== SERVICIO: obtenerAnunciosPorUsuario ===");
+        System.out.println("Buscando anuncios para userId: '" + idUsuario + "'");
+        System.out.println("Longitud del userId: " + (idUsuario != null ? idUsuario.length() : 0));
+        
+        List<Anuncio> anuncios = anuncioRepository.findByIdUsuario(idUsuario);
+        
+        System.out.println("Anuncios encontrados en repositorio: " + anuncios.size());
+        anuncios.forEach(anuncio -> {
+            System.out.println("  - Anuncio ID: " + anuncio.getIdAnuncio() + 
+                             ", Usuario guardado: '" + anuncio.getIdUsuario() + "'" +
+                             ", Coincide: " + idUsuario.equals(anuncio.getIdUsuario()));
+        });
+        
+        return anuncios;
     }
     
     public List<Anuncio> obtenerTodosLosAnunciosActivos() {

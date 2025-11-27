@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import anuncioService from '../services/anuncioApiService';
 import notificacionService from '../services/notificacionService';
 import { setupAuthInterceptor } from '../services/apiService';
@@ -10,6 +10,7 @@ const ListaAnuncios = () => {
   const { isAuthenticated, getIdTokenClaims } = useAuth0();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const tipoVehiculo = searchParams.get('tipo');
   const [anuncios, setAnuncios] = useState([]);
   const [anunciosFiltrados, setAnunciosFiltrados] = useState([]);
@@ -22,9 +23,14 @@ const ListaAnuncios = () => {
   const [mostrarModalContacto, setMostrarModalContacto] = useState(false);
   const [anuncioSeleccionado, setAnuncioSeleccionado] = useState(null);
   const [mensajeContacto, setMensajeContacto] = useState('');
+  
+  // Detectar si estamos en "Mis Anuncios" (desde Dashboard con tab=anuncios)
+  const esMisAnuncios = location.pathname === '/' && searchParams.get('tab') === 'anuncios';
+  
+  // Verificar si hay un tipo de vehículo válido (no vacío y no solo "=")
+  const tieneTipoValido = tipoVehiculo && tipoVehiculo.trim() !== '' && tipoVehiculo.trim() !== '=';
 
   useEffect(() => {
-    cargarAnuncios();
     obtenerUserId();
     
     // Configurar el interceptor de autenticación
@@ -34,7 +40,28 @@ const ListaAnuncios = () => {
   }, [isAuthenticated, getIdTokenClaims]);
 
   useEffect(() => {
-    if (tipoVehiculo && anuncios.length > 0) {
+    // Cargar anuncios cuando cambie la autenticación, esMisAnuncios o userId
+    if (esMisAnuncios) {
+      if (!isAuthenticated) {
+        setAnuncios([]);
+        setLoading(false);
+        setError('Debes iniciar sesión para ver tus anuncios');
+      } else if (userId) {
+        // Solo cargar cuando tengamos el userId
+        cargarAnuncios();
+      }
+    } else {
+      // Para otras vistas (no Mis Anuncios), cargar todos los anuncios
+      cargarAnuncios();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, esMisAnuncios, userId]);
+
+  useEffect(() => {
+    // No filtrar por tipo si es "Mis Anuncios"
+    if (esMisAnuncios) {
+      setAnunciosFiltrados(anuncios);
+    } else if (tipoVehiculo && anuncios.length > 0) {
       // Filtrar anuncios por tipo de vehículo usando el campo tipoVehiculo
       const filtrados = anuncios.filter(anuncio => {
         const anuncioTipo = (anuncio.tipoVehiculo || '').trim();
@@ -44,7 +71,7 @@ const ListaAnuncios = () => {
     } else {
       setAnunciosFiltrados(anuncios);
     }
-  }, [tipoVehiculo, anuncios]);
+  }, [tipoVehiculo, anuncios, esMisAnuncios]);
 
   const obtenerUserId = async () => {
     if (isAuthenticated && getIdTokenClaims) {
@@ -61,15 +88,53 @@ const ListaAnuncios = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await anuncioService.obtenerTodosLosAnuncios();
-      if (response.success) {
-        setAnuncios(response.anuncios || []);
+      
+      // Si es "Mis Anuncios", SOLO cargar los anuncios del usuario
+      if (esMisAnuncios) {
+        if (!isAuthenticated) {
+          setError('Debes iniciar sesión para ver tus anuncios');
+          setAnuncios([]);
+          return;
+        }
+        
+        if (!userId) {
+          setError('Error: No se pudo identificar al usuario');
+          setAnuncios([]);
+          return;
+        }
+        
+        const response = await anuncioService.obtenerMisAnuncios();
+        if (response.success) {
+          const anunciosRecibidos = response.anuncios || [];
+          // Filtrar SOLO los anuncios del usuario actual como medida de seguridad
+          const misAnuncios = anunciosRecibidos.filter(anuncio => {
+            return anuncio.idUsuario === userId;
+          });
+          console.log('Anuncios recibidos:', anunciosRecibidos.length);
+          console.log('Anuncios filtrados (mis anuncios):', misAnuncios.length);
+          console.log('Mi userId:', userId);
+          setAnuncios(misAnuncios);
+        } else {
+          setError('Error al cargar tus anuncios');
+          setAnuncios([]);
+        }
       } else {
-        setError('Error al cargar los anuncios');
+        // Cargar todos los anuncios (para otras vistas)
+        const response = await anuncioService.obtenerTodosLosAnuncios();
+        if (response.success) {
+          setAnuncios(response.anuncios || []);
+        } else {
+          setError('Error al cargar los anuncios');
+        }
       }
     } catch (err) {
       console.error('Error al cargar anuncios:', err);
-      setError('Error al cargar los anuncios. Por favor, intenta nuevamente.');
+      if (esMisAnuncios) {
+        setError('Error al cargar tus anuncios. Por favor, intenta nuevamente.');
+        setAnuncios([]);
+      } else {
+        setError('Error al cargar los anuncios. Por favor, intenta nuevamente.');
+      }
     } finally {
       setLoading(false);
     }
@@ -237,13 +302,16 @@ const ListaAnuncios = () => {
     );
   }
 
-  const anunciosAMostrar = tipoVehiculo ? anunciosFiltrados : anuncios;
+  // En "Mis Anuncios" siempre mostrar los anuncios sin filtrar por tipo
+  const anunciosAMostrar = esMisAnuncios ? anuncios : (tipoVehiculo ? anunciosFiltrados : anuncios);
 
   if (anunciosAMostrar.length === 0) {
     return (
       <div className="lista-anuncios-empty">
         <p>
-          {tipoVehiculo 
+          {esMisAnuncios
+            ? 'Aún no tienes anuncios publicados'
+            : tipoVehiculo 
             ? `No hay anuncios disponibles para ${tipoVehiculo} en este momento.`
             : 'No hay anuncios disponibles en este momento.'}
         </p>
@@ -254,32 +322,13 @@ const ListaAnuncios = () => {
   return (
     <div className="lista-anuncios-container">
       <div className="lista-anuncios-header">
-        {tipoVehiculo && (
-          <button 
-            onClick={() => navigate('/')} 
-            className="btn-volver"
-            style={{
-              marginBottom: '1rem',
-              padding: '0.5rem 1rem',
-              background: '#0066cc',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '0.9rem',
-              fontWeight: '600'
-            }}
-          >
-            ← Volver al inicio
-          </button>
-        )}
         <h2>
-          {tipoVehiculo ? `🚗 Vehículos ${tipoVehiculo} en Venta` : '🚗 Vehículos en Venta'}
+          {tieneTipoValido ? `Vehículos ${tipoVehiculo} en Venta` : 'Tus Anuncios'}
         </h2>
         <p>
-          {anunciosAMostrar.length} {anunciosAMostrar.length === 1 ? 'anuncio disponible' : 'anuncios disponibles'}
-          {tipoVehiculo && anuncios.length > anunciosAMostrar.length && 
-            ` (de ${anuncios.length} total)`}
+          {esMisAnuncios 
+            ? `${anunciosAMostrar.length} ${anunciosAMostrar.length === 1 ? 'anuncio publicado' : 'anuncios publicados'}`
+            : `${anunciosAMostrar.length} ${anunciosAMostrar.length === 1 ? 'anuncio disponible' : 'anuncios disponibles'}${tipoVehiculo && anuncios.length > anunciosAMostrar.length ? ` (de ${anuncios.length} total)` : ''}`}
         </p>
       </div>
       <div className="lista-anuncios-grid">
@@ -293,6 +342,11 @@ const ListaAnuncios = () => {
               <div className="anuncio-imagen-container">
                 {anuncio.imagenes && anuncio.imagenes.length > 0 ? (
                   <>
+                    {anuncio.tipoVehiculo && (
+                      <div className="anuncio-badge">
+                        {anuncio.tipoVehiculo.toUpperCase()}
+                      </div>
+                    )}
                     <img
                       src={`http://localhost:8080${imagenMostrada?.urlImagen || anuncio.imagenes[0].urlImagen}`}
                       alt={anuncio.titulo || anuncio.modelo}
@@ -348,85 +402,50 @@ const ListaAnuncios = () => {
                 )}
               </div>
             <div className="anuncio-content">
-              <h3 className="anuncio-titulo">
-                {anuncio.titulo || `${anuncio.modelo} ${anuncio.anio}`}
-              </h3>
-              <div className="anuncio-details">
-                <div className="anuncio-detail-item">
-                  <span className="detail-label">Año:</span>
-                  <span className="detail-value">{anuncio.anio}</span>
-                </div>
-                <div className="anuncio-detail-item">
-                  <span className="detail-label">Kilometraje:</span>
-                  <span className="detail-value">
-                    {anuncio.kilometraje?.toLocaleString('es-PE')} km
-                  </span>
-                </div>
+              <div className="anuncio-header-info">
+                <h3 className="anuncio-modelo">
+                  {anuncio.modelo}
+                </h3>
+                <p className="anuncio-anio">{anuncio.anio}</p>
               </div>
-              <p className="anuncio-descripcion">
-                {anuncio.descripcion?.length > 100
-                  ? `${anuncio.descripcion.substring(0, 100)}...`
-                  : anuncio.descripcion}
-              </p>
-              {(anuncio.emailContacto || anuncio.telefonoContacto) && (
-                <div className="anuncio-contacto">
-                  <div className="contacto-title">📞 Contacto Directo:</div>
-                  <div className="contacto-info">
-                    {anuncio.emailContacto && (
-                      <div className="contacto-item">
-                        <span className="contacto-label">Email:</span>
-                        <a href={`mailto:${anuncio.emailContacto}`} className="contacto-link">
-                          {anuncio.emailContacto}
-                        </a>
-                      </div>
-                    )}
-                    {anuncio.telefonoContacto && (
-                      <div className="contacto-item">
-                        <span className="contacto-label">Teléfono:</span>
-                        <a href={`tel:${anuncio.telefonoContacto}`} className="contacto-link">
-                          {anuncio.telefonoContacto}
-                        </a>
-                      </div>
-                    )}
+              <div className="anuncio-precio-destacado">
+                {formatearPrecio(anuncio.precio)}
+              </div>
+              <div className="anuncio-specs">
+                {anuncio.tipoVehiculo && (
+                  <div className="anuncio-spec-item">
+                    <span className="spec-icon">🚗</span>
+                    <span className="spec-text">{anuncio.tipoVehiculo}</span>
                   </div>
-                </div>
-              )}
-              <div className="anuncio-footer">
-                <div className="anuncio-precio">
-                  {formatearPrecio(anuncio.precio)}
-                </div>
-                <div className="anuncio-fecha">
-                  {formatearFecha(anuncio.fechaCreacion)}
+                )}
+                <div className="anuncio-spec-item">
+                  <span className="spec-icon">📊</span>
+                  <span className="spec-text">{anuncio.kilometraje?.toLocaleString('es-PE')} km</span>
                 </div>
               </div>
-              <div className="anuncio-actions">
-                {esMiAnuncio(anuncio) ? (
+              <div className="anuncio-separator"></div>
+              <div className="anuncio-actions-new">
+                <a 
+                  href={`/anuncio/${anuncio.idAnuncio}`}
+                  className="anuncio-ver-detalles"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate(`/anuncio/${anuncio.idAnuncio}`);
+                  }}
+                >
+                  Ver Detalles
+                </a>
+                {esMiAnuncio(anuncio) && (
                   <button
-                    className="anuncio-delete-button"
-                    onClick={() => handleEliminar(anuncio.idAnuncio)}
+                    className="anuncio-delete-button-new"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleEliminar(anuncio.idAnuncio);
+                    }}
                     disabled={eliminando === anuncio.idAnuncio}
                   >
                     {eliminando === anuncio.idAnuncio ? 'Eliminando...' : '🗑️ Eliminar'}
                   </button>
-                ) : (
-                  isAuthenticated ? (
-                    <button
-                      className="anuncio-contactar-button"
-                      onClick={() => abrirModalContacto(anuncio)}
-                      disabled={contactando && contactando[anuncio.idAnuncio]}
-                    >
-                      {contactando && contactando[anuncio.idAnuncio] 
-                        ? 'Enviando...' 
-                        : 'Contactar'}
-                    </button>
-                  ) : (
-                    <button
-                      className="anuncio-contactar-button anuncio-contactar-button-disabled"
-                      onClick={() => alert('Debes iniciar sesión para contactar al vendedor')}
-                    >
-                      Contactar
-                    </button>
-                  )
                 )}
               </div>
             </div>

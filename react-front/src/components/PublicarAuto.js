@@ -237,8 +237,7 @@ const PublicarAuto = () => {
   }
 
   return (
-    <div className="publicar-auto-container">
-      <div className="publicar-auto-card">
+    <form onSubmit={handleSubmit} className="publicar-auto-form">
         <h2>Publicar Auto en Venta</h2>
         <p className="publicar-auto-subtitle">
           Completa el formulario para publicar tu vehículo
@@ -281,8 +280,6 @@ const PublicarAuto = () => {
             <p>¡Anuncio publicado exitosamente!</p>
           </div>
         )}
-
-        <form onSubmit={handleSubmit} className="publicar-auto-form">
           <div className="form-group">
             <label htmlFor="modelo">Modelo *</label>
             <input
@@ -456,9 +453,7 @@ const PublicarAuto = () => {
           <button type="submit" className="submit-button" disabled={loading}>
             {loading ? 'Publicando...' : 'Publicar Anuncio'}
           </button>
-        </form>
-      </div>
-    </div>
+    </form>
   );
 };
 

@@ -238,20 +238,23 @@ const DetalleAnuncio = () => {
             </div>
           )}
 
-          <div className="detalle-anuncio-contacto">
-            {anuncio.emailContacto && (
-              <div className="contacto-item">
-                <span className="contacto-label">Email:</span>
-                <span className="contacto-value">{anuncio.emailContacto}</span>
-              </div>
-            )}
-            {anuncio.telefonoContacto && (
-              <div className="contacto-item">
-                <span className="contacto-label">Teléfono:</span>
-                <span className="contacto-value">{anuncio.telefonoContacto}</span>
-              </div>
-            )}
-          </div>
+          {isAuthenticated && (
+            <div className="detalle-anuncio-contacto">
+              <h3>Datos de Contacto</h3>
+              {anuncio.emailContacto && (
+                <div className="contacto-item">
+                  <span className="contacto-label">Email:</span>
+                  <span className="contacto-value">{anuncio.emailContacto}</span>
+                </div>
+              )}
+              {anuncio.telefonoContacto && (
+                <div className="contacto-item">
+                  <span className="contacto-label">Teléfono:</span>
+                  <span className="contacto-value">{anuncio.telefonoContacto}</span>
+                </div>
+              )}
+            </div>
+          )}
 
           {isAuthenticated && !esPropietario && (
             <button

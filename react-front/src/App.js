@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard';
 import Callback from './components/Callback';
 import ListaAnunciosPage from './components/ListaAnunciosPage';
 import DetalleAnuncio from './components/DetalleAnuncio';
+import ChatIA from './components/ChatIA';
 import './App.css';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
             <Route path="/callback" element={<Callback />} />
             <Route path="/anuncios" element={<ListaAnunciosPage />} />
             <Route path="/anuncio/:idAnuncio" element={<DetalleAnuncio />} />
+            <Route path="/chat" element={<ChatIA />} />
           </Routes>
         </div>
       </Router>

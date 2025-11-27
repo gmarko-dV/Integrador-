@@ -12,13 +12,37 @@
 
 .lista-anuncios-header h2 {
   font-size: 2rem;
-  color: #333;
+  color: white;
   margin-bottom: 10px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
 }
 
 .lista-anuncios-header p {
-  color: #666;
+  color: white;
   font-size: 1.1rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+/* Estilos para cuando la página tiene fondo blanco */
+.anuncios-page-white .lista-anuncios-header h2 {
+  color: #000;
+  text-shadow: none;
+}
+
+.anuncios-page-white .lista-anuncios-header p {
+  color: #000;
+  text-shadow: none;
+}
+
+/* Estilos para cuando está en content-section (desde Dashboard) */
+.content-section .lista-anuncios-header h2 {
+  color: #000;
+  text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8);
+}
+
+.content-section .lista-anuncios-header p {
+  color: #000;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8);
 }
 
 .lista-anuncios-grid {
@@ -48,6 +72,23 @@
   overflow: hidden;
   background: #f5f5f5;
   position: relative;
+}
+
+.anuncio-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transform: rotate(5deg);
 }
 
 .anuncio-imagen-controls {
@@ -151,6 +192,108 @@
 
 .anuncio-content {
   padding: 20px;
+}
+
+.anuncio-header-info {
+  margin-bottom: 12px;
+}
+
+.anuncio-modelo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.anuncio-anio {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0;
+}
+
+.anuncio-precio-destacado {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2563eb;
+  margin-bottom: 15px;
+}
+
+.anuncio-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.anuncio-spec-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.spec-icon {
+  font-size: 1rem;
+}
+
+.spec-text {
+  color: #333;
+}
+
+.anuncio-separator {
+  width: 100%;
+  height: 2px;
+  background: #dc2626;
+  margin: 15px 0;
+}
+
+.anuncio-actions-new {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.anuncio-ver-detalles {
+  display: block;
+  text-align: center;
+  color: #333;
+  text-decoration: none;
+  font-size: 0.95rem;
+  padding: 8px 0;
+  transition: color 0.2s;
+}
+
+.anuncio-ver-detalles:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.anuncio-delete-button-new {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+}
+
+.anuncio-delete-button-new:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.anuncio-delete-button-new:disabled {
+  background: #999;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .anuncio-titulo {

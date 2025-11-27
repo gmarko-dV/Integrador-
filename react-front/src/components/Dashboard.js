@@ -188,7 +188,7 @@ const Dashboard = () => {
                     }, 100);
                   }}
                 >
-                  Ver Anuncios
+                  Mis Anuncios
                 </a>
                 <a 
                   href="#buscar-placa" 
@@ -223,6 +223,16 @@ const Dashboard = () => {
                   }}
                 >
                   Publicar Auto
+                </a>
+                <a 
+                  href="/chat" 
+                  className="nav-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate('/chat');
+                  }}
+                >
+                  Chat IA
                 </a>
               </>
             ) : (
@@ -338,9 +348,9 @@ const Dashboard = () => {
 
       {/* Content Section - Solo se muestra si hay una sección activa */}
       {activeTab && (
-        <div className={`content-section ${activeTab === 'buscar' ? 'buscar-section' : activeTab === 'publicar' ? 'publicar-section' : ''}`}>
+        <div className={`content-section ${activeTab === 'buscar' ? 'buscar-section' : activeTab === 'publicar' ? 'publicar-section' : activeTab === 'anuncios' ? 'anuncios-section' : ''}`}>
           {isAuthenticated ? (
-            <div className="authenticated-content">
+            <div className={`authenticated-content ${activeTab === 'publicar' ? 'publicar-content' : ''}`}>
               {activeTab === 'anuncios' && <ListaAnuncios />}
               {activeTab === 'buscar' && <PlateSearch />}
               {activeTab === 'publicar' && <PublicarAuto />}
@@ -359,44 +369,9 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Contenido adicional para usuarios no autenticados cuando no hay sección activa */}
-      {!activeTab && !isAuthenticated && (
-        <div className="content-section">
-          <div className="dashboard-login-card">
-            <h3>Inicia sesión para continuar</h3>
-            <p>
-              Necesitas iniciar sesión con tu cuenta de TECSUP para buscar placas de vehículos o publicar tu auto.
-            </p>
-            <LoginButton />
-          </div>
-
-          <div className="dashboard-features">
-            <div className="dashboard-feature-card">
-              <div className="dashboard-feature-icon">🔍</div>
-              <h4>Consulta Rápida</h4>
-              <p>Busca información de vehículos en segundos</p>
-            </div>
-            <div className="dashboard-feature-card">
-              <div className="dashboard-feature-icon">📊</div>
-              <h4>Datos Oficiales</h4>
-              <p>Información verificada del gobierno</p>
-            </div>
-            <div className="dashboard-feature-card">
-              <div className="dashboard-feature-icon">🛡️</div>
-              <h4>Seguro</h4>
-              <p>Tu información está protegida</p>
-            </div>
-          </div>
-
-          <div className="dashboard-services">
-            <h3>Estado de los Servicios</h3>
-            <BackendInfo />
-          </div>
-        </div>
-      )}
 
       <footer className="dashboard-footer">
-        <p>© 2024 checkAuto. Todos los derechos reservados.</p>
+        <p>© 2025 checkAuto. Todos los derechos reservados.</p>
       </footer>
     </div>
   );

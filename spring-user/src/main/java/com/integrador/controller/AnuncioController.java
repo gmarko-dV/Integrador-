@@ -153,16 +153,60 @@ public class AnuncioController {
     @GetMapping("/mis-anuncios")
     public ResponseEntity<Map<String, Object>> obtenerMisAnuncios() {
         try {
+            System.out.println("=== OBTENER MIS ANUNCIOS - INICIO ===");
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated()) {
+            System.out.println("Authentication object: " + authentication);
+            System.out.println("Authentication class: " + (authentication != null ? authentication.getClass().getName() : "null"));
+            System.out.println("Is authenticated: " + (authentication != null && authentication.isAuthenticated()));
+            
+            if (authentication == null) {
+                System.out.println("ERROR: Authentication es null");
                 return ResponseEntity.status(401)
                     .body(Map.of("error", "Usuario no autenticado"));
             }
             
-            OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
-            String userId = oauth2User.getAttribute("sub");
+            if (!authentication.isAuthenticated()) {
+                System.out.println("ERROR: Authentication no está autenticado");
+                return ResponseEntity.status(401)
+                    .body(Map.of("error", "Usuario no autenticado"));
+            }
+            
+            // Obtener userId dependiendo del tipo de autenticación
+            String userId = null;
+            if (authentication instanceof JwtAuthenticationToken) {
+                // Autenticación con JWT token
+                System.out.println("Tipo: JwtAuthenticationToken");
+                Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
+                userId = jwt.getClaimAsString("sub");
+                System.out.println("User ID del JWT: " + userId);
+                System.out.println("JWT claims: " + jwt.getClaims());
+            } else if (authentication.getPrincipal() instanceof OAuth2User) {
+                // Autenticación con OAuth2
+                System.out.println("Tipo: OAuth2User");
+                OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+                userId = oauth2User.getAttribute("sub");
+                System.out.println("User ID del OAuth2: " + userId);
+            } else {
+                System.out.println("ERROR: Tipo de autenticación no soportado: " + authentication.getClass().getName());
+                System.out.println("Principal class: " + authentication.getPrincipal().getClass().getName());
+                return ResponseEntity.status(401)
+                    .body(Map.of("error", "Tipo de autenticación no soportado: " + authentication.getClass().getName()));
+            }
+            
+            if (userId == null || userId.isEmpty()) {
+                System.out.println("ERROR: No se pudo obtener el ID del usuario");
+                return ResponseEntity.status(401)
+                    .body(Map.of("error", "No se pudo obtener el ID del usuario"));
+            }
+            
+            System.out.println("User ID final: " + userId);
             
             List<Anuncio> anuncios = anuncioService.obtenerAnunciosPorUsuario(userId);
+            
+            System.out.println("Anuncios encontrados: " + anuncios.size());
+            anuncios.forEach(anuncio -> {
+                System.out.println("Anuncio ID: " + anuncio.getIdAnuncio() + ", Usuario: " + anuncio.getIdUsuario() + ", Modelo: " + anuncio.getModelo());
+            });
             
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
@@ -171,6 +215,8 @@ public class AnuncioController {
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
+            System.out.println("EXCEPCIÓN en obtenerMisAnuncios: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(500)
                 .body(Map.of("error", "Error al obtener los anuncios: " + e.getMessage()));
         }

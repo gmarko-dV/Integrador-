@@ -1,11 +1,13 @@
 import React from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import { useNavigate } from 'react-router-dom';
 import { LoginButton, Profile } from './AuthComponents';
 import ListaAnuncios from './ListaAnuncios';
 import './Dashboard.css';
 
 const ListaAnunciosPage = () => {
   const { isAuthenticated, isLoading } = useAuth0();
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -25,11 +27,72 @@ const ListaAnunciosPage = () => {
           </div>
 
           <nav className="main-nav">
-            <a href="/" className="nav-link">Inicio</a>
-            <a href="/anuncios" className="nav-link">Buscar Autos</a>
-            <div className="nav-link dropdown">
-              Contacto <span className="dropdown-arrow">▼</span>
-            </div>
+            <a 
+              href="/" 
+              className="nav-link"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            >
+              Inicio
+            </a>
+            {isAuthenticated ? (
+              <>
+                <a 
+                  href="#anuncios" 
+                  className="nav-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate('/?tab=anuncios');
+                  }}
+                >
+                  Mis Anuncios
+                </a>
+                <a 
+                  href="#buscar-placa" 
+                  className="nav-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate('/?tab=buscar');
+                  }}
+                >
+                  Buscar Placa
+                </a>
+                <a 
+                  href="#publicar" 
+                  className="nav-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate('/?tab=publicar');
+                  }}
+                >
+                  Publicar Auto
+                </a>
+                <a 
+                  href="/chat" 
+                  className="nav-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate('/chat');
+                  }}
+                >
+                  Chat IA
+                </a>
+              </>
+            ) : (
+              <a 
+                href="/anuncios" 
+                className="nav-link"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/anuncios');
+                }}
+              >
+                Buscar Autos
+              </a>
+            )}
           </nav>
 
           <div className="header-right">
@@ -41,12 +104,12 @@ const ListaAnunciosPage = () => {
       </header>
 
       {/* Content Section */}
-      <div className="content-section">
+      <div className="content-section content-section-anuncios-page anuncios-page-white">
         <ListaAnuncios />
       </div>
 
       <footer className="dashboard-footer">
-        <p>© 2024 checkAuto. Todos los derechos reservados.</p>
+        <p>© 2025 checkAuto. Todos los derechos reservados.</p>
       </footer>
     </div>
   );
