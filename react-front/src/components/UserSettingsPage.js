@@ -1,12 +1,12 @@
 import React from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
 import { LoginButton, Profile } from './AuthComponents';
 import { NotificationDropdown } from './Notificaciones';
-import ListaAnuncios from './ListaAnuncios';
+import UserSettings from './UserSettings';
 import './Dashboard.css';
 
-const ListaAnunciosPage = () => {
+const UserSettingsPage = () => {
   const { isAuthenticated, isLoading } = useAuth0();
   const navigate = useNavigate();
 
@@ -24,7 +24,13 @@ const ListaAnunciosPage = () => {
       <header className="peruautos-header">
         <div className="header-container">
           <div className="logo-section">
-            <h1 className="logo-text">checkAuto</h1>
+            <h1 
+              className="logo-text"
+              onClick={() => navigate('/')}
+              style={{ cursor: 'pointer' }}
+            >
+              checkAuto
+            </h1>
           </div>
 
           <nav className="main-nav">
@@ -83,17 +89,11 @@ const ListaAnunciosPage = () => {
                 </a>
               </>
             ) : (
-              <a 
-                href="/anuncios" 
-                className="nav-link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate('/anuncios');
-                }}
-              >
-                Buscar Autos
-              </a>
+              <a href="#buscar" className="nav-link">Buscar Autos</a>
             )}
+            <div className="nav-link dropdown">
+              Contacto <span className="dropdown-arrow">▼</span>
+            </div>
           </nav>
 
           <div className="header-right">
@@ -112,8 +112,10 @@ const ListaAnunciosPage = () => {
       </header>
 
       {/* Content Section */}
-      <div className="content-section content-section-anuncios-page anuncios-page-white">
-        <ListaAnuncios />
+      <div className="content-section content-section-settings">
+        <div className="settings-page-container">
+          <UserSettings onClose={() => navigate('/')} />
+        </div>
       </div>
 
       <footer className="dashboard-footer">
@@ -123,5 +125,5 @@ const ListaAnunciosPage = () => {
   );
 };
 
-export default ListaAnunciosPage;
+export default UserSettingsPage;
 

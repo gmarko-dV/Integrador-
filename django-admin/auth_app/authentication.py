@@ -115,7 +115,28 @@ class Auth0Authentication(BaseAuthentication):
         
         try:
             user = User.objects.get(username=auth0_id)
-            # Actualizar email si cambió
+            
+            # NO actualizar el nombre si el usuario ya tiene nombre en Django
+            # Esto preserva los cambios que el usuario haya hecho en la plataforma
+            # Solo actualizar si el nombre está completamente vacío
+            has_name_in_django = bool(user.first_name or user.last_name)
+            
+            if has_name_in_django:
+                # El usuario ya tiene nombre en Django, NO sobrescribirlo
+                logger.debug(f'Usuario {auth0_id} ya tiene nombre en Django ({user.first_name} {user.last_name}), preservando...')
+            else:
+                # Solo si el usuario no tiene nombre, actualizarlo desde Auth0
+                if name:
+                    name_parts = name.split(' ', 1) if name else ['', '']
+                    first_name = name_parts[0] if len(name_parts) > 0 else ''
+                    last_name = name_parts[1] if len(name_parts) > 1 else ''
+                    if first_name or last_name:
+                        user.first_name = first_name
+                        user.last_name = last_name
+                        user.save()
+                        logger.info(f'Nombre inicial establecido desde Auth0 para usuario {auth0_id}')
+            
+            # Actualizar email si cambió (esto es seguro)
             if email and user.email != email:
                 user.email = email
                 user.save()

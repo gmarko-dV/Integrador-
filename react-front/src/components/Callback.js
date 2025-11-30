@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import './Callback.css';
 
 const Callback = () => {
 
   const { isLoading, error, isAuthenticated } = useAuth0();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const urlError = searchParams.get('error');
   const code = searchParams.get('code');
@@ -35,8 +36,24 @@ const Callback = () => {
     
     if (!isLoading && isAuthenticated) {
       setHasRedirected(true);
+      // Intentar obtener el returnTo del appState guardado por Auth0
+      let returnTo = '/';
+      
+      try {
+        // El SDK de Auth0 guarda el appState en el cache
+        const auth0Cache = localStorage.getItem('@@auth0spajs@@::q4z3HBJ8q0yVsUGCI9zyXskGA26Kus4b::openid profile email offline_access');
+        if (auth0Cache) {
+          const parsed = JSON.parse(auth0Cache);
+          if (parsed?.appState?.returnTo) {
+            returnTo = parsed.appState.returnTo;
+          }
+        }
+      } catch (e) {
+        // Si hay error, usar el default '/'
+      }
+      
       setTimeout(() => {
-        window.location.href = '/';
+        navigate(returnTo);
       }, 500);
       return;
     }

@@ -52,21 +52,9 @@ export const setupAuthInterceptor = (getIdTokenClaims) => {
         if (claims && claims.__raw) {
           const token = claims.__raw;
           config.headers.Authorization = `Bearer ${token}`;
-          console.log('ID Token agregado a la petición:', config.url);
-          console.log('Token (primeros 50 caracteres):', token.substring(0, Math.min(50, token.length)) + '...');
-        } else {
-          console.warn('No se pudo obtener el ID token para:', config.url);
         }
-      } else {
-        console.warn('getIdTokenClaims no está disponible');
       }
     } catch (error) {
-      console.error('Error obteniendo ID token en interceptor:', error);
-      console.error('Detalles:', {
-        error: error.error,
-        error_description: error.error_description,
-        message: error.message
-      });
       // No lanzar el error para que la petición continúe (pero fallará con 401)
     }
     return config;
@@ -74,8 +62,6 @@ export const setupAuthInterceptor = (getIdTokenClaims) => {
 
   interceptorIdSpring = springApi.interceptors.request.use(interceptor);
   interceptorIdDjango = djangoApi.interceptors.request.use(interceptor);
-  
-  console.log('Interceptor de autenticación configurado (usando ID token)');
 };
 
 // Función para obtener el ID token manualmente si es necesario
@@ -85,7 +71,6 @@ export const getToken = async () => {
       const claims = await getIdTokenClaimsFn();
       return claims?.__raw || null;
     } catch (error) {
-      console.error('Error obteniendo ID token:', error);
       return null;
     }
   }
@@ -102,7 +87,27 @@ export const authService = {
 
   // Obtener información del usuario desde Django
   async getUserProfile() {
-    const response = await djangoApi.get('/auth/profile');
+    try {
+      const response = await djangoApi.get('/auth/profile');
+      
+      // Asegurar que siempre devolvamos un objeto
+      if (response.data && typeof response.data === 'object') {
+        return response.data;
+      } else {
+        return response.data || {};
+      }
+    } catch (error) {
+      console.error('Error en getUserProfile:', error);
+      throw error;
+    }
+  },
+
+  // Actualizar perfil del usuario en Django
+  async updateProfile(firstName, lastName) {
+    const response = await djangoApi.put('/auth/profile/update/', {
+      first_name: firstName,
+      last_name: lastName
+    });
     return response.data;
   },
 

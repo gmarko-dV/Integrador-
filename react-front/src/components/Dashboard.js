@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LoginButton, Profile } from './AuthComponents';
+import { NotificationDropdown } from './Notificaciones';
 import BackendInfo from './BackendInfo';
 import PlateSearch from './PlateSearch';
 import PublicarAuto from './PublicarAuto';
@@ -52,17 +53,14 @@ const Dashboard = () => {
       const syncUser = async () => {
         try {
           await new Promise(resolve => setTimeout(resolve, 500)); // Esperar 500ms
-          const profile = await authService.getUserProfile();
-          console.log('Usuario sincronizado con Django:', profile);
+          await authService.getUserProfile();
         } catch (error) {
-          console.error('Error al sincronizar usuario con Django:', error);
           // Intentar una vez más después de 2 segundos
           setTimeout(async () => {
             try {
-              const profile = await authService.getUserProfile();
-              console.log('Usuario sincronizado con Django (segundo intento):', profile);
+              await authService.getUserProfile();
             } catch (retryError) {
-              console.error('Error al sincronizar usuario con Django (segundo intento):', retryError);
+              console.error('Error al sincronizar usuario con Django:', retryError);
             }
           }, 2000);
         }
@@ -236,7 +234,23 @@ const Dashboard = () => {
                 </a>
               </>
             ) : (
-              <a href="#buscar" className="nav-link">Buscar Autos</a>
+              <a 
+                href="#buscar" 
+                className="nav-link"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveTab('buscar');
+                  navigate('/?tab=buscar');
+                  setTimeout(() => {
+                    const contentSection = document.querySelector('.content-section');
+                    if (contentSection) {
+                      contentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }, 100);
+                }}
+              >
+                Buscar Autos
+              </a>
             )}
             <div className="nav-link dropdown">
               Contacto <span className="dropdown-arrow">▼</span>
@@ -245,7 +259,14 @@ const Dashboard = () => {
 
           <div className="header-right">
             <div className="header-actions">
-              {isAuthenticated ? <Profile /> : <LoginButton />}
+              {isAuthenticated ? (
+                <>
+                  <NotificationDropdown />
+                  <Profile />
+                </>
+              ) : (
+                <LoginButton />
+              )}
             </div>
           </div>
         </div>
@@ -357,13 +378,18 @@ const Dashboard = () => {
             </div>
           ) : (
             <div className="unauthenticated-content">
-              <div className="dashboard-login-card">
-                <h3>Inicia sesión para continuar</h3>
-                <p>
-                  Necesitas iniciar sesión con tu cuenta de TECSUP para acceder a esta sección.
-                </p>
-                <LoginButton />
-              </div>
+              {activeTab === 'buscar' ? (
+                // Mostrar PlateSearch incluso si no está autenticado
+                <PlateSearch />
+              ) : (
+                <div className="dashboard-login-card">
+                  <h3>Inicia sesión para continuar</h3>
+                  <p>
+                    Necesitas iniciar sesión con tu cuenta de TECSUP para acceder a esta sección.
+                  </p>
+                  <LoginButton />
+                </div>
+              )}
             </div>
           )}
         </div>

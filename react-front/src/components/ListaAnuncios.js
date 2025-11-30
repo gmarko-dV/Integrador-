@@ -25,7 +25,10 @@ const ListaAnuncios = () => {
   const [mensajeContacto, setMensajeContacto] = useState('');
   
   // Detectar si estamos en "Mis Anuncios" (desde Dashboard con tab=anuncios)
-  const esMisAnuncios = location.pathname === '/' && searchParams.get('tab') === 'anuncios';
+  // Recalcular cada vez que cambien los searchParams
+  const esMisAnuncios = React.useMemo(() => {
+    return location.pathname === '/' && searchParams.get('tab') === 'anuncios';
+  }, [location.pathname, searchParams]);
   
   // Verificar si hay un tipo de vehículo válido (no vacío y no solo "=")
   const tieneTipoValido = tipoVehiculo && tipoVehiculo.trim() !== '' && tipoVehiculo.trim() !== '=';
@@ -42,13 +45,18 @@ const ListaAnuncios = () => {
   useEffect(() => {
     // Cargar anuncios cuando cambie la autenticación, esMisAnuncios o userId
     if (esMisAnuncios) {
+      // Si estamos en "Mis Anuncios", SOLO cargar los anuncios del usuario
       if (!isAuthenticated) {
         setAnuncios([]);
+        setAnunciosFiltrados([]);
         setLoading(false);
         setError('Debes iniciar sesión para ver tus anuncios');
       } else if (userId) {
         // Solo cargar cuando tengamos el userId
         cargarAnuncios();
+      } else {
+        // Esperar a que se obtenga el userId
+        setLoading(true);
       }
     } else {
       // Para otras vistas (no Mis Anuncios), cargar todos los anuncios
@@ -110,9 +118,6 @@ const ListaAnuncios = () => {
           const misAnuncios = anunciosRecibidos.filter(anuncio => {
             return anuncio.idUsuario === userId;
           });
-          console.log('Anuncios recibidos:', anunciosRecibidos.length);
-          console.log('Anuncios filtrados (mis anuncios):', misAnuncios.length);
-          console.log('Mi userId:', userId);
           setAnuncios(misAnuncios);
         } else {
           setError('Error al cargar tus anuncios');
@@ -236,12 +241,6 @@ const ListaAnuncios = () => {
       }
     } catch (err) {
       console.error('Error al enviar mensaje:', err);
-      console.error('Error completo:', {
-        message: err.message,
-        response: err.response,
-        request: err.request,
-        config: err.config
-      });
       
       let errorMessage = 'Error al enviar el mensaje';
       

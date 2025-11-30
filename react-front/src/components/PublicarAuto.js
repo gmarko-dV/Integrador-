@@ -127,20 +127,12 @@ const PublicarAuto = () => {
         // Obtener ID token (siempre JWS, no JWE)
         const claims = await getIdTokenClaims();
         const token = claims?.__raw;
-        console.log('ID Token obtenido correctamente:', token ? 'Sí (longitud: ' + token.length + ')' : 'No');
         if (!token) {
           setError('No se pudo obtener el token de autenticación. Por favor, inicia sesión nuevamente.');
           setLoading(false);
           return;
         }
       } catch (tokenError) {
-        console.error('Error obteniendo ID token antes de la petición:', tokenError);
-        console.error('Detalles del error:', {
-          message: tokenError.message,
-          error: tokenError.error,
-          error_description: tokenError.error_description
-        });
-        
         // Mensaje más específico según el tipo de error
         let errorMessage = 'Error de autenticación. ';
         if (tokenError.error === 'login_required') {
@@ -189,9 +181,7 @@ const PublicarAuto = () => {
       formDataToSend.append('imagen1', imagen1);
       formDataToSend.append('imagen2', imagen2);
 
-      console.log('Enviando petición para crear anuncio...');
       const response = await anuncioService.crearAnuncio(formDataToSend);
-      console.log('Respuesta recibida:', response);
 
       if (response.success) {
         setSuccess(true);
@@ -215,8 +205,7 @@ const PublicarAuto = () => {
         document.getElementById('imagen2').value = '';
       }
     } catch (err) {
-      console.error('Error completo:', err);
-      console.error('Error response:', err.response);
+      console.error('Error al crear anuncio:', err);
       const errorMessage = err.response?.data?.error || 
                           err.message || 
                           'Error al crear el anuncio. Por favor, intenta nuevamente.';
