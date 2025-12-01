@@ -1,50 +1,59 @@
+/* ============================================
+   CONTENEDOR PRINCIPAL
+   ============================================ */
 .detalle-anuncio-container {
-  max-width: 1400px;
+  max-width: var(--max-width-container);
   margin: 0 auto;
-  padding: 2rem;
-  background: white;
+  padding: var(--spacing-xl);
+  background: var(--color-white);
   min-height: 100vh;
 }
 
 .detalle-anuncio-header {
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-xl);
 }
 
 .btn-volver-detalle {
-  background: #0066cc;
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-white);
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background var(--transition-normal);
 }
 
 .btn-volver-detalle:hover {
-  background: #0052a3;
+  background: var(--color-primary-hover);
 }
 
+/* ============================================
+   CONTENIDO
+   ============================================ */
 .detalle-anuncio-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 3rem;
+  gap: var(--spacing-xxl);
 }
 
+/* ============================================
+   IMÁGENES
+   ============================================ */
 .detalle-anuncio-imagenes {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--spacing-md);
 }
 
 .imagen-principal-container {
   position: relative;
   width: 100%;
   height: 500px;
-  border-radius: 12px;
+  border-radius: var(--border-radius-lg);
   overflow: hidden;
-  background: #f5f5f5;
+  background: var(--color-bg-light);
 }
 
 .imagen-principal {
@@ -58,7 +67,7 @@
   top: 50%;
   transform: translateY(-50%);
   background: rgba(0, 0, 0, 0.6);
-  color: white;
+  color: var(--color-white);
   border: none;
   width: 50px;
   height: 50px;
@@ -68,8 +77,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.3s;
-  z-index: 10;
+  transition: background var(--transition-normal);
+  z-index: var(--z-index-overlay);
 }
 
 .imagen-nav-button:hover {
@@ -77,21 +86,21 @@
 }
 
 .imagen-nav-prev {
-  left: 20px;
+  left: var(--spacing-lg);
 }
 
 .imagen-nav-next {
-  right: 20px;
+  right: var(--spacing-lg);
 }
 
 .imagen-indicadores-detalle {
   position: absolute;
-  bottom: 20px;
+  bottom: var(--spacing-lg);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 8px;
-  z-index: 10;
+  gap: var(--spacing-sm);
+  z-index: var(--z-index-overlay);
 }
 
 .indicador {
@@ -100,11 +109,11 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.5);
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background var(--transition-normal);
 }
 
 .indicador.active {
-  background: white;
+  background: var(--color-white);
 }
 
 .imagen-placeholder-detalle {
@@ -115,57 +124,57 @@
   justify-content: center;
   font-size: 6rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  color: var(--color-white);
 }
 
 .imagenes-miniatura {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem;
+  gap: var(--spacing-xs);
 }
 
 .miniatura {
   width: 100%;
   height: 80px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: var(--border-radius-md);
   cursor: pointer;
   border: 2px solid transparent;
-  transition: border-color 0.3s;
+  transition: border-color var(--transition-normal);
 }
 
-.miniatura:hover {
-  border-color: #0066cc;
-}
-
+.miniatura:hover,
 .miniatura.active {
-  border-color: #0066cc;
+  border-color: var(--color-primary);
 }
 
+/* ============================================
+   INFORMACIÓN
+   ============================================ */
 .detalle-anuncio-info {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--spacing-lg);
 }
 
 .detalle-anuncio-titulo {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--spacing-md);
 }
 
 .detalle-anuncio-titulo h1 {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #333;
+  color: var(--color-text);
   margin: 0;
 }
 
 .anio-badge {
-  background: #0066cc;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+  background: var(--color-primary);
+  color: var(--color-white);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--border-radius-md);
   font-size: 1rem;
   font-weight: 600;
 }
@@ -173,24 +182,24 @@
 .detalle-anuncio-precio {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #0066cc;
+  color: var(--color-primary);
 }
 
 .detalle-anuncio-specs {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 12px;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: var(--color-bg-section);
+  border-radius: var(--border-radius-lg);
 }
 
 .spec-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #e0e0e0;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .spec-item:last-child {
@@ -199,58 +208,62 @@
 
 .spec-label {
   font-weight: 600;
-  color: #666;
+  color: var(--color-text-light);
 }
 
 .spec-value {
-  color: #333;
+  color: var(--color-text);
   font-weight: 500;
 }
 
+/* ============================================
+   DESCRIPCIÓN
+   ============================================ */
 .detalle-anuncio-descripcion {
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 12px;
+  padding: var(--spacing-lg);
+  background: var(--color-bg-section);
+  border-radius: var(--border-radius-lg);
 }
 
 .detalle-anuncio-descripcion h3 {
   font-size: 1.3rem;
-  color: #333;
-  margin-bottom: 1rem;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-md);
 }
 
 .detalle-anuncio-descripcion p {
-  color: #666;
+  color: var(--color-text-light);
   line-height: 1.6;
   margin: 0;
 }
 
+/* ============================================
+   CONTACTO
+   ============================================ */
 .detalle-anuncio-contacto {
-  padding: 1.5rem;
-  background: #e3f2fd;
-  border-radius: 12px;
-  border-left: 4px solid #0066cc;
+  padding: var(--spacing-lg);
+  background: var(--color-bg-contact);
+  border-radius: var(--border-radius-lg);
+  border-left: 4px solid var(--color-primary);
 }
 
 .detalle-anuncio-contacto h3 {
   font-size: 1.3rem;
-  color: #333;
-  margin-bottom: 1rem;
-  margin-top: 0;
+  color: var(--color-text);
+  margin: 0 0 var(--spacing-md) 0;
 }
 
 .detalle-anuncio-contacto-bloqueado {
-  padding: 1.5rem;
-  background: #fff3cd;
-  border-radius: 12px;
-  border-left: 4px solid #ffc107;
+  padding: var(--spacing-lg);
+  background: var(--color-bg-warning);
+  border-radius: var(--border-radius-lg);
+  border-left: 4px solid var(--color-warning-border);
 }
 
 .detalle-anuncio-contacto-bloqueado h3 {
   font-size: 1.3rem;
-  color: #333;
-  margin-bottom: 1rem;
-  margin-top: 0;
+  color: var(--color-text);
+  margin: 0 0 var(--spacing-md) 0;
 }
 
 .contacto-bloqueado-mensaje {
@@ -258,16 +271,16 @@
 }
 
 .contacto-bloqueado-mensaje p {
-  color: #856404;
+  color: var(--color-warning-text);
   font-size: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-md);
   font-weight: 500;
 }
 
 .contacto-item {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
 }
 
 .contacto-item:last-child {
@@ -276,67 +289,67 @@
 
 .contacto-label {
   font-weight: 600;
-  color: #333;
+  color: var(--color-text);
   min-width: 80px;
 }
 
 .contacto-value {
-  color: #666;
+  color: var(--color-text-light);
 }
 
 .btn-contactar-detalle {
-  background: #0066cc;
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-white);
   border: none;
-  padding: 1rem 2rem;
-  border-radius: 8px;
+  padding: var(--spacing-md) var(--spacing-xl);
+  border-radius: var(--border-radius-md);
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s;
-  margin-top: 1rem;
+  transition: background var(--transition-normal);
+  margin-top: var(--spacing-md);
 }
 
 .btn-contactar-detalle:hover {
-  background: #0052a3;
+  background: var(--color-primary-hover);
 }
 
 .login-prompt-detalle {
-  padding: 1.5rem;
-  background: #fff3cd;
-  border-radius: 8px;
+  padding: var(--spacing-lg);
+  background: var(--color-bg-warning);
+  border-radius: var(--border-radius-md);
   text-align: center;
-  margin-top: 1rem;
+  margin-top: var(--spacing-md);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--spacing-md);
   align-items: center;
 }
 
 .login-prompt-detalle p {
   margin: 0;
-  color: #856404;
+  color: var(--color-warning-text);
   font-weight: 500;
 }
 
+/* ============================================
+   MODAL
+   ============================================ */
 .modal-overlay-detalle {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  inset: 0;
+  background: var(--color-shadow);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: var(--z-index-modal);
 }
 
 .modal-content-detalle {
-  background: white;
-  border-radius: 12px;
+  background: var(--color-white);
+  border-radius: var(--border-radius-lg);
   width: 90%;
-  max-width: 500px;
+  max-width: var(--max-width-modal);
   max-height: 90vh;
   overflow-y: auto;
 }
@@ -345,21 +358,21 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid #e0e0e0;
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .modal-header-detalle h3 {
   margin: 0;
   font-size: 1.5rem;
-  color: #333;
+  color: var(--color-text);
 }
 
 .modal-close-detalle {
   background: none;
   border: none;
   font-size: 2rem;
-  color: #666;
+  color: var(--color-text-light);
   cursor: pointer;
   padding: 0;
   width: 32px;
@@ -368,27 +381,27 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: background 0.3s;
+  transition: background var(--transition-normal);
 }
 
 .modal-close-detalle:hover {
-  background: #f3f4f6;
+  background: var(--color-border-light);
 }
 
 .modal-body-detalle {
-  padding: 1.5rem;
+  padding: var(--spacing-lg);
 }
 
 .modal-body-detalle p {
-  margin-bottom: 1rem;
-  color: #666;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text-light);
 }
 
 .mensaje-textarea-detalle {
   width: 100%;
-  padding: 0.75rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
+  padding: var(--spacing-sm);
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius-md);
   font-size: 1rem;
   font-family: inherit;
   resize: vertical;
@@ -398,31 +411,31 @@
 
 .mensaje-textarea-detalle:focus {
   outline: none;
-  border-color: #0066cc;
+  border-color: var(--color-primary);
 }
 
 .modal-footer-detalle {
   display: flex;
-  gap: 1rem;
-  padding: 1.5rem;
-  border-top: 1px solid #e0e0e0;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  border-top: 1px solid var(--color-border);
   justify-content: flex-end;
 }
 
 .btn-enviar-mensaje {
-  background: #0066cc;
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-white);
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background var(--transition-normal);
 }
 
 .btn-enviar-mensaje:hover:not(:disabled) {
-  background: #0052a3;
+  background: var(--color-primary-hover);
 }
 
 .btn-enviar-mensaje:disabled {
@@ -431,36 +444,42 @@
 }
 
 .btn-cancelar {
-  background: #e0e0e0;
-  color: #333;
+  background: var(--color-border);
+  color: var(--color-text);
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background var(--transition-normal);
 }
 
 .btn-cancelar:hover {
   background: #d0d0d0;
 }
 
+/* ============================================
+   ESTADOS
+   ============================================ */
 .detalle-anuncio-loading,
 .detalle-anuncio-error {
   text-align: center;
-  padding: 4rem 2rem;
-  color: #666;
+  padding: var(--spacing-xxl) var(--spacing-xl);
+  color: var(--color-text-light);
 }
 
 .detalle-anuncio-error {
-  color: #dc2626;
+  color: var(--color-error);
 }
 
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
 @media (max-width: 1024px) {
   .detalle-anuncio-content {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: var(--spacing-xl);
   }
 
   .imagen-principal-container {
@@ -470,7 +489,7 @@
 
 @media (max-width: 768px) {
   .detalle-anuncio-container {
-    padding: 1rem;
+    padding: var(--spacing-md);
   }
 
   .detalle-anuncio-titulo h1 {
@@ -485,4 +504,3 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
-

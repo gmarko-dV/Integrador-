@@ -1,49 +1,51 @@
-/* Estilos para PlateSearch */
-
+/* ============================================
+   FORMULARIO
+   ============================================ */
 .plate-search-form {
-  background-color: white;
-  padding: 25px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+  background-color: var(--color-white);
+  padding: var(--spacing-xxl);
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 2px 10px var(--color-shadow);
+  margin-bottom: var(--spacing-xl);
 }
 
 .plate-search-form h3 {
   margin-top: 0;
-  margin-bottom: 15px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .plate-search-input-group {
   display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
 }
 
 .plate-search-input {
   flex: 1;
-  padding: 12px;
+  padding: var(--spacing-md);
   font-size: 16px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
 }
 
 .plate-search-input:disabled {
-  background-color: #f5f5f5;
+  background-color: var(--color-bg-lighter);
   cursor: not-allowed;
 }
 
 .plate-search-button {
-  padding: 12px 24px;
+  padding: var(--spacing-md) var(--spacing-xl);
   font-size: 16px;
-  background-color: #0066cc;
-  color: white;
+  background-color: var(--color-primary);
+  color: var(--color-white);
   border: none;
-  border-radius: 5px;
+  border-radius: var(--border-radius-sm);
   cursor: pointer;
+  transition: background-color var(--transition-normal);
 }
 
 .plate-search-button:hover:not(:disabled) {
-  background-color: #0052a3;
+  background-color: var(--color-primary-hover);
 }
 
 .plate-search-button:disabled {
@@ -52,32 +54,36 @@
 }
 
 .plate-search-clear-button {
-  padding: 8px 16px;
+  padding: var(--spacing-sm) var(--spacing-lg);
   font-size: 14px;
-  background-color: #f0f0f0;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  background-color: var(--color-bg-light);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
   cursor: pointer;
+  transition: background-color var(--transition-normal);
 }
 
 .plate-search-clear-button:hover {
-  background-color: #e0e0e0;
+  background-color: var(--color-border);
 }
 
 .plate-search-error {
-  margin-top: 15px;
-  padding: 12px;
-  background-color: #fee;
-  border: 1px solid #fcc;
-  border-radius: 5px;
-  color: #c33;
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background-color: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
+  border-radius: var(--border-radius-sm);
+  color: var(--color-error-text);
 }
 
+/* ============================================
+   RESULTADOS
+   ============================================ */
 .plate-search-result {
-  background-color: white;
-  padding: 25px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: var(--color-white);
+  padding: var(--spacing-xxl);
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 2px 10px var(--color-shadow);
 }
 
 .plate-search-result h3 {
@@ -86,72 +92,71 @@
 
 .vehicle-details-container {
   display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
-  padding-bottom: 20px;
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-xl);
   border-bottom: 1px solid #eee;
 }
 
 .vehicle-image-container {
   width: 150px;
   height: 100px;
-  background-color: #f0f0f0;
+  background-color: var(--color-bg-light);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 5px;
+  border-radius: var(--border-radius-sm);
 }
 
 .vehicle-image {
   width: 150px;
   height: 100px;
   object-fit: cover;
-  border-radius: 5px;
+  border-radius: var(--border-radius-sm);
 }
 
 .vehicle-basic-info h4 {
-  margin: 0 0 10px 0;
+  margin: 0 0 var(--spacing-sm) 0;
   font-size: 20px;
 }
 
 .vehicle-basic-info p {
-  margin: 5px 0;
+  margin: var(--spacing-xs) 0;
 }
 
 .vehicle-year {
-  color: #666;
+  color: var(--color-text-light);
 }
 
 .vehicle-specs-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  margin-bottom: 20px;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
 }
 
 .vehicle-spec-item strong {
-  color: #666;
+  color: var(--color-text-light);
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: var(--spacing-xs);
 }
 
 .vehicle-spec-item p {
-  margin: 5px 0;
+  margin: var(--spacing-xs) 0;
 }
 
 .vehicle-description {
-  padding: 15px;
-  background-color: #f9f9f9;
-  border-radius: 5px;
-  margin-bottom: 20px;
+  padding: var(--spacing-lg);
+  background-color: var(--color-bg-section);
+  border-radius: var(--border-radius-sm);
+  margin-bottom: var(--spacing-xl);
 }
 
 .vehicle-description strong {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: var(--spacing-sm);
 }
 
 .vehicle-description p {
-  margin: 10px 0 0 0;
+  margin: var(--spacing-sm) 0 0 0;
 }
-
