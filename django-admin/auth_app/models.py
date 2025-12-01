@@ -32,16 +32,27 @@ class Vehiculo(models.Model):
         return f"{self.placa} - {self.marca} {self.modelo}" if self.marca else self.placa
 
 
+class CategoriaVehiculo(models.Model):
+    """Modelo para categorías de vehículos (permite agregar más dinámicamente)"""
+    id_categoria = models.AutoField(primary_key=True, db_column='id_categoria')
+    nombre = models.CharField(max_length=100, unique=True, db_column='nombre')
+    codigo = models.CharField(max_length=50, unique=True, db_column='codigo')
+    descripcion = models.TextField(blank=True, null=True, db_column='descripcion')
+    activo = models.BooleanField(default=True, db_column='activo')
+    fecha_creacion = models.DateTimeField(auto_now_add=True, db_column='fecha_creacion')
+    
+    class Meta:
+        db_table = 'categorias_vehiculo'
+        verbose_name = 'Categoría de Vehículo'
+        verbose_name_plural = 'Categorías de Vehículos'
+        ordering = ['nombre']
+    
+    def __str__(self):
+        return self.nombre
+
+
 class Anuncio(models.Model):
     """Modelo para anuncios de vehículos en venta"""
-    TIPO_VEHICULO_CHOICES = [
-        ('sedan', 'Sedán'),
-        ('suv', 'SUV'),
-        ('hatchback', 'Hatchback'),
-        ('coupe', 'Coupé'),
-        ('deportivo', 'Deportivo'),
-        ('station-wagon', 'Station Wagon'),
-    ]
 
     id_anuncio = models.AutoField(primary_key=True, db_column='id_anuncio')
     id_usuario = models.CharField(max_length=255, db_column='id_usuario')
@@ -60,10 +71,17 @@ class Anuncio(models.Model):
     telefono_contacto = models.CharField(max_length=20, blank=True, null=True, db_column='telefono_contacto')
     tipo_vehiculo = models.CharField(
         max_length=50, 
-        choices=TIPO_VEHICULO_CHOICES, 
         blank=True, 
         null=True,
         db_column='tipo_vehiculo'
+    )
+    categoria = models.ForeignKey(
+        CategoriaVehiculo,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='anuncios',
+        db_column='id_categoria'
     )
     fecha_creacion = models.DateTimeField(auto_now_add=True, db_column='fecha_creacion')
     fecha_actualizacion = models.DateTimeField(auto_now=True, db_column='fecha_actualizacion')
