@@ -1,13 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from './AuthProvider';
 import { LoginButton, Profile } from './AuthComponents';
 import { NotificationDropdown } from './Notificaciones';
 import UserSettings from './UserSettings';
 import './Dashboard.css';
 
 const UserSettingsPage = () => {
-  const { isAuthenticated, isLoading } = useAuth0();
+  const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
   if (isLoading) {

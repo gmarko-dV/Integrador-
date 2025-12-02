@@ -13,13 +13,14 @@ public class JwtConfig {
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        // Configuración para Auth0
-        String jwkSetUri = "https://dev-gmarko.us.auth0.com/.well-known/jwks.json";
-        String issuerUri = "https://dev-gmarko.us.auth0.com/";
+        // Configuración para Supabase
+        String supabaseUrl = "https://kkjjgvqqzxothhojvzss.supabase.co";
+        String jwkSetUri = supabaseUrl + "/.well-known/jwks.json";
+        String issuerUri = supabaseUrl;
         
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
         
-        // Validar issuer pero no requerir audience (para ID tokens)
+        // Validar issuer pero no requerir audience (para access tokens de Supabase)
         decoder.setJwtValidator(JwtValidators.createDefaultWithIssuer(issuerUri));
         
         return decoder;

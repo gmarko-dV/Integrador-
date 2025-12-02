@@ -25,7 +25,7 @@ let getIdTokenClaimsFn = null;
 let interceptorIdSpring = null;
 let interceptorIdDjango = null;
 
-// Interceptor para agregar el token de Auth0 a las peticiones
+// Interceptor para agregar el token de Supabase a las peticiones
 export const setupAuthInterceptor = (getIdTokenClaims) => {
   // Guardar la función para uso futuro
   getIdTokenClaimsFn = getIdTokenClaims;
@@ -46,8 +46,7 @@ export const setupAuthInterceptor = (getIdTokenClaims) => {
       }
       
       if (getIdTokenClaimsFn) {
-        // Obtener ID token (siempre JWS firmado, no JWE encriptado)
-        // Los ID tokens son JWS y pueden ser validados por Spring Boot
+        // Obtener access token de Supabase
         const claims = await getIdTokenClaimsFn();
         if (claims && claims.__raw) {
           const token = claims.__raw;
@@ -56,6 +55,7 @@ export const setupAuthInterceptor = (getIdTokenClaims) => {
       }
     } catch (error) {
       // No lanzar el error para que la petición continúe (pero fallará con 401)
+      console.error('Error al agregar token:', error);
     }
     return config;
   };

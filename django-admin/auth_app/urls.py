@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views, public_views
+from . import views
 
 app_name = 'auth_app'
 
@@ -10,8 +10,4 @@ urlpatterns = [
     path('profile/', views.user_profile, name='user_profile'),
     path('profile/update/', views.update_profile, name='update_profile'),
     path('logout/', views.logout, name='logout'),
-    
-    # Endpoints públicos
-    path('health/', public_views.health_check, name='health_check'),
-    path('info/', public_views.api_info, name='api_info'),
 ]

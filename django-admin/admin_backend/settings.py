@@ -79,13 +79,14 @@ WSGI_APPLICATION = 'admin_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'car_Sales_pe',
-        'USER': 'postgres',
-        'PASSWORD': '123456',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': 'postgres',
+        'USER': 'postgres.kkjjgvqqzxothhojvzss',
+        'PASSWORD': 'LOgineosnash18',
+        'HOST': 'aws-1-us-east-2.pooler.supabase.com',
+        'PORT': '6543',
         'OPTIONS': {
             'client_encoding': 'UTF8',
+            'connect_timeout': 10,
         },
     }
 }
@@ -136,7 +137,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Auth0 Configuración
+# Supabase Configuración
+SUPABASE_URL = 'https://kkjjgvqqzxothhojvzss.supabase.co'
+SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtrampndnFxenhvdGhob2p2enNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyNTkyNjQsImV4cCI6MjA3OTgzNTI2NH0.DR-bCWKczVoYuXbAFS_LWewJEb41E84AvAOVd7T_8sA'
+
+# Auth0 Configuración (mantener para compatibilidad temporal)
 AUTH0_DOMAIN = 'dev-gmarko.us.auth0.com'  
 AUTH0_CLIENT_ID = 'q4z3HBJ8q0yVsUGCI9zyXskGA26Kus4b'
 AUTH0_CLIENT_SECRET = 'TgPxpZmbLG-odXNg9ZxgZr8ie6nzCilfhyE1dUPtmEs3mycACIPAKY4kuwetW1DA'
@@ -149,7 +154,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'auth_app.authentication.Auth0Authentication',
+        'auth_app.authentication.SupabaseAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (

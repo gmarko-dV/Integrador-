@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import anuncioService from '../services/anuncioApiService';
 import { setupAuthInterceptor } from '../services/apiService';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from './AuthProvider';
 import './AnunciosPreview.css';
 
 const AnunciosPreview = ({ limite = 6 }) => {
-  const { isAuthenticated, getIdTokenClaims } = useAuth0();
+  const { isAuthenticated, getIdTokenClaims } = useAuth();
   const navigate = useNavigate();
   const [anuncios, setAnuncios] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -81,7 +81,7 @@ const AnunciosPreview = ({ limite = 6 }) => {
                     />
                   ) : (
                     <div className="anuncio-preview-placeholder">
-                      🚗
+                      <span className="vehicle-icon">Auto</span>
                     </div>
                   )}
                   {anuncio.tipoVehiculo && (
@@ -105,7 +105,7 @@ const AnunciosPreview = ({ limite = 6 }) => {
                   <div className="anuncio-preview-specs">
                     {anuncio.tipoVehiculo && (
                       <div className="anuncio-preview-spec">
-                        <span className="spec-icon">🚗</span>
+                        <span className="spec-icon">●</span>
                         <span>{anuncio.tipoVehiculo}</span>
                       </div>
                     )}

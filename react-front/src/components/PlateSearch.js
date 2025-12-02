@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from './AuthProvider';
 import { API_ENDPOINTS } from '../config/api';
 import SpringLogin from './SpringLogin';
 import './PlateSearch.css';
 
 const PlateSearch = () => {
-  const { user, isAuthenticated } = useAuth0();
+  const { user, isAuthenticated } = useAuth();
   const [plateNumber, setPlateNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [searchResult, setSearchResult] = useState(null);
@@ -149,7 +149,7 @@ const VehicleDetails = ({ vehicle }) => {
           />
         ) : (
           <div className="vehicle-image-container">
-            🚗
+            <span className="vehicle-icon">Auto</span>
           </div>
         )}
         <div className="vehicle-basic-info">

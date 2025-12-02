@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from './AuthProvider';
 import anuncioService from '../services/anuncioApiService';
 import notificacionService from '../services/notificacionService';
 import { setupAuthInterceptor } from '../services/apiService';
-import { LoginButton } from './AuthComponents';
 import './DetalleAnuncio.css';
 
 const DetalleAnuncio = () => {
   const { idAnuncio } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated, getIdTokenClaims, user, loginWithRedirect } = useAuth0();
+  const { isAuthenticated, getIdTokenClaims, user, loginWithRedirect } = useAuth();
   const [anuncio, setAnuncio] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -70,16 +69,7 @@ const DetalleAnuncio = () => {
   const handleContactar = async () => {
     if (!isAuthenticated) {
       // Si no está autenticado, redirigir al login
-      loginWithRedirect({
-        authorizationParams: {
-          prompt: 'login',
-          screen_hint: 'signup',
-          scope: 'openid profile email offline_access'
-        },
-        appState: {
-          returnTo: `/anuncio/${idAnuncio}`
-        }
-      });
+      navigate(`/login?returnTo=/anuncio/${idAnuncio}`);
       return;
     }
 
@@ -184,7 +174,7 @@ const DetalleAnuncio = () => {
             </div>
           ) : (
             <div className="imagen-placeholder-detalle">
-              🚗
+              <span className="vehicle-icon">Auto</span>
             </div>
           )}
 
@@ -269,16 +259,7 @@ const DetalleAnuncio = () => {
             <button
               className="btn-contactar-detalle"
               onClick={() => {
-                loginWithRedirect({
-                  authorizationParams: {
-                    prompt: 'login',
-                    screen_hint: 'signup',
-                    scope: 'openid profile email offline_access'
-                  },
-                  appState: {
-                    returnTo: `/anuncio/${idAnuncio}`
-                  }
-                });
+                navigate(`/login?returnTo=/anuncio/${idAnuncio}`);
               }}
             >
               Iniciar Sesión para Contactar

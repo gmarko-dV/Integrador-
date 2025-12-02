@@ -28,7 +28,7 @@ urlpatterns = [
     path('', redirect_to_admin, name='home'),
     path('admin/', admin.site.urls),
     path('api/auth/', include('auth_app.urls')),
-    path('api/public/', include('auth_app.urls')),
+    path('api/public/', include('auth_app.public_urls')),
 ]
 
 # Servir archivos media en desarrollo

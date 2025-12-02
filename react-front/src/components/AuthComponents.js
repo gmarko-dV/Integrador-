@@ -128,7 +128,7 @@ const Profile = () => {
                 navigate('/configuracion');
               }}
             >
-              ⚙️ Configuración
+              Configuración
             </button>
           </div>
           

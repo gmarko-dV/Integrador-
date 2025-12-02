@@ -10,7 +10,169 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class Auth0Authentication(BaseAuthentication):
+class SupabaseAuthentication(BaseAuthentication):
+    """
+    Autenticación personalizada para Supabase
+    """
+    
+    def authenticate(self, request):
+        auth_header = request.META.get('HTTP_AUTHORIZATION')
+        
+        if not auth_header:
+            return None
+            
+        try:
+            token = auth_header.split(' ')[1]  # Bearer <token>
+        except IndexError:
+            return None
+            
+        try:
+            # Verificar que el token sea un JWT válido (formato: header.payload.signature)
+            if not token or len(token.split('.')) != 3:
+                raise exceptions.AuthenticationFailed('Token no es un JWT válido')
+            
+            # Obtener el header del token para extraer el kid
+            unverified_header = jwt.get_unverified_header(token)
+            kid = unverified_header.get('kid')
+            
+            if not kid:
+                raise exceptions.AuthenticationFailed('Token no contiene kid en el header JWT')
+            
+            # Obtener la clave pública correcta usando el kid
+            public_key = self._get_public_key(kid)
+            
+            if not public_key:
+                raise exceptions.AuthenticationFailed('No se pudo obtener la clave pública para verificar el token')
+            
+            # Decodificar el token JWT de Supabase
+            supabase_url = getattr(settings, 'SUPABASE_URL', 'https://kkjjgvqqzxothhojvzss.supabase.co')
+            issuer = supabase_url.rstrip('/')
+            
+            payload = jwt.decode(
+                token,
+                public_key,
+                algorithms=['HS256', 'RS256'],
+                issuer=issuer,
+                options={"verify_aud": False}
+            )
+            
+            # Validar dominio institucional del email (opcional)
+            email = payload.get('email')
+            allowed_domain = getattr(settings, 'INSTITUTIONAL_EMAIL_DOMAIN', None)
+            if allowed_domain and email and not email.endswith(f"@{allowed_domain}"):
+                logger.warning(f'Email {email} no pertenece al dominio permitido {allowed_domain}')
+                # No fallar, solo loguear advertencia
+
+            # Obtener o crear el usuario
+            user = self._get_or_create_user(payload)
+            return (user, token)
+            
+        except jwt.ExpiredSignatureError:
+            raise exceptions.AuthenticationFailed('Token expirado')
+        except jwt.InvalidTokenError as e:
+            logger.error(f'Error de token inválido: {str(e)}')
+            raise exceptions.AuthenticationFailed('Token inválido')
+        except Exception as e:
+            logger.error(f'Error de autenticación: {str(e)}', exc_info=True)
+            raise exceptions.AuthenticationFailed(f'Error de autenticación: {str(e)}')
+    
+    def _get_jwks(self):
+        """
+        Obtener las claves públicas de Supabase y cachearlas
+        """
+        supabase_url = getattr(settings, 'SUPABASE_URL', 'https://kkjjgvqqzxothhojvzss.supabase.co')
+        jwks_url = f"{supabase_url.rstrip('/')}/.well-known/jwks.json"
+        try:
+            response = requests.get(jwks_url, timeout=5)
+            response.raise_for_status()
+            jwks = response.json()
+            
+            # Convertir JWKS a formato que PyJWT puede usar
+            public_keys = {}
+            for key in jwks.get('keys', []):
+                kid = key.get('kid')
+                if kid:
+                    # Supabase puede usar tanto RS256 como HS256
+                    if key.get('kty') == 'RSA':
+                        public_keys[kid] = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(key))
+                    elif key.get('kty') == 'oct':
+                        # Para HS256, usar la clave secreta directamente
+                        public_keys[kid] = key.get('k')
+            
+            return public_keys
+        except Exception as e:
+            logger.error(f'Error al obtener JWKS de Supabase: {str(e)}')
+            return {}
+    
+    def _get_public_key(self, kid):
+        """
+        Obtener la clave pública específica usando el kid
+        """
+        # Obtener todas las claves
+        public_keys = self._get_jwks()
+        return public_keys.get(kid)
+    
+    def _get_or_create_user(self, payload):
+        """
+        Obtener o crear un usuario basado en el payload del token de Supabase
+        """
+        supabase_id = payload.get('sub')
+        email = payload.get('email')
+        # Supabase almacena metadata en user_metadata, pero en el JWT viene directamente
+        name = payload.get('name') or payload.get('user_metadata', {}).get('nombre') or payload.get('user_metadata', {}).get('full_name') or ''
+        
+        if not supabase_id:
+            raise exceptions.AuthenticationFailed('Token no contiene sub (user ID)')
+        
+        try:
+            user = User.objects.get(username=supabase_id)
+            
+            # NO actualizar el nombre si el usuario ya tiene nombre en Django
+            has_name_in_django = bool(user.first_name or user.last_name)
+            
+            if has_name_in_django:
+                logger.debug(f'Usuario {supabase_id} ya tiene nombre en Django ({user.first_name} {user.last_name}), preservando...')
+            else:
+                # Solo si el usuario no tiene nombre, actualizarlo desde Supabase
+                if name:
+                    name_parts = name.split(' ', 1) if name else ['', '']
+                    first_name = name_parts[0] if len(name_parts) > 0 else ''
+                    last_name = name_parts[1] if len(name_parts) > 1 else ''
+                    if first_name or last_name:
+                        user.first_name = first_name
+                        user.last_name = last_name
+                        user.save()
+                        logger.info(f'Nombre inicial establecido desde Supabase para usuario {supabase_id}')
+            
+            # Actualizar email si cambió
+            if email and user.email != email:
+                user.email = email
+                user.save()
+        except User.DoesNotExist:
+            # Crear nuevo usuario
+            name_parts = name.split(' ', 1) if name else ['', '']
+            first_name = name_parts[0] if len(name_parts) > 0 else ''
+            last_name = name_parts[1] if len(name_parts) > 1 else ''
+            
+            user = User(
+                username=supabase_id,
+                email=email or '',
+                first_name=first_name,
+                last_name=last_name
+            )
+            user.set_unusable_password()
+            user.save()
+            logger.info(f'Usuario creado desde Supabase: {supabase_id} (ID: {user.id})')
+        
+        return user
+
+
+# Mantener Auth0Authentication para compatibilidad temporal
+class Auth0Authentication(SupabaseAuthentication):
+    """
+    Alias para compatibilidad - ahora usa Supabase
+    """
+    pass
     """
     Autenticación personalizada para Auth0
     """

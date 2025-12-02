@@ -149,7 +149,7 @@ const ChatIA = () => {
 
       {recommendedAnuncios.length > 0 && (
         <div className="chat-recommendations">
-          <h3>🚗 Vehículos Recomendados</h3>
+          <h3>Vehículos Recomendados</h3>
           <div className="recommendations-grid">
             {recommendedAnuncios.map((anuncio) => (
               <div key={anuncio.idAnuncio} className="recommendation-card">

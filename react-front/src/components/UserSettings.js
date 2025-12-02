@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from './AuthProvider';
 import { authService } from '../services/apiService';
 import { setupAuthInterceptor } from '../services/apiService';
 import './UserSettings.css';
 
 const UserSettings = ({ onClose }) => {
-  const { user, isAuthenticated, getIdTokenClaims, loginWithRedirect } = useAuth0();
+  const { user, isAuthenticated, getIdTokenClaims, loginWithRedirect } = useAuth();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);

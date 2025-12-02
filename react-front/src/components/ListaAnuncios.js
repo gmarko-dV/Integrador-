@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from './AuthProvider';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import anuncioService from '../services/anuncioApiService';
 import notificacionService from '../services/notificacionService';
@@ -7,7 +7,7 @@ import { setupAuthInterceptor } from '../services/apiService';
 import './ListaAnuncios.css';
 
 const ListaAnuncios = () => {
-  const { isAuthenticated, getIdTokenClaims } = useAuth0();
+  const { isAuthenticated, getIdTokenClaims } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -413,12 +413,12 @@ const ListaAnuncios = () => {
               <div className="anuncio-specs">
                 {anuncio.tipoVehiculo && (
                   <div className="anuncio-spec-item">
-                    <span className="spec-icon">🚗</span>
+                    <span className="spec-icon">●</span>
                     <span className="spec-text">{anuncio.tipoVehiculo}</span>
                   </div>
                 )}
                 <div className="anuncio-spec-item">
-                  <span className="spec-icon">📊</span>
+                  <span className="spec-icon">●</span>
                   <span className="spec-text">{anuncio.kilometraje?.toLocaleString('es-PE')} km</span>
                 </div>
               </div>

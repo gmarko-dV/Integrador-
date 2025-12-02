@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from './AuthProvider';
 import { authService, setupAuthInterceptor } from '../services/apiService';
 
 const BackendInfo = () => {
-  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+  const { getAccessToken, isAuthenticated } = useAuth();
   const [backendData, setBackendData] = useState({
     spring: null,
     django: null,
@@ -14,9 +14,12 @@ const BackendInfo = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      setupAuthInterceptor(getAccessTokenSilently);
+      setupAuthInterceptor(async () => {
+        const token = await getAccessToken();
+        return token ? { __raw: token } : null;
+      });
     }
-  }, [isAuthenticated, getAccessTokenSilently]);
+  }, [isAuthenticated, getAccessToken]);
 
   const fetchBackendData = async () => {
     setLoading(true);

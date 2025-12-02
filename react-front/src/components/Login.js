@@ -91,7 +91,7 @@ const Login = () => {
       <div className="login-container">
         <div className="login-card">
           <div className="login-header">
-            <h1>🚗 CheckAuto</h1>
+            <h1>CheckAuto</h1>
             <p>{isLoginMode ? 'Inicia sesión en tu cuenta' : 'Crea una nueva cuenta'}</p>
           </div>
 
@@ -197,7 +197,7 @@ const Login = () => {
 
           <div className="login-back">
             <button type="button" onClick={() => navigate('/')}>
-              ← Volver al inicio
+              Volver al inicio
             </button>
           </div>
         </div>

@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from './AuthProvider';
 import notificacionService from '../services/notificacionService';
 import { setupAuthInterceptor } from '../services/apiService';
 import './Notificaciones.css';
 
 // Hook personalizado para obtener notificaciones
 export const useNotificaciones = () => {
-  const { isAuthenticated, getIdTokenClaims } = useAuth0();
+  const { isAuthenticated, getIdTokenClaims } = useAuth();
   const [notificaciones, setNotificaciones] = useState([]);
   const [cantidadNoLeidas, setCantidadNoLeidas] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -58,7 +58,7 @@ export const useNotificaciones = () => {
 
 // Componente de dropdown de notificaciones
 export const NotificationDropdown = () => {
-  const { isAuthenticated } = useAuth0();
+  const { isAuthenticated } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const {
@@ -142,7 +142,7 @@ export const NotificationDropdown = () => {
         onClick={() => setIsOpen(!isOpen)}
         title="Ver notificaciones"
       >
-        <span className="notification-bell-icon">🔔</span>
+        <span className="notification-bell-icon">●</span>
         <span className="notification-arrow-icon">▼</span>
         {cantidadNoLeidas > 0 && (
           <span className="notification-badge">{cantidadNoLeidas}</span>
@@ -232,7 +232,7 @@ export const NotificationDropdown = () => {
 
 // Componente original (mantener para compatibilidad)
 const Notificaciones = () => {
-  const { isAuthenticated, getIdTokenClaims } = useAuth0();
+  const { isAuthenticated, getIdTokenClaims } = useAuth();
   const [notificaciones, setNotificaciones] = useState([]);
   const [cantidadNoLeidas, setCantidadNoLeidas] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -332,7 +332,7 @@ const Notificaciones = () => {
     <div className="notificaciones-container">
       <div className="notificaciones-header">
         <h3>
-          🔔 Notificaciones
+          Notificaciones
           {cantidadNoLeidas > 0 && (
             <span className="notificaciones-badge">{cantidadNoLeidas}</span>
           )}

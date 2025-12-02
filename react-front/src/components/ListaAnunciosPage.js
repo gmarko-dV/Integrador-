@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from './AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import { LoginButton, Profile } from './AuthComponents';
 import { NotificationDropdown } from './Notificaciones';
@@ -7,7 +7,7 @@ import ListaAnuncios from './ListaAnuncios';
 import './Dashboard.css';
 
 const ListaAnunciosPage = () => {
-  const { isAuthenticated, isLoading } = useAuth0();
+  const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
   if (isLoading) {

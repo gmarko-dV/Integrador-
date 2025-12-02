@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from './AuthProvider';
 import anuncioService from '../services/anuncioApiService';
 import { setupAuthInterceptor } from '../services/apiService';
 import './PublicarAuto.css';
 
 const PublicarAuto = () => {
-  const { isAuthenticated, getIdTokenClaims, loginWithRedirect } = useAuth0();
+  const { isAuthenticated, getIdTokenClaims, loginWithRedirect } = useAuth();
 
   // Asegurar que el interceptor esté configurado
   useEffect(() => {
