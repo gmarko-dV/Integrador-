@@ -8,12 +8,13 @@ import PlateSearch from './PlateSearch';
 import PublicarAuto from './PublicarAuto';
 import ListaAnuncios from './ListaAnuncios';
 import AnunciosPreview from './AnunciosPreview';
+import Contacto from './Contacto';
 import { authService, setupAuthInterceptor } from '../services/apiService';
 import './Dashboard.css';
 
 const Dashboard = () => {
   const { isAuthenticated, isLoading, user, getIdTokenClaims, loginWithRedirect } = useAuth();
-  const [activeTab, setActiveTab] = useState(null); // null = mostrar hero, 'anuncios', 'buscar', 'publicar' = mostrar solo esa sección
+  const [activeTab, setActiveTab] = useState(null); // null = mostrar hero, 'anuncios', 'buscar', 'publicar', 'contacto' = mostrar solo esa sección
   const [portadaImage, setPortadaImage] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -36,7 +37,7 @@ const Dashboard = () => {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const tab = searchParams.get('tab');
-    if (tab && ['anuncios', 'buscar', 'publicar'].includes(tab)) {
+    if (tab && ['anuncios', 'buscar', 'publicar', 'contacto'].includes(tab)) {
       setActiveTab(tab);
     } else {
       setActiveTab(null);
@@ -252,9 +253,23 @@ const Dashboard = () => {
                 Buscar Autos
               </a>
             )}
-            <div className="nav-link dropdown">
-              Contacto <span className="dropdown-arrow">▼</span>
-            </div>
+            <a 
+              href="#contacto" 
+              className={`nav-link ${activeTab === 'contacto' ? 'active' : ''}`}
+              onClick={(e) => {
+                e.preventDefault();
+                setActiveTab('contacto');
+                navigate('/?tab=contacto');
+                setTimeout(() => {
+                  const contentSection = document.querySelector('.content-section');
+                  if (contentSection) {
+                    contentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }, 100);
+              }}
+            >
+              Contacto
+            </a>
           </nav>
 
           <div className="header-right">
@@ -277,10 +292,10 @@ const Dashboard = () => {
         <main className="hero-section">
           <div className="hero-content">
             <h1 className="hero-title">
-              El portal confiable para la compra y venta de autos nuevos y usados en Perú.
+              El portal más confiable para comprar y vender autos seminuevos y usados en Perú.
             </h1>
             <p className="hero-subtitle">
-              En CheckAuto® encontrarás miles de vehículos disponibles en todas las ciudades del país, con precios competitivos y herramientas como nuestro buscador de placas para verificar la información del auto antes de decidir. ¿Listo para comprar o vender tu vehículo en Perú?
+              En CheckAuto encontrarás una amplia selección de vehículos disponibles en todo el país, con precios competitivos y herramientas exclusivas como nuestro verificador de placas, que te permite confirmar la información del vehículo antes de tomar una decisión. ¿Listo para comprar o vender tu auto en Perú?
             </p>
 
             {/* Action Buttons */}
@@ -369,8 +384,10 @@ const Dashboard = () => {
 
       {/* Content Section - Solo se muestra si hay una sección activa */}
       {activeTab && (
-        <div className={`content-section ${activeTab === 'buscar' ? 'buscar-section' : activeTab === 'publicar' ? 'publicar-section' : activeTab === 'anuncios' ? 'anuncios-section' : ''}`}>
-          {isAuthenticated ? (
+        <div className={`content-section ${activeTab === 'buscar' ? 'buscar-section' : activeTab === 'publicar' ? 'publicar-section' : activeTab === 'anuncios' ? 'anuncios-section' : activeTab === 'contacto' ? 'contacto-section' : ''}`}>
+          {activeTab === 'contacto' ? (
+            <Contacto />
+          ) : isAuthenticated ? (
             <div className={`authenticated-content ${activeTab === 'publicar' ? 'publicar-content' : ''}`}>
               {activeTab === 'anuncios' && <ListaAnuncios />}
               {activeTab === 'buscar' && <PlateSearch />}

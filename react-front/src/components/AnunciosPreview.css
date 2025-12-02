@@ -1,12 +1,15 @@
+/* ============================================
+   SECCIÓN PRINCIPAL
+   ============================================ */
 .anuncios-preview-section {
-  background: white;
-  padding: 4rem 2rem;
+  background: var(--color-white);
+  padding: var(--spacing-xxxxl) var(--spacing-xxl);
   position: relative;
   z-index: 1;
 }
 
 .anuncios-preview-container {
-  max-width: 1400px;
+  max-width: var(--max-width-container);
   margin: 0 auto;
 }
 
@@ -14,23 +17,29 @@
   text-align: center;
   font-size: 2.5rem;
   font-weight: 700;
-  color: #333;
-  margin-bottom: 3rem;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-xxxl);
 }
 
+/* ============================================
+   GRID DE ANUNCIOS
+   ============================================ */
 .anuncios-preview-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 2rem;
+  gap: var(--spacing-xxl);
   padding: 0;
 }
 
+/* ============================================
+   TARJETAS
+   ============================================ */
 .anuncio-preview-card {
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -38,7 +47,7 @@
 
 .anuncio-preview-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 20px var(--color-shadow);
 }
 
 .anuncio-preview-image-container {
@@ -46,14 +55,14 @@
   width: 100%;
   height: 220px;
   overflow: hidden;
-  background: #f5f5f5;
+  background: var(--color-bg-light);
 }
 
 .anuncio-preview-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: transform var(--transition-normal);
 }
 
 .anuncio-preview-card:hover .anuncio-preview-image {
@@ -68,17 +77,17 @@
   justify-content: center;
   font-size: 4rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  color: var(--color-white);
 }
 
 .anuncio-preview-badge {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
   background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  color: var(--color-white);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
   font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -87,8 +96,11 @@
   letter-spacing: 0.5px;
 }
 
+/* ============================================
+   CONTENIDO
+   ============================================ */
 .anuncio-preview-content {
-  padding: 1.5rem;
+  padding: var(--spacing-xl);
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -97,89 +109,94 @@
 .anuncio-preview-header {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  margin-bottom: 0.75rem;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
 }
 
 .anuncio-preview-modelo {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #333;
+  color: var(--color-text);
   margin: 0;
   line-height: 1.3;
 }
 
 .anuncio-preview-anio {
   font-size: 1rem;
-  color: #666;
+  color: var(--color-text-light);
   font-weight: 500;
 }
 
 .anuncio-preview-precio {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #0066cc;
-  margin-bottom: 1rem;
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-md);
 }
 
 .anuncio-preview-specs {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
 }
 
 .anuncio-preview-spec {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-xs);
   font-size: 0.9rem;
-  color: #666;
+  color: var(--color-text-light);
 }
 
 .spec-icon {
   font-size: 1rem;
-  color: #dc2626;
+  color: var(--color-danger);
 }
 
 .anuncio-preview-divider {
   height: 1px;
-  background: #dc2626;
-  margin: 1rem 0;
+  background: var(--color-danger);
+  margin: var(--spacing-md) 0;
 }
 
 .anuncio-preview-button {
   background: transparent;
   border: none;
-  color: #333;
+  color: var(--color-text);
   font-size: 1rem;
   font-weight: 600;
-  padding: 0.75rem;
+  padding: var(--spacing-sm);
   cursor: pointer;
-  transition: color 0.3s ease;
+  transition: color var(--transition-normal);
   text-align: left;
   margin-top: auto;
 }
 
 .anuncio-preview-button:hover {
-  color: #0066cc;
+  color: var(--color-primary);
 }
 
+/* ============================================
+   ESTADOS
+   ============================================ */
 .anuncios-preview-loading {
   text-align: center;
-  padding: 3rem;
-  color: #666;
+  padding: var(--spacing-xxxl);
+  color: var(--color-text-light);
 }
 
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
 @media (max-width: 768px) {
   .anuncios-preview-grid {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: var(--spacing-xl);
   }
 
   .anuncios-preview-title {
     font-size: 2rem;
-    margin-bottom: 2rem;
+    margin-bottom: var(--spacing-xxl);
   }
 }
-

@@ -111,26 +111,20 @@
 {% endblock %}
 
 {% block content %}
-{% if total_anuncios is not None %}
 <div class="quick-stats">
+    <div class="quick-stat-card warning">
+        <h3>👥 Usuarios Registrados</h3>
+        <div class="value">{{ total_usuarios|default:0 }}</div>
+    </div>
     <div class="quick-stat-card">
-        <h3>Total Anuncios</h3>
-        <div class="value">{{ total_anuncios }}</div>
+        <h3>📢 Total Publicaciones</h3>
+        <div class="value">{{ total_anuncios|default:0 }}</div>
     </div>
     <div class="quick-stat-card success">
-        <h3>Anuncios Activos</h3>
-        <div class="value">{{ anuncios_activos }}</div>
-    </div>
-    <div class="quick-stat-card warning">
-        <h3>Usuarios</h3>
-        <div class="value">{{ total_usuarios }}</div>
-    </div>
-    <div class="quick-stat-card info">
-        <h3>Vehículos</h3>
-        <div class="value">{{ total_vehiculos }}</div>
+        <h3>✅ Publicaciones Activas</h3>
+        <div class="value">{{ anuncios_activos|default:0 }}</div>
     </div>
 </div>
-{% endif %}
 
 {{ block.super }}
 {% endblock %}
