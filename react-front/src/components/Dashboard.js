@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from './AuthProvider';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LoginButton, Profile } from './AuthComponents';
 import { NotificationDropdown } from './Notificaciones';
@@ -12,7 +12,7 @@ import { authService, setupAuthInterceptor } from '../services/apiService';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const { isAuthenticated, isLoading, user, getIdTokenClaims, loginWithRedirect } = useAuth0();
+  const { isAuthenticated, isLoading, user, getIdTokenClaims, loginWithRedirect } = useAuth();
   const [activeTab, setActiveTab] = useState(null); // null = mostrar hero, 'anuncios', 'buscar', 'publicar' = mostrar solo esa sección
   const [portadaImage, setPortadaImage] = useState(null);
   const navigate = useNavigate();

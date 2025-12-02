@@ -1,141 +1,37 @@
-import React, { useEffect, useState } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from './AuthProvider';
 import './Callback.css';
 
 const Callback = () => {
-
-  const { isLoading, error, isAuthenticated } = useAuth0();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const urlError = searchParams.get('error');
-  const code = searchParams.get('code');
-  const [hasRedirected, setHasRedirected] = useState(false);
-  
-  // Debug: ver qué errores tenemos (debe estar antes de cualquier return)
+  const { isAuthenticated, isLoading } = useAuth();
+
   useEffect(() => {
-    if (urlError) {
-      console.log('Error en URL:', urlError);
-      console.log('Todos los parámetros de URL:', Object.fromEntries(searchParams.entries()));
-    }
-    if (error) {
-      console.log('Error de Auth0:', error);
-      console.log('Detalles del error:', {
-        error: error.error,
-        error_description: error.error_description,
-        message: error.message,
-        statusCode: error.statusCode
-      });
-    }
-  }, [urlError, error, searchParams]);
-  
-  useEffect(() => {
-    if (hasRedirected) return;
-    
-    if (urlError || error) return;
-    
-    if (!isLoading && isAuthenticated) {
-      setHasRedirected(true);
-      // Intentar obtener el returnTo del appState guardado por Auth0
-      let returnTo = '/';
-      
-      try {
-        // El SDK de Auth0 guarda el appState en el cache
-        const auth0Cache = localStorage.getItem('@@auth0spajs@@::q4z3HBJ8q0yVsUGCI9zyXskGA26Kus4b::openid profile email offline_access');
-        if (auth0Cache) {
-          const parsed = JSON.parse(auth0Cache);
-          if (parsed?.appState?.returnTo) {
-            returnTo = parsed.appState.returnTo;
-          }
-        }
-      } catch (e) {
-        // Si hay error, usar el default '/'
+    // Supabase maneja automáticamente el callback de OAuth
+    // Solo necesitamos esperar a que la autenticación se complete y redirigir
+    if (!isLoading) {
+      if (isAuthenticated) {
+        // Usuario autenticado, redirigir al inicio
+        navigate('/');
+      } else {
+        // Si no está autenticado después de cargar, puede haber un error
+        // Esperar un poco más por si está procesando
+        const timer = setTimeout(() => {
+          navigate('/');
+        }, 2000);
+        return () => clearTimeout(timer);
       }
-      
-      setTimeout(() => {
-        navigate(returnTo);
-      }, 500);
-      return;
     }
-    
-    if (code && isLoading) return;
-    
-    if (!isLoading && !isAuthenticated && !code && !urlError && !error) {
-      const timer = setTimeout(() => {
-        if (!hasRedirected) {
-          setHasRedirected(true);
-          window.location.href = '/';
-        }
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading, isAuthenticated, code, urlError, error, hasRedirected]);
-
-  if (isLoading) {
-    return (
-      <div className="callback-loading">
-        <p>Procesando login...</p>
-      </div>
-    );
-  }
-  
-  // Detectar error de dominio no permitido
-  // Solo mostrar este error si realmente es un error de acceso denegado relacionado con dominio
-  const hasAccessDeniedError = 
-    (urlError === 'access_denied' && searchParams.get('error_description')?.includes('dominio')) ||
-    (urlError === 'access_denied' && searchParams.get('error_description')?.includes('institucional')) ||
-    (error && error.error === 'access_denied' && 
-     (error.error_description?.toLowerCase().includes('dominio') || 
-      error.error_description?.toLowerCase().includes('institucional') ||
-      error.message?.toLowerCase().includes('dominio')));
-
-  // Mostrar error de acceso denegado
-  if (hasAccessDeniedError && !isLoading) {
-    return (
-      <div className="callback-error callback-error-access-denied">
-        <h2>⚠️ Acceso Denegado</h2>
-        <p className="callback-error-message">
-          Solo se permiten correos institucionales de <strong>TECSUP</strong>.
-        </p>
-        <p className="callback-error-description">
-          Por favor, inicia sesión con una cuenta que termine en <strong>@tecsup.edu.pe</strong>
-        </p>
-        <button 
-          onClick={() => window.location.href = '/'}
-          className="callback-error-button"
-        >
-          Volver al Inicio
-        </button>
-      </div>
-    );
-  }
-
-  // Mostrar otros errores
-  if (error && !hasAccessDeniedError) {
-    return (
-      <div className="callback-error callback-error-other">
-        <h2>Error de Autenticación</h2>
-        <p className="callback-error-message">
-          {error.message || error.error_description || 'Error al procesar el login'}
-        </p>
-        <button 
-          onClick={() => window.location.href = '/'}
-          className="callback-error-button"
-        >
-          Volver al Inicio
-        </button>
-      </div>
-    );
-  }
-
-  if (hasRedirected && isAuthenticated) {
-    return null;
-  }
+  }, [isAuthenticated, isLoading, navigate]);
 
   return (
-    <div className="callback-success">
-      <p><strong>¡Login exitoso!</strong></p>
-      <p>Redirigiendo...</p>
+    <div className="callback-container">
+      <div className="callback-content">
+        <div className="callback-spinner"></div>
+        <h2>Procesando autenticación...</h2>
+        <p>Por favor espera un momento</p>
+      </div>
     </div>
   );
 };
