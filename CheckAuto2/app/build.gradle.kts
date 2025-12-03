@@ -66,12 +66,16 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.androidx.compose.animation.core.lint)
     
-    // Supabase
+    // Supabase - según documentación oficial
     implementation(libs.supabase.postgrest)
     implementation(libs.supabase.realtime)
     implementation(libs.supabase.storage)
-    implementation(libs.supabase.gotrue)
+    implementation(libs.supabase.auth)
     implementation(libs.ktor.client.android)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.utils)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -6,6 +6,7 @@ import com.tecsup.checkauto.model.Vehiculo
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
+import io.github.jan.supabase.storage.storage
 import kotlinx.serialization.Serializable
 
 // ========================================
@@ -86,6 +87,16 @@ data class HistorialBusquedaSupabase(
     val placa_consultada: String? = null,
     val fecha_consulta: String? = null,
     val resultado_api: String? = null
+)
+
+@Serializable
+data class CategoriaVehiculoSupabase(
+    val id_categoria: Int? = null,
+    val nombre: String,
+    val codigo: String? = null,
+    val descripcion: String? = null,
+    val activo: Boolean = true,
+    val fecha_creacion: String? = null
 )
 
 // ========================================
@@ -289,6 +300,88 @@ object SupabaseService {
                 select()
             }
             .decodeSingle<HistorialBusquedaSupabase>()
+    }
+    
+    // ========================================
+    // STORAGE - IMÁGENES
+    // ========================================
+    
+    /**
+     * Subir imagen a Supabase Storage
+     * @param bucket Nombre del bucket (ej: "anuncios")
+     * @param path Ruta donde guardar (ej: "anuncio-123/imagen1.jpg")
+     * @param data Bytes de la imagen
+     * @return URL pública de la imagen
+     */
+    suspend fun uploadImage(
+        bucket: String,
+        path: String,
+        data: ByteArray
+    ): String {
+        val storage = client.storage.from(bucket)
+        storage.upload(path, data) {
+            upsert = true
+        }
+        return storage.publicUrl(path)
+    }
+    
+    /**
+     * Eliminar imagen de Supabase Storage
+     */
+    suspend fun deleteImage(bucket: String, path: String) {
+        client.storage.from(bucket).delete(path)
+    }
+    
+    /**
+     * Obtener URL pública de una imagen
+     */
+    suspend fun getImageUrl(bucket: String, path: String): String {
+        return client.storage.from(bucket).publicUrl(path)
+    }
+    
+    // ========================================
+    // CATEGORÍAS DE VEHÍCULOS
+    // ========================================
+    
+    /**
+     * Obtener todas las categorías de vehículos activas
+     */
+    suspend fun getCategoriasVehiculos(): List<CategoriaVehiculoSupabase> {
+        return client.from("categorias_vehiculos")
+            .select {
+                filter {
+                    eq("activo", true)
+                }
+                order("nombre", Order.ASCENDING)
+            }
+            .decodeList<CategoriaVehiculoSupabase>()
+    }
+    
+    /**
+     * Obtener categoría por ID
+     */
+    suspend fun getCategoriaById(id: Int): CategoriaVehiculoSupabase? {
+        return client.from("categorias_vehiculos")
+            .select {
+                filter {
+                    eq("id_categoria", id)
+                }
+            }
+            .decodeSingleOrNull<CategoriaVehiculoSupabase>()
+    }
+    
+    /**
+     * Obtener categoría por código
+     */
+    suspend fun getCategoriaByCodigo(codigo: String): CategoriaVehiculoSupabase? {
+        return client.from("categorias_vehiculos")
+            .select {
+                filter {
+                    eq("codigo", codigo)
+                    eq("activo", true)
+                }
+            }
+            .decodeSingleOrNull<CategoriaVehiculoSupabase>()
     }
 }
 

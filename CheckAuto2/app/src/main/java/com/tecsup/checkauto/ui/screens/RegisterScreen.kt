@@ -30,18 +30,22 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import com.tecsup.checkauto.service.SupabaseAuthService
 import io.github.jan.supabase.auth.user.UserInfo
+import java.util.regex.Pattern
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(
-    onLoginSuccess: (UserInfo?) -> Unit,
-    onNavigateToRegister: () -> Unit = {},
-    onSkip: () -> Unit = {}
+fun RegisterScreen(
+    onRegisterSuccess: (UserInfo?) -> Unit,
+    onNavigateToLogin: () -> Unit = {},
+    onBack: () -> Unit = {}
 ) {
+    var nombre by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var successMessage by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
@@ -99,14 +103,14 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Bienvenido de vuelta",
+                text = "Crea tu cuenta",
                 fontSize = 18.sp,
                 color = Color.White.copy(alpha = 0.9f)
             )
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            // Formulario de login
+            // Formulario de registro
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
@@ -119,6 +123,27 @@ fun LoginScreen(
                     modifier = Modifier.padding(24.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    // Botón de volver
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                Icons.Default.ArrowBack,
+                                contentDescription = "Volver",
+                                tint = Color(0xFF0066CC)
+                            )
+                        }
+                        Text(
+                            "Registro",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF0066CC),
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
                     if (errorMessage != null) {
                         Card(
                             colors = CardDefaults.cardColors(
@@ -134,6 +159,35 @@ fun LoginScreen(
                             )
                         }
                     }
+
+                    if (successMessage != null) {
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = successMessage ?: "",
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(12.dp),
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+
+                    OutlinedTextField(
+                        value = nombre,
+                        onValueChange = { nombre = it; errorMessage = null },
+                        label = { Text("Nombre completo") },
+                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFF0066CC),
+                            focusedLabelColor = Color(0xFF0066CC)
+                        )
+                    )
 
                     OutlinedTextField(
                         value = email,
@@ -161,6 +215,28 @@ fun LoginScreen(
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Color(0xFF0066CC),
                             focusedLabelColor = Color(0xFF0066CC)
+                        ),
+                        supportingText = {
+                            Text(
+                                "Mínimo 6 caracteres",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
+                    )
+
+                    OutlinedTextField(
+                        value = confirmPassword,
+                        onValueChange = { confirmPassword = it; errorMessage = null },
+                        label = { Text("Confirmar contraseña") },
+                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFF0066CC),
+                            focusedLabelColor = Color(0xFF0066CC)
                         )
                     )
 
@@ -168,23 +244,38 @@ fun LoginScreen(
 
                     Button(
                         onClick = {
-                            if (email.isBlank() || password.isBlank()) {
-                                errorMessage = "Por favor completa todos los campos"
-                            } else {
-                                isLoading = true
-                                errorMessage = null
-                                scope.launch {
-                                    try {
-                                        val userInfo = SupabaseAuthService.signIn(email, password)
-                                        if (userInfo != null) {
-                                            onLoginSuccess(userInfo)
-                                        } else {
-                                            errorMessage = "Error al iniciar sesión. Verifica tus credenciales."
+                            // Validaciones
+                            when {
+                                nombre.isBlank() -> errorMessage = "El nombre es requerido"
+                                email.isBlank() -> errorMessage = "El correo electrónico es requerido"
+                                !isValidEmailFormat(email) -> errorMessage = "El formato del correo electrónico no es válido"
+                                password.isBlank() -> errorMessage = "La contraseña es requerida"
+                                password.length < 6 -> errorMessage = "La contraseña debe tener al menos 6 caracteres"
+                                confirmPassword.isBlank() -> errorMessage = "Debes confirmar tu contraseña"
+                                password != confirmPassword -> errorMessage = "Las contraseñas no coinciden"
+                                else -> {
+                                    isLoading = true
+                                    errorMessage = null
+                                    successMessage = null
+                                    scope.launch {
+                                        try {
+                                            val userInfo = SupabaseAuthService.signUp(
+                                                email = email,
+                                                password = password,
+                                                nombre = nombre
+                                            )
+                                            if (userInfo != null) {
+                                                successMessage = "¡Cuenta creada exitosamente! Redirigiendo..."
+                                                delay(1500)
+                                                onRegisterSuccess(userInfo)
+                                            } else {
+                                                errorMessage = "Error al crear la cuenta. Intenta nuevamente."
+                                                isLoading = false
+                                            }
+                                        } catch (e: Exception) {
+                                            errorMessage = "Error: ${e.message ?: "No se pudo crear la cuenta"}"
                                             isLoading = false
                                         }
-                                    } catch (e: Exception) {
-                                        errorMessage = "Error: ${e.message ?: "No se pudo iniciar sesión"}"
-                                        isLoading = false
                                     }
                                 }
                             }
@@ -204,22 +295,11 @@ fun LoginScreen(
                             )
                         } else {
                             Text(
-                                "Iniciar Sesión",
+                                "Crear Cuenta",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
                         }
-                    }
-
-                    TextButton(
-                        onClick = { /* TODO: Recuperar contraseña */ },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            "¿Olvidaste tu contraseña?",
-                            fontSize = 14.sp,
-                            color = Color(0xFF0066CC)
-                        )
                     }
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -230,33 +310,30 @@ fun LoginScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            "¿No tienes cuenta? ",
+                            "¿Ya tienes cuenta? ",
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                         Text(
-                            "Regístrate",
+                            "Inicia sesión",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF0066CC),
-                            modifier = Modifier.clickable(onClick = onNavigateToRegister)
+                            modifier = Modifier.clickable(onClick = onNavigateToLogin)
                         )
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            TextButton(
-                onClick = onSkip,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    "Continuar sin iniciar sesión",
-                    fontSize = 14.sp,
-                    color = Color.White.copy(alpha = 0.8f)
-                )
-            }
         }
     }
 }
+
+// Función de utilidad para validar email (renombrada para evitar conflictos)
+private fun isValidEmailFormat(email: String): Boolean {
+    val emailPattern = Pattern.compile(
+        "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
+        Pattern.CASE_INSENSITIVE
+    )
+    return emailPattern.matcher(email).matches()
+}
+

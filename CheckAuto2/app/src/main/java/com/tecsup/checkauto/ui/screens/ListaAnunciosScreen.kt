@@ -23,8 +23,12 @@ import androidx.compose.ui.platform.LocalContext
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.tecsup.checkauto.model.Anuncio
+import com.tecsup.checkauto.service.SupabaseService
+import com.tecsup.checkauto.service.ModelConverter
 import java.text.NumberFormat
 import java.util.*
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 
 @Composable
 fun ListaAnunciosScreen(
@@ -36,53 +40,40 @@ fun ListaAnunciosScreen(
     isAuthenticated: Boolean = false,
     userId: String? = null
 ) {
-    // Datos de ejemplo (más adelante vendrán de la API)
-    val anunciosEjemplo = remember {
-        listOf(
-            Anuncio(
-                idAnuncio = 1,
-                modelo = "Toyota Corolla",
-                anio = 2020,
-                kilometraje = 50000,
-                precio = 35000.0,
-                descripcion = "Excelente estado, único dueño, mantenimiento al día",
-                emailContacto = "vendedor@ejemplo.com",
-                telefonoContacto = "+51 987 654 321",
-                fechaCreacion = "2024-01-15",
-                imagenes = listOf(),
-                tipoVehiculo = "Sedan"
-            ),
-            Anuncio(
-                idAnuncio = 2,
-                modelo = "Honda Civic",
-                anio = 2019,
-                kilometraje = 60000,
-                precio = 32000.0,
-                descripcion = "Vehículo en perfectas condiciones, revisado",
-                emailContacto = "contacto@ejemplo.com",
-                telefonoContacto = "+51 987 654 322",
-                fechaCreacion = "2024-01-20",
-                imagenes = listOf(),
-                tipoVehiculo = "Sedan"
-            ),
-            Anuncio(
-                idAnuncio = 3,
-                modelo = "Toyota RAV4",
-                anio = 2021,
-                kilometraje = 30000,
-                precio = 45000.0,
-                descripcion = "SUV en excelente estado, ideal para familia",
-                emailContacto = "venta@ejemplo.com",
-                telefonoContacto = "+51 987 654 323",
-                fechaCreacion = "2024-01-25",
-                imagenes = listOf(),
-                tipoVehiculo = "SUV"
-            )
-        )
+    var anuncios by remember { mutableStateOf<List<Anuncio>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    
+    // Cargar anuncios desde Supabase
+    LaunchedEffect(esMisAnuncios, userId, tipoVehiculo) {
+        isLoading = true
+        errorMessage = null
+        try {
+            val anunciosSupabase = if (esMisAnuncios && userId != null) {
+                SupabaseService.getAnunciosByUserId(userId)
+            } else {
+                SupabaseService.getAnuncios()
+            }
+            
+            // Convertir y cargar imágenes para cada anuncio
+            val anunciosConImagenes = anunciosSupabase.map { anuncioSupabase ->
+                val imagenesSupabase = try {
+                    SupabaseService.getImagenesByAnuncioId(anuncioSupabase.id_anuncio ?: 0)
+                } catch (e: Exception) {
+                    emptyList()
+                }
+                val imagenes = imagenesSupabase.map { ModelConverter.imagenSupabaseToImagen(it) }
+                ModelConverter.anuncioSupabaseToAnuncio(anuncioSupabase, imagenes)
+            }
+            
+            anuncios = anunciosConImagenes
+            isLoading = false
+        } catch (e: Exception) {
+            errorMessage = "Error al cargar anuncios: ${e.message}"
+            isLoading = false
+        }
     }
-
-    var anuncios by remember { mutableStateOf(anunciosEjemplo) }
-    var isLoading by remember { mutableStateOf(false) }
     var imagenActual by remember { mutableStateOf(mapOf<Long, Int>()) }
     var tipoFiltro by remember { mutableStateOf(tipoVehiculo) }
 
@@ -122,6 +113,23 @@ fun ListaAnunciosScreen(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        if (errorMessage != null) {
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            ) {
+                Text(
+                    text = errorMessage ?: "",
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
 
         if (isLoading) {
             Box(
@@ -169,7 +177,34 @@ fun ListaAnunciosScreen(
                         },
                         onAnuncioClick = { onAnuncioClick(anuncio.idAnuncio ?: 0) },
                         onContactar = { onContactar(anuncio) },
-                        onEliminar = { onEliminar(anuncio.idAnuncio ?: 0) },
+                        onEliminar = { 
+                            scope.launch {
+                                try {
+                                    anuncio.idAnuncio?.toInt()?.let { id ->
+                                        SupabaseService.deleteAnuncio(id)
+                                        // Recargar anuncios
+                                        val anunciosSupabase = if (esMisAnuncios && userId != null) {
+                                            SupabaseService.getAnunciosByUserId(userId)
+                                        } else {
+                                            SupabaseService.getAnuncios()
+                                        }
+                                        val anunciosConImagenes = anunciosSupabase.map { anuncioSupabase ->
+                                            val imagenesSupabase = try {
+                                                SupabaseService.getImagenesByAnuncioId(anuncioSupabase.id_anuncio ?: 0)
+                                            } catch (e: Exception) {
+                                                emptyList()
+                                            }
+                                            val imagenes = imagenesSupabase.map { ModelConverter.imagenSupabaseToImagen(it) }
+                                            ModelConverter.anuncioSupabaseToAnuncio(anuncioSupabase, imagenes)
+                                        }
+                                        anuncios = anunciosConImagenes
+                                    }
+                                } catch (e: Exception) {
+                                    errorMessage = "Error al eliminar: ${e.message}"
+                                }
+                            }
+                            onEliminar(anuncio.idAnuncio ?: 0) 
+                        },
                         esMiAnuncio = esMisAnuncios && anuncio.idUsuario == userId,
                         isAuthenticated = isAuthenticated
                     )
@@ -221,7 +256,7 @@ fun AnuncioCard(
                     Image(
                         painter = rememberAsyncImagePainter(
                             ImageRequest.Builder(context)
-                                .data("http://localhost:8080$imagenMostrada")
+                                .data(imagenMostrada)
                                 .crossfade(true)
                                 .build()
                         ),

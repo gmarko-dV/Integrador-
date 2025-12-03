@@ -15,6 +15,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.SimpleDateFormat
 import java.util.*
+import com.tecsup.checkauto.service.SupabaseService
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 
 data class Notificacion(
     val idNotificacion: Long,
@@ -29,37 +32,51 @@ data class Notificacion(
 
 @Composable
 fun NotificacionesScreen(
+    vendedorId: String? = null,
     onBack: () -> Unit = {},
     onAnuncioClick: (Long) -> Unit = {}
 ) {
-    // Datos de ejemplo (más adelante vendrán de la API)
-    val notificacionesEjemplo = remember {
-        listOf(
-            Notificacion(
-                idNotificacion = 1,
-                titulo = "Nuevo mensaje sobre tu vehículo",
-                mensaje = "Hola, estoy interesado en tu vehículo Toyota Corolla 2020. ¿Podrías darme más información?",
-                nombreComprador = "Juan Pérez",
-                emailComprador = "juan@ejemplo.com",
-                fechaCreacion = "2024-01-25T10:30:00",
-                leida = false,
-                idAnuncio = 1
-            ),
-            Notificacion(
-                idNotificacion = 2,
-                titulo = "Consulta sobre vehículo",
-                mensaje = "Me gustaría saber si el vehículo aún está disponible y si puedo verlo este fin de semana.",
-                nombreComprador = "María García",
-                emailComprador = "maria@ejemplo.com",
-                fechaCreacion = "2024-01-24T15:45:00",
-                leida = true,
-                idAnuncio = 2
-            )
-        )
+    var notificaciones by remember { mutableStateOf<List<Notificacion>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    
+    // Función para cargar notificaciones
+    fun cargarNotificaciones() {
+        if (vendedorId == null) {
+            isLoading = false
+            return
+        }
+        
+        scope.launch {
+            isLoading = true
+            errorMessage = null
+            try {
+                val notificacionesSupabase = SupabaseService.getNotificacionesByVendedor(vendedorId)
+                notificaciones = notificacionesSupabase.map { notif ->
+                    Notificacion(
+                        idNotificacion = notif.id_notificacion?.toLong() ?: 0L,
+                        titulo = notif.titulo,
+                        mensaje = notif.mensaje ?: "",
+                        nombreComprador = notif.nombre_comprador,
+                        emailComprador = notif.email_comprador,
+                        fechaCreacion = notif.fecha_creacion ?: "",
+                        leida = notif.leido || notif.leida,
+                        idAnuncio = notif.id_anuncio?.toLong()
+                    )
+                }
+                isLoading = false
+            } catch (e: Exception) {
+                errorMessage = "Error al cargar notificaciones: ${e.message}"
+                isLoading = false
+            }
+        }
     }
-
-    var notificaciones by remember { mutableStateOf(notificacionesEjemplo) }
-    var isLoading by remember { mutableStateOf(false) }
+    
+    // Cargar notificaciones al iniciar y cuando cambia el vendedorId
+    LaunchedEffect(vendedorId) {
+        cargarNotificaciones()
+    }
 
     val cantidadNoLeidas = notificaciones.count { !it.leida }
 
@@ -108,6 +125,23 @@ fun NotificacionesScreen(
             }
         }
 
+        if (errorMessage != null) {
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = errorMessage ?: "",
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
+
         if (isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -147,7 +181,29 @@ fun NotificacionesScreen(
                     item {
                         Button(
                             onClick = {
-                                notificaciones = notificaciones.map { it.copy(leida = true) }
+                                if (vendedorId != null) {
+                                    scope.launch {
+                                        try {
+                                            SupabaseService.markAllNotificacionesAsRead(vendedorId)
+                                            // Recargar notificaciones
+                                            val notificacionesSupabase = SupabaseService.getNotificacionesByVendedor(vendedorId)
+                                            notificaciones = notificacionesSupabase.map { notif ->
+                                                Notificacion(
+                                                    idNotificacion = notif.id_notificacion?.toLong() ?: 0L,
+                                                    titulo = notif.titulo,
+                                                    mensaje = notif.mensaje ?: "",
+                                                    nombreComprador = notif.nombre_comprador,
+                                                    emailComprador = notif.email_comprador,
+                                                    fechaCreacion = notif.fecha_creacion ?: "",
+                                                    leida = notif.leido || notif.leida,
+                                                    idAnuncio = notif.id_anuncio?.toLong()
+                                                )
+                                            }
+                                        } catch (e: Exception) {
+                                            errorMessage = "Error: ${e.message}"
+                                        }
+                                    }
+                                }
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -162,10 +218,20 @@ fun NotificacionesScreen(
                     NotificacionCard(
                         notificacion = notificacion,
                         onMarkAsRead = {
-                            notificaciones = notificaciones.map { n ->
-                                if (n.idNotificacion == notificacion.idNotificacion) {
-                                    n.copy(leida = true)
-                                } else n
+                            scope.launch {
+                                try {
+                                    notificacion.idNotificacion.toInt().let { id ->
+                                        SupabaseService.markNotificacionAsRead(id)
+                                        // Actualizar estado local
+                                        notificaciones = notificaciones.map { n ->
+                                            if (n.idNotificacion == notificacion.idNotificacion) {
+                                                n.copy(leida = true)
+                                            } else n
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    errorMessage = "Error: ${e.message}"
+                                }
                             }
                         },
                         onAnuncioClick = {

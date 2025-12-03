@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,14 +37,33 @@ fun DashboardScreen(
     onNavigateToPublicar: () -> Unit,
     onNavigateToChat: () -> Unit = {},
     onNavigateToConfiguracion: () -> Unit = {},
+    onNavigateToNotificaciones: () -> Unit = {},
     onNavigateToDetalleAnuncio: (Long) -> Unit = {},
     isAuthenticated: Boolean = false,
     userName: String? = null,
+    userId: String? = null,
     onLogin: () -> Unit = {}
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     var showVehicleTypes by remember { mutableStateOf(true) }
     val context = LocalContext.current
+    
+    // Cargar cantidad de notificaciones no leídas
+    var cantidadNoLeidas by remember { mutableStateOf(0) }
+    val scope = rememberCoroutineScope()
+    
+    LaunchedEffect(userId) {
+        if (userId != null && isAuthenticated) {
+            scope.launch {
+                try {
+                    val notificacionesNoLeidas = com.tecsup.checkauto.service.SupabaseService.getUnreadNotificaciones(userId)
+                    cantidadNoLeidas = notificacionesNoLeidas.size
+                } catch (e: Exception) {
+                    // Error silencioso
+                }
+            }
+        }
+    }
 
     // URL del fondo de carretera (igual que la web)
     val backgroundImageUrl = "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
@@ -106,13 +127,33 @@ fun DashboardScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             if (isAuthenticated) {
-                                // Notificaciones placeholder
-                                IconButton(onClick = { /* TODO: Abrir notificaciones */ }) {
-                                    Icon(
-                                        Icons.Default.Notifications,
-                                        contentDescription = "Notificaciones",
-                                        tint = Color.White
-                                    )
+                                // Notificaciones con badge
+                                Box {
+                                    IconButton(onClick = onNavigateToNotificaciones) {
+                                        Icon(
+                                            Icons.Default.Notifications,
+                                            contentDescription = "Notificaciones",
+                                            tint = Color.White
+                                        )
+                                    }
+                                    // Badge de notificaciones no leídas
+                                    if (cantidadNoLeidas > 0) {
+                                        Surface(
+                                            color = MaterialTheme.colorScheme.error,
+                                            shape = RoundedCornerShape(10.dp),
+                                            modifier = Modifier
+                                                .align(Alignment.TopEnd)
+                                                .offset(x = 8.dp, y = (-8).dp)
+                                        ) {
+                                            Text(
+                                                text = if (cantidadNoLeidas > 99) "99+" else cantidadNoLeidas.toString(),
+                                                fontSize = 10.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White,
+                                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                                            )
+                                        }
+                                    }
                                 }
                                 // Perfil
                                 IconButton(onClick = onNavigateToConfiguracion) {
@@ -220,14 +261,97 @@ fun DashboardScreen(
                         modifier = Modifier.padding(bottom = 20.dp)
                     )
 
-                    val vehicleTypes = listOf(
-                        "Hatchback" to "🚗",
-                        "Sedan" to "🚙",
-                        "Coupé" to "🏎️",
-                        "SUV" to "🚐",
-                        "Station Wagon" to "🚕",
-                        "Deportivo" to "🏁"
+    // Cargar categorías desde Supabase
+    var categoriasVehiculos by remember { mutableStateOf<List<com.tecsup.checkauto.service.CategoriaVehiculoSupabase>>(emptyList()) }
+    
+    LaunchedEffect(Unit) {
+        try {
+            categoriasVehiculos = com.tecsup.checkauto.service.SupabaseService.getCategoriasVehiculos()
+            // Si no hay categorías, usar las por defecto
+            if (categoriasVehiculos.isEmpty()) {
+                categoriasVehiculos = listOf(
+                    com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                        id_categoria = null,
+                        nombre = "Hatchback",
+                        codigo = "hatchback"
+                    ),
+                    com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                        id_categoria = null,
+                        nombre = "Sedan",
+                        codigo = "sedan"
+                    ),
+                    com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                        id_categoria = null,
+                        nombre = "Coupé",
+                        codigo = "coupe"
+                    ),
+                    com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                        id_categoria = null,
+                        nombre = "SUV",
+                        codigo = "suv"
+                    ),
+                    com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                        id_categoria = null,
+                        nombre = "Station Wagon",
+                        codigo = "station-wagon"
+                    ),
+                    com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                        id_categoria = null,
+                        nombre = "Deportivo",
+                        codigo = "deportivo"
                     )
+                )
+            }
+        } catch (e: Exception) {
+            // En caso de error, usar categorías por defecto
+            categoriasVehiculos = listOf(
+                com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                    id_categoria = null,
+                    nombre = "Hatchback",
+                    codigo = "hatchback"
+                ),
+                com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                    id_categoria = null,
+                    nombre = "Sedan",
+                    codigo = "sedan"
+                ),
+                com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                    id_categoria = null,
+                    nombre = "Coupé",
+                    codigo = "coupe"
+                ),
+                com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                    id_categoria = null,
+                    nombre = "SUV",
+                    codigo = "suv"
+                ),
+                com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                    id_categoria = null,
+                    nombre = "Station Wagon",
+                    codigo = "station-wagon"
+                ),
+                com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                    id_categoria = null,
+                    nombre = "Deportivo",
+                    codigo = "deportivo"
+                )
+            )
+        }
+    }
+    
+    // Mapeo de emojis para tipos de vehículos
+    val emojiMap = mapOf(
+        "Hatchback" to "🚗",
+        "Sedan" to "🚙",
+        "Coupé" to "🏎️",
+        "SUV" to "🚐",
+        "Station Wagon" to "🚕",
+        "Deportivo" to "🏁"
+    )
+    
+    val vehicleTypes = categoriasVehiculos.map { categoria ->
+        categoria.nombre to (emojiMap[categoria.nombre] ?: "🚗")
+    }
 
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(3),

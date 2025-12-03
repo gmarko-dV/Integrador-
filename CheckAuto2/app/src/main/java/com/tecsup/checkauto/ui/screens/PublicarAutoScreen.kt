@@ -1,6 +1,8 @@
 package com.tecsup.checkauto.ui.screens
 
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -23,6 +25,11 @@ import coil.request.ImageRequest
 import java.util.regex.Pattern
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.tecsup.checkauto.service.SupabaseService
+import com.tecsup.checkauto.service.SupabaseAuthService
+import com.tecsup.checkauto.service.ModelConverter
+import com.tecsup.checkauto.config.SupabaseConfig
+import java.io.InputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,6 +38,8 @@ fun PublicarAutoScreen(
     isAuthenticated: Boolean = true
 ) {
     val context = LocalContext.current
+    
+    // Variables de estado
     var modelo by remember { mutableStateOf("") }
     var anio by remember { mutableStateOf("") }
     var kilometraje by remember { mutableStateOf("") }
@@ -41,19 +50,105 @@ fun PublicarAutoScreen(
     var tipoVehiculo by remember { mutableStateOf("") }
     var imagen1Uri by remember { mutableStateOf<Uri?>(null) }
     var imagen2Uri by remember { mutableStateOf<Uri?>(null) }
+    
+    // Launchers para seleccionar imágenes desde la galería
+    val launcherImagen1 = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { imagen1Uri = it }
+    }
+    
+    val launcherImagen2 = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { imagen2Uri = it }
+    }
     var isLoading by remember { mutableStateOf(false) }
     var success by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
-
-    val tiposVehiculo = listOf(
-        "Hatchback",
-        "Sedan",
-        "Coupé",
-        "SUV",
-        "Station Wagon",
-        "Deportivo"
-    )
+    
+    // Cargar categorías desde Supabase
+    var categoriasVehiculos by remember { mutableStateOf<List<com.tecsup.checkauto.service.CategoriaVehiculoSupabase>>(emptyList()) }
+    var isLoadingCategorias by remember { mutableStateOf(true) }
+    
+    LaunchedEffect(Unit) {
+        isLoadingCategorias = true
+        try {
+            categoriasVehiculos = SupabaseService.getCategoriasVehiculos()
+            // Si no hay categorías, usar las por defecto
+            if (categoriasVehiculos.isEmpty()) {
+                categoriasVehiculos = listOf(
+                    com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                        id_categoria = null,
+                        nombre = "Hatchback",
+                        codigo = "hatchback"
+                    ),
+                    com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                        id_categoria = null,
+                        nombre = "Sedan",
+                        codigo = "sedan"
+                    ),
+                    com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                        id_categoria = null,
+                        nombre = "Coupé",
+                        codigo = "coupe"
+                    ),
+                    com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                        id_categoria = null,
+                        nombre = "SUV",
+                        codigo = "suv"
+                    ),
+                    com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                        id_categoria = null,
+                        nombre = "Station Wagon",
+                        codigo = "station-wagon"
+                    ),
+                    com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                        id_categoria = null,
+                        nombre = "Deportivo",
+                        codigo = "deportivo"
+                    )
+                )
+            }
+            isLoadingCategorias = false
+        } catch (e: Exception) {
+            // En caso de error, usar categorías por defecto
+            categoriasVehiculos = listOf(
+                com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                    id_categoria = null,
+                    nombre = "Hatchback",
+                    codigo = "hatchback"
+                ),
+                com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                    id_categoria = null,
+                    nombre = "Sedan",
+                    codigo = "sedan"
+                ),
+                com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                    id_categoria = null,
+                    nombre = "Coupé",
+                    codigo = "coupe"
+                ),
+                com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                    id_categoria = null,
+                    nombre = "SUV",
+                    codigo = "suv"
+                ),
+                com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                    id_categoria = null,
+                    nombre = "Station Wagon",
+                    codigo = "station-wagon"
+                ),
+                com.tecsup.checkauto.service.CategoriaVehiculoSupabase(
+                    id_categoria = null,
+                    nombre = "Deportivo",
+                    codigo = "deportivo"
+                )
+            )
+            isLoadingCategorias = false
+        }
+    }
 
     if (!isAuthenticated) {
         Box(
@@ -213,14 +308,28 @@ fun PublicarAutoScreen(
                 expanded = expandedTipo,
                 onDismissRequest = { expandedTipo = false }
             ) {
-                tiposVehiculo.forEach { tipo ->
+                if (isLoadingCategorias) {
                     DropdownMenuItem(
-                        text = { Text(tipo) },
-                        onClick = {
-                            tipoVehiculo = tipo
-                            expandedTipo = false
-                        }
+                        text = { 
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                CircularProgressIndicator(modifier = Modifier.size(16.dp))
+                            }
+                        },
+                        onClick = {}
                     )
+                } else {
+                    categoriasVehiculos.forEach { categoria ->
+                        DropdownMenuItem(
+                            text = { Text(categoria.nombre) },
+                            onClick = {
+                                tipoVehiculo = categoria.nombre
+                                expandedTipo = false
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -283,8 +392,8 @@ fun PublicarAutoScreen(
                 imageUri = imagen1Uri,
                 label = "Imagen 1",
                 modifier = Modifier.weight(1f),
-                onImageSelected = { uri ->
-                    imagen1Uri = uri
+                onSelectClick = {
+                    launcherImagen1.launch("image/*")
                 },
                 enabled = !isLoading
             )
@@ -294,8 +403,8 @@ fun PublicarAutoScreen(
                 imageUri = imagen2Uri,
                 label = "Imagen 2",
                 modifier = Modifier.weight(1f),
-                onImageSelected = { uri ->
-                    imagen2Uri = uri
+                onSelectClick = {
+                    launcherImagen2.launch("image/*")
                 },
                 enabled = !isLoading
             )
@@ -325,25 +434,86 @@ fun PublicarAutoScreen(
                         error = null
                         success = false
                         
-                        // Simular publicación (más adelante será una llamada real a la API)
                         scope.launch {
-                            delay(2000)
-                            success = true
-                            isLoading = false
-                            
-                            // Limpiar formulario
-                            modelo = ""
-                            anio = ""
-                            kilometraje = ""
-                            precio = ""
-                            descripcion = ""
-                            emailContacto = ""
-                            telefonoContacto = ""
-                            tipoVehiculo = ""
-                            imagen1Uri = null
-                            imagen2Uri = null
-                            
-                            onSuccess()
+                            try {
+                                val userId = SupabaseAuthService.getCurrentUserId()
+                                if (userId == null) {
+                                    error = "Debes iniciar sesión para publicar"
+                                    isLoading = false
+                                    return@launch
+                                }
+                                
+                                // Crear anuncio
+                                val anuncio = com.tecsup.checkauto.model.Anuncio(
+                                    modelo = modelo,
+                                    anio = anio.toInt(),
+                                    kilometraje = kilometraje.toInt(),
+                                    precio = precio.toDouble(),
+                                    descripcion = descripcion,
+                                    emailContacto = emailContacto.takeIf { it.isNotBlank() },
+                                    telefonoContacto = telefonoContacto.takeIf { it.isNotBlank() },
+                                    tipoVehiculo = tipoVehiculo,
+                                    idUsuario = userId
+                                )
+                                
+                                val anuncioSupabase = ModelConverter.anuncioToAnuncioSupabase(anuncio)
+                                val anuncioCreado = SupabaseService.createAnuncio(anuncioSupabase)
+                                
+                                // Subir imágenes
+                                val imagenesUri = listOfNotNull(imagen1Uri, imagen2Uri)
+                                val imagenesUrls = mutableListOf<String>()
+                                
+                                imagenesUri.forEachIndexed { index, uri ->
+                                    try {
+                                        val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
+                                        val imageBytes = inputStream?.readBytes()
+                                        
+                                        if (imageBytes != null) {
+                                            val extension = context.contentResolver.getType(uri)?.split("/")?.last() ?: "jpg"
+                                            val fileName = "${anuncioCreado.id_anuncio}/imagen${index + 1}.${extension}"
+                                            val imageUrl = SupabaseService.uploadImage(
+                                                SupabaseConfig.STORAGE_BUCKET_ANUNCIOS,
+                                                fileName,
+                                                imageBytes
+                                            )
+                                            imagenesUrls.add(imageUrl)
+                                            
+                                            // Guardar referencia en la tabla de imágenes
+                                            SupabaseService.addImagen(
+                                                com.tecsup.checkauto.service.ImagenSupabase(
+                                                    id_anuncio = anuncioCreado.id_anuncio ?: 0,
+                                                    url_imagen = imageUrl,
+                                                    orden = index
+                                                )
+                                            )
+                                        }
+                                    } catch (e: Exception) {
+                                        // Continuar aunque falle una imagen
+                                        error = "Error al subir imagen ${index + 1}: ${e.message}"
+                                    }
+                                }
+                                
+                                success = true
+                                isLoading = false
+                                
+                                // Limpiar formulario
+                                modelo = ""
+                                anio = ""
+                                kilometraje = ""
+                                precio = ""
+                                descripcion = ""
+                                emailContacto = ""
+                                telefonoContacto = ""
+                                tipoVehiculo = ""
+                                imagen1Uri = null
+                                imagen2Uri = null
+                                
+                                delay(1000)
+                                onSuccess()
+                            } catch (e: Exception) {
+                                error = "Error al publicar: ${e.message}"
+                                isLoading = false
+                            }
                         }
                     }
                 }
@@ -373,7 +543,7 @@ fun ImageSelector(
     imageUri: Uri?,
     label: String,
     modifier: Modifier = Modifier,
-    onImageSelected: (Uri) -> Unit,
+    onSelectClick: () -> Unit,
     enabled: Boolean = true
 ) {
     val context = LocalContext.current
@@ -381,9 +551,7 @@ fun ImageSelector(
         modifier = modifier
             .height(150.dp)
             .clickable(enabled = enabled) {
-                // TODO: Abrir selector de imágenes
-                // Por ahora, simular selección
-                // En producción, usar ActivityResultLauncher para seleccionar imagen
+                onSelectClick()
             },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant

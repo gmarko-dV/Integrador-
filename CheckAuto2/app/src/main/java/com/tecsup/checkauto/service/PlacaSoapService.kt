@@ -1,5 +1,6 @@
 package com.tecsup.checkauto.service
 
+import android.util.Log
 import com.tecsup.checkauto.config.ApiConfig
 import com.tecsup.checkauto.model.Vehiculo
 import kotlinx.coroutines.Dispatchers
@@ -19,9 +20,12 @@ class PlacaSoapService {
     suspend fun searchPlateDirect(plateNumber: String): Result<Vehiculo> = withContext(Dispatchers.IO) {
         try {
             val placaLimpia = plateNumber.uppercase().replace("-", "").replace(" ", "")
+            Log.d("PlacaSoapService", "Buscando placa: $placaLimpia")
             
             // Crear SOAP request
             val soapRequest = crearSOAPRequest(placaLimpia, ApiConfig.PLACA_API_USERNAME)
+            Log.d("PlacaSoapService", "SOAP Request: $soapRequest")
+            Log.d("PlacaSoapService", "URL: ${ApiConfig.PLACA_API_URL}")
             
             // Crear HTTP request
             val requestBody = soapRequest.toRequestBody(soapMediaType)
@@ -34,19 +38,46 @@ class PlacaSoapService {
             
             // Ejecutar request
             val response = client.newCall(request).execute()
+            val responseBody = response.body?.string() ?: ""
+            
+            Log.d("PlacaSoapService", "Response Code: ${response.code}")
+            Log.d("PlacaSoapService", "Response Body: ${responseBody.take(500)}") // Primeros 500 caracteres
             
             if (response.isSuccessful) {
-                val soapResponse = response.body?.string() ?: ""
-                val jsonContent = extraerJSONDelSOAP(soapResponse)
-                
-                // Parsear JSON a Vehiculo
-                val vehiculo = parseJsonToVehiculo(jsonContent, placaLimpia)
-                Result.success(vehiculo)
+                try {
+                    val jsonContent = extraerJSONDelSOAP(responseBody)
+                    Log.d("PlacaSoapService", "JSON extraído: $jsonContent")
+                    
+                    // Parsear JSON a Vehiculo
+                    val vehiculo = parseJsonToVehiculo(jsonContent, placaLimpia)
+                    Result.success(vehiculo)
+                } catch (parseException: Exception) {
+                    Log.e("PlacaSoapService", "Error parseando respuesta: ${parseException.message}", parseException)
+                    Result.failure(Exception("Error al procesar la respuesta de la API: ${parseException.message}"))
+                }
             } else {
-                Result.failure(Exception("Error HTTP: ${response.code} - ${response.message}"))
+                // Intentar extraer el mensaje de error del SOAP fault
+                val soapError = extraerErrorDelSOAP(responseBody)
+                
+                val errorMsg = when {
+                    response.code == 500 -> {
+                        if (soapError.isNotEmpty()) {
+                            "Error de la API: $soapError. Verifica que la placa sea válida o que las credenciales sean correctas."
+                        } else {
+                            "Error del servidor (500). La API de placas puede estar temporalmente no disponible. Intenta más tarde."
+                        }
+                    }
+                    response.code == 401 -> "Error de autenticación (401). Verifica las credenciales de la API."
+                    response.code == 404 -> "Endpoint no encontrado (404). Verifica la URL de la API."
+                    else -> "Error HTTP ${response.code}: ${response.message}"
+                }
+                Log.e("PlacaSoapService", errorMsg)
+                Log.e("PlacaSoapService", "Response body: $responseBody")
+                Result.failure(Exception(errorMsg))
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            Log.e("PlacaSoapService", "Excepción al buscar placa: ${e.message}", e)
+            Result.failure(Exception("Error de conexión: ${e.message}. Verifica tu conexión a internet."))
         }
     }
     
@@ -109,6 +140,38 @@ class PlacaSoapService {
             throw Exception("No se encontró JSON en la respuesta SOAP")
         } catch (e: Exception) {
             throw Exception("Error parseando respuesta SOAP: ${e.message}")
+        }
+    }
+    
+    private fun extraerErrorDelSOAP(soapResponse: String): String {
+        return try {
+            val factory = DocumentBuilderFactory.newInstance()
+            factory.isNamespaceAware = true
+            val builder = factory.newDocumentBuilder()
+            val inputSource = InputSource(StringReader(soapResponse))
+            val document = builder.parse(inputSource)
+            
+            // Buscar faultstring en el SOAP fault
+            val faultStringNodes = document.getElementsByTagName("faultstring")
+            if (faultStringNodes.length > 0) {
+                faultStringNodes.item(0).textContent.trim()
+            } else {
+                ""
+            }
+        } catch (e: Exception) {
+            // Si no se puede parsear, buscar manualmente
+            val faultStringIndex = soapResponse.indexOf("<faultstring>")
+            if (faultStringIndex != -1) {
+                val start = faultStringIndex + "<faultstring>".length
+                val end = soapResponse.indexOf("</faultstring>", start)
+                if (end != -1) {
+                    soapResponse.substring(start, end).trim()
+                } else {
+                    ""
+                }
+            } else {
+                ""
+            }
         }
     }
     

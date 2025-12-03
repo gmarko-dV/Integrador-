@@ -1,10 +1,13 @@
 package com.tecsup.checkauto
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
@@ -12,14 +15,20 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.tecsup.checkauto.model.Anuncio
 import com.tecsup.checkauto.ui.screens.*
+import com.tecsup.checkauto.ui.components.FloatingChatBubble
 import com.tecsup.checkauto.ui.theme.CheckAutoTheme
+import com.tecsup.checkauto.service.SupabaseAuthService
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        
+        // Manejar deep links de Supabase para confirmación de email
+        handleSupabaseDeepLink(intent)
+        
         setContent {
             CheckAutoTheme {
                 Surface(
@@ -27,6 +36,63 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     AppNavigation()
+                }
+            }
+        }
+    }
+    
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        // Manejar deep links cuando la app ya está abierta
+        handleSupabaseDeepLink(intent)
+    }
+    
+    private fun handleSupabaseDeepLink(intent: Intent) {
+        val data: Uri? = intent.data
+        if (data != null) {
+            Log.d("MainActivity", "Deep link recibido: $data")
+            
+            // Verificar si es un enlace de confirmación de Supabase
+            // Puede venir de:
+            // 1. URL de la web: http://localhost:3000/callback o https://tu-dominio.com/callback
+            // 2. Deep link personalizado: checkauto://auth/callback
+            val isCallbackLink = (data.scheme == "http" && data.host == "localhost" && data.port == 3000 && data.path == "/callback") ||
+                    (data.scheme == "https" && data.path?.contains("/callback") == true) ||
+                    (data.scheme == "checkauto" && data.host == "auth")
+            
+            if (isCallbackLink) {
+                // Extraer los parámetros de la URL
+                val accessToken = data.getQueryParameter("access_token")
+                val refreshToken = data.getQueryParameter("refresh_token")
+                val type = data.getQueryParameter("type")
+                val error = data.getQueryParameter("error")
+                
+                Log.d("MainActivity", "Callback recibido - Token: ${accessToken != null}, Tipo: $type, Error: $error")
+                
+                // Procesar el callback de Supabase
+                kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                    try {
+                        if (error != null) {
+                            Log.e("MainActivity", "Error en callback: $error")
+                            return@launch
+                        }
+                        
+                        // Esperar un momento para que Supabase procese el callback
+                        kotlinx.coroutines.delay(500)
+                        
+                        // Verificar si hay una sesión activa usando el servicio
+                        val session = SupabaseAuthService.getCurrentSession()
+                        if (session != null) {
+                            val user = SupabaseAuthService.getCurrentUser()
+                            Log.d("MainActivity", "✅ Sesión confirmada: ${user?.email}")
+                            // La sesión ya está activa, el usuario está autenticado
+                            // El estado de autenticación se actualizará automáticamente en AppNavigation
+                        } else {
+                            Log.d("MainActivity", "⚠️ No se encontró sesión. Puede que el usuario necesite confirmar el email primero.")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("MainActivity", "Error al procesar callback: ${e.message}")
+                    }
                 }
             }
         }
@@ -40,7 +106,18 @@ fun AppNavigation() {
     var userId by remember { mutableStateOf<String?>(null) }
     var userName by remember { mutableStateOf<String?>(null) }
     var userEmail by remember { mutableStateOf<String?>(null) }
+    
+    // Verificar autenticación al iniciar
+    LaunchedEffect(Unit) {
+        val currentUser = com.tecsup.checkauto.service.SupabaseAuthService.getCurrentUser()
+        isAuthenticated = currentUser != null
+        userId = currentUser?.id
+        userEmail = currentUser?.email
+        userName = currentUser?.userMetadata?.get("nombre")?.toString() 
+            ?: currentUser?.email?.substringBefore("@")
+    }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     NavHost(
         navController = navController,
         startDestination = "splash"
@@ -57,19 +134,46 @@ fun AppNavigation() {
 
         composable("login") {
             LoginScreen(
-                onLoginSuccess = {
+                onLoginSuccess = { userInfo ->
                     isAuthenticated = true
-                    userId = "mobile-user-123"
-                    userName = "Usuario Móvil"
-                    userEmail = "usuario@ejemplo.com"
+                    userId = userInfo?.id
+                    userEmail = userInfo?.email
+                    userName = userInfo?.userMetadata?.get("nombre")?.toString() 
+                        ?: userInfo?.email?.substringBefore("@")
                     navController.navigate("dashboard") {
                         popUpTo("login") { inclusive = true }
                     }
+                },
+                onNavigateToRegister = {
+                    navController.navigate("register")
                 },
                 onSkip = {
                     navController.navigate("dashboard") {
                         popUpTo("login") { inclusive = true }
                     }
+                }
+            )
+        }
+        
+        composable("register") {
+            RegisterScreen(
+                onRegisterSuccess = { userInfo ->
+                    isAuthenticated = true
+                    userId = userInfo?.id
+                    userEmail = userInfo?.email
+                    userName = userInfo?.userMetadata?.get("nombre")?.toString() 
+                        ?: userInfo?.email?.substringBefore("@")
+                    navController.navigate("dashboard") {
+                        popUpTo("register") { inclusive = true }
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.navigate("login") {
+                        popUpTo("register") { inclusive = true }
+                    }
+                },
+                onBack = {
+                    navController.popBackStack()
                 }
             )
         }
@@ -90,17 +194,17 @@ fun AppNavigation() {
                 onNavigateToConfiguracion = {
                     navController.navigate("configuracion")
                 },
+                onNavigateToNotificaciones = {
+                    navController.navigate("notificaciones")
+                },
                 onNavigateToDetalleAnuncio = { idAnuncio ->
                     navController.navigate("detalle/$idAnuncio")
                 },
                 isAuthenticated = isAuthenticated,
                 userName = userName,
+                userId = userId,
                 onLogin = {
-                    // TODO: Implementar login con Auth0
-                    isAuthenticated = true
-                    userId = "mobile-user-123"
-                    userName = "Usuario Móvil"
-                    userEmail = "usuario@ejemplo.com"
+                    navController.navigate("login")
                 }
             )
         }
@@ -113,7 +217,8 @@ fun AppNavigation() {
                     navController.navigate("detalle/$idAnuncio")
                 },
                 onContactar = { anuncio ->
-                    // TODO: Implementar contacto
+                    // Navegar al detalle del anuncio para contactar
+                    navController.navigate("detalle/${anuncio.idAnuncio}")
                 },
                 onEliminar = { idAnuncio ->
                     // TODO: Implementar eliminación
@@ -144,10 +249,14 @@ fun AppNavigation() {
             UserSettingsScreen(
                 userName = userName,
                 userEmail = userEmail,
+                userId = userId,
                 onBack = {
                     navController.popBackStack()
                 },
                 onLogout = {
+                    kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                        com.tecsup.checkauto.service.SupabaseAuthService.signOut()
+                    }
                     isAuthenticated = false
                     userId = null
                     userName = null
@@ -167,6 +276,7 @@ fun AppNavigation() {
 
         composable("notificaciones") {
             NotificacionesScreen(
+                vendedorId = userId,
                 onBack = {
                     navController.popBackStack()
                 },
@@ -196,35 +306,23 @@ fun AppNavigation() {
 
         composable("detalle/{idAnuncio}") { backStackEntry ->
             val idAnuncio = backStackEntry.arguments?.getString("idAnuncio")?.toLongOrNull() ?: 0L
-            
-            // Por ahora, crear un anuncio de ejemplo
-            // En producción, esto vendría de la API
-            val anuncioEjemplo = Anuncio(
-                idAnuncio = idAnuncio,
-                modelo = "Toyota Corolla",
-                anio = 2020,
-                kilometraje = 50000,
-                precio = 35000.0,
-                descripcion = "Excelente estado, único dueño, mantenimiento al día. Vehículo en perfectas condiciones.",
-                emailContacto = "vendedor@ejemplo.com",
-                telefonoContacto = "+51 987 654 321",
-                fechaCreacion = "2024-01-15",
-                imagenes = listOf(),
-                tipoVehiculo = "Sedan",
-                idUsuario = userId
-            )
 
             DetalleAnuncioScreen(
-                anuncio = anuncioEjemplo,
+                anuncioId = idAnuncio,
                 onBack = {
                     navController.popBackStack()
                 },
                 onContactar = {
-                    // TODO: Implementar contacto
+                    // TODO: Implementar contacto con notificaciones
                 },
-                esPropietario = anuncioEjemplo.idUsuario == userId,
-                isAuthenticated = isAuthenticated
+                esPropietario = false, // Se calcula dentro de la pantalla
+                isAuthenticated = isAuthenticated,
+                userId = userId
             )
         }
+    }
+    
+    // Chat flotante (overlay global, aparece en todas las pantallas)
+    FloatingChatBubble()
     }
 }

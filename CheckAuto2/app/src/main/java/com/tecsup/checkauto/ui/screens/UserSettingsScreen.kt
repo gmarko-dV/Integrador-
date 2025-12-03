@@ -15,17 +15,37 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tecsup.checkauto.service.SupabaseService
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 
 @Composable
 fun UserSettingsScreen(
     userName: String? = null,
     userEmail: String? = null,
     userAvatar: String? = null,
+    userId: String? = null,
     onBack: () -> Unit = {},
     onLogout: () -> Unit = {},
     onNavigateToNotificaciones: () -> Unit = {},
     onNavigateToMisAnuncios: () -> Unit = {}
 ) {
+    // Cargar cantidad de notificaciones no leídas
+    var cantidadNoLeidas by remember { mutableStateOf(0) }
+    val scope = rememberCoroutineScope()
+    
+    LaunchedEffect(userId) {
+        if (userId != null) {
+            scope.launch {
+                try {
+                    val notificacionesNoLeidas = com.tecsup.checkauto.service.SupabaseService.getUnreadNotificaciones(userId)
+                    cantidadNoLeidas = notificacionesNoLeidas.size
+                } catch (e: Exception) {
+                    // Error silencioso
+                }
+            }
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -113,12 +133,32 @@ fun UserSettingsScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         ) {
-            SettingsMenuItem(
-                icon = Icons.Default.Notifications,
-                title = "Notificaciones",
-                subtitle = "Gestiona tus notificaciones",
-                onClick = onNavigateToNotificaciones
-            )
+            Box(modifier = Modifier.fillMaxWidth()) {
+                SettingsMenuItem(
+                    icon = Icons.Default.Notifications,
+                    title = "Notificaciones",
+                    subtitle = "Gestiona tus notificaciones",
+                    onClick = onNavigateToNotificaciones
+                )
+                // Badge de notificaciones no leídas
+                if (cantidadNoLeidas > 0) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.error,
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(end = 16.dp, top = 8.dp)
+                    ) {
+                        Text(
+                            text = if (cantidadNoLeidas > 99) "99+" else cantidadNoLeidas.toString(),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = androidx.compose.ui.graphics.Color.White,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+            }
 
             SettingsMenuItem(
                 icon = Icons.Default.Settings,

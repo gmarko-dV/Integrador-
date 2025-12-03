@@ -1,11 +1,11 @@
 package com.tecsup.checkauto.service
 
 import com.tecsup.checkauto.config.SupabaseConfig
-import io.github.jan.supabase.gotrue.auth
-import io.github.jan.supabase.gotrue.providers.builtin.Email
-import io.github.jan.supabase.gotrue.providers.Google
-import io.github.jan.supabase.gotrue.user.UserInfo
-import io.github.jan.supabase.gotrue.user.UserSession
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.builtin.Email
+import io.github.jan.supabase.auth.providers.Google
+import io.github.jan.supabase.auth.user.UserInfo
+import io.github.jan.supabase.auth.user.UserSession
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -28,7 +28,10 @@ object SupabaseAuthService {
         password: String,
         nombre: String? = null
     ): UserInfo? {
-        val result = client.auth.signUpWith(Email) {
+        // Nota: redirectTo se configura en Supabase Dashboard
+        // La URL de redirección se establece en Authentication → URL Configuration
+        // La app móvil interceptará automáticamente la URL de la web mediante App Links
+        client.auth.signUpWith(Email) {
             this.email = email
             this.password = password
             if (nombre != null) {

@@ -16,6 +16,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // Repositorio adicional para Supabase si es necesario
+        maven {
+            url = uri("https://jitpack.io")
+        }
     }
 }
 
