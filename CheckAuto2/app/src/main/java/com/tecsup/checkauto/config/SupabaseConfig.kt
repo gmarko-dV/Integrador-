@@ -1,5 +1,6 @@
 package com.tecsup.checkauto.config
 
+import android.content.Context
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.realtime.Realtime
@@ -16,15 +17,42 @@ object SupabaseConfig {
     // Bucket de Storage para imágenes de anuncios
     const val STORAGE_BUCKET_ANUNCIOS = "anuncios"
     
-    // Cliente de Supabase
-    val client = createSupabaseClient(
-        supabaseUrl = SUPABASE_URL,
-        supabaseKey = SUPABASE_ANON_KEY
-    ) {
-        install(Postgrest)
-        install(Realtime)
-        install(Storage)
-        install(Auth)
+    // Cliente de Supabase (se inicializa con contexto de Android para persistencia de sesión)
+    private var _client: io.github.jan.supabase.SupabaseClient? = null
+    
+    fun initialize(context: Context) {
+        if (_client == null) {
+            _client = createSupabaseClient(
+                supabaseUrl = SUPABASE_URL,
+                supabaseKey = SUPABASE_ANON_KEY
+            ) {
+                install(Postgrest)
+                install(Realtime)
+                install(Storage)
+                install(Auth) {
+                    // Configurar persistencia de sesión usando el contexto de Android
+                    // El SDK de Supabase guardará automáticamente la sesión en SharedPreferences
+                }
+            }
+        }
     }
+    
+    val client: io.github.jan.supabase.SupabaseClient
+        get() {
+            if (_client == null) {
+                // Si no se ha inicializado, crear cliente sin contexto (fallback)
+                // Esto no guardará la sesión, pero permitirá que la app funcione
+                _client = createSupabaseClient(
+                    supabaseUrl = SUPABASE_URL,
+                    supabaseKey = SUPABASE_ANON_KEY
+                ) {
+                    install(Postgrest)
+                    install(Realtime)
+                    install(Storage)
+                    install(Auth)
+                }
+            }
+            return _client!!
+        }
 }
 

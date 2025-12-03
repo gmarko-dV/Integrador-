@@ -17,7 +17,8 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    onNavigateToDashboard: () -> Unit
 ) {
     var startAnimation by remember { mutableStateOf(false) }
     val alphaAnim = rememberInfiniteTransition(label = "splash_alpha")
@@ -34,7 +35,16 @@ fun SplashScreen(
     LaunchedEffect(key1 = true) {
         startAnimation = true
         delay(2000) // Mostrar splash por 2 segundos
-        onNavigateToLogin()
+        
+        // Verificar si hay una sesión guardada
+        val currentUser = com.tecsup.checkauto.service.SupabaseAuthService.getCurrentUser()
+        if (currentUser != null) {
+            // Hay una sesión válida, navegar directamente al dashboard
+            onNavigateToDashboard()
+        } else {
+            // No hay sesión, navegar al login
+            onNavigateToLogin()
+        }
     }
 
     Box(

@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -146,39 +147,57 @@ fun DetalleAnuncioScreen(
                     .padding(paddingValues)
                     .verticalScroll(rememberScrollState())
             ) {
-            // Header con botón de volver
-            Surface(
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.fillMaxWidth()
+            // Header moderno con gradiente
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color(0xFF0066CC),
+                                Color(0xFF0052A3)
+                            )
+                        )
+                    )
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = onBack) {
+                    IconButton(
+                        onClick = onBack,
+                        modifier = Modifier
+                            .background(
+                                Color.White.copy(alpha = 0.2f),
+                                RoundedCornerShape(12.dp)
+                            )
+                    ) {
                         Icon(
                             Icons.Default.ArrowBack,
                             contentDescription = "Volver",
-                            tint = Color.White
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
+                    Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = "Detalle del Vehículo",
-                        fontSize = 20.sp,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
+                        letterSpacing = 0.5.sp,
                         modifier = Modifier.weight(1f)
                     )
                 }
             }
 
-            // Imagen principal
+            // Imagen principal mejorada
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp)
+                    .height(350.dp)
             ) {
             if (imagenes.isNotEmpty() && imagenActual < imagenes.size) {
                 Image(
@@ -287,11 +306,11 @@ fun DetalleAnuncioScreen(
                 }
             }
 
-            // Información del vehículo
+            // Información del vehículo mejorada
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(20.dp)
             ) {
             // Título y año
             Row(
@@ -299,92 +318,171 @@ fun DetalleAnuncioScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = anuncioData.titulo ?: "${anuncioData.modelo} ${anuncioData.anio}",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Surface(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(12.dp)
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = anuncioData.titulo ?: "${anuncioData.modelo} ${anuncioData.anio}",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1A1A1A),
+                        letterSpacing = 0.3.sp,
+                        lineHeight = 34.sp
+                    )
+                    if (anuncioData.modelo != null) {
+                        Text(
+                            text = anuncioData.modelo,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF6B7280),
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                }
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFF0066CC)
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
                     Text(
                         text = "${anuncioData.anio}",
-                        fontSize = 14.sp,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // Precio
-            Text(
-                text = formatter.format(anuncioData.precio),
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
+            // Precio destacado
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = formatter.format(anuncioData.precio),
+                    fontSize = 34.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0066CC),
+                    letterSpacing = 0.5.sp
+                )
+                Surface(
+                    color = Color(0xFF10B981).copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "Precio",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF10B981),
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                    )
+                }
+            }
 
-            Spacer(modifier = Modifier.height(16.dp))
-            HorizontalDivider()
+            Spacer(modifier = Modifier.height(24.dp))
+            HorizontalDivider(color = Color(0xFFE2E8F0), thickness = 1.dp)
 
-            // Especificaciones
-            Spacer(modifier = Modifier.height(16.dp))
+            // Especificaciones mejoradas
+            Spacer(modifier = Modifier.height(20.dp))
             Text(
                 text = "Especificaciones",
-                fontSize = 18.sp,
+                fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 12.dp)
+                color = Color(0xFF1A1A1A),
+                letterSpacing = 0.5.sp,
+                modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            if (anuncioData.tipoVehiculo != null) {
-                SpecRow("Tipo", anuncioData.tipoVehiculo)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFFF8F9FA)
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    if (anuncioData.tipoVehiculo != null) {
+                        SpecRow("Tipo", anuncioData.tipoVehiculo)
+                    }
+                    SpecRow("Kilometraje", "${numberFormatter.format(anuncioData.kilometraje)} km")
+                }
             }
-            SpecRow("Kilometraje", "${numberFormatter.format(anuncioData.kilometraje)} km")
 
-            Spacer(modifier = Modifier.height(16.dp))
-            HorizontalDivider()
+            Spacer(modifier = Modifier.height(24.dp))
+            HorizontalDivider(color = Color(0xFFE2E8F0), thickness = 1.dp)
 
-            // Descripción
-            Spacer(modifier = Modifier.height(16.dp))
+            // Descripción mejorada
+            Spacer(modifier = Modifier.height(20.dp))
             Text(
                 text = "Descripción",
-                fontSize = 18.sp,
+                fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 8.dp)
+                color = Color(0xFF1A1A1A),
+                letterSpacing = 0.5.sp,
+                modifier = Modifier.padding(bottom = 12.dp)
             )
-            Text(
-                text = anuncioData.descripcion,
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                lineHeight = 20.sp
-            )
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFFF8F9FA)
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Text(
+                    text = anuncioData.descripcion,
+                    fontSize = 15.sp,
+                    color = Color(0xFF4A5568),
+                    lineHeight = 24.sp,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
 
             // Datos de contacto (solo si está autenticado)
             if (isAuthenticated && (anuncioData.emailContacto != null || anuncioData.telefonoContacto != null)) {
-                Spacer(modifier = Modifier.height(16.dp))
-                HorizontalDivider()
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
+                HorizontalDivider(color = Color(0xFFE2E8F0), thickness = 1.dp)
+                Spacer(modifier = Modifier.height(20.dp))
                 Text(
                     text = "Datos de Contacto",
-                    fontSize = 18.sp,
+                    fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    color = Color(0xFF1A1A1A),
+                    letterSpacing = 0.5.sp,
+                    modifier = Modifier.padding(bottom = 12.dp)
                 )
-                if (anuncioData.emailContacto != null) {
-                    SpecRow("Email", anuncioData.emailContacto)
-                }
-                if (anuncioData.telefonoContacto != null) {
-                    SpecRow("Teléfono", anuncioData.telefonoContacto)
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFF8F9FA)
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        if (anuncioData.emailContacto != null) {
+                            SpecRow("Email", anuncioData.emailContacto)
+                        }
+                        if (anuncioData.telefonoContacto != null) {
+                            SpecRow("Teléfono", anuncioData.telefonoContacto)
+                        }
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Botones de acción
+            // Botones de acción mejorados
             if (isAuthenticated && !esPropietarioReal) {
                 Button(
                     onClick = {
@@ -393,14 +491,24 @@ fun DetalleAnuncioScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp),
+                        .height(60.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
+                        containerColor = Color(0xFF0066CC)
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = 6.dp,
+                        pressedElevation = 4.dp
                     )
                 ) {
-                    Icon(Icons.Default.Email, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Contactar Vendedor", fontSize = 16.sp)
+                    Icon(Icons.Default.Email, contentDescription = null, modifier = Modifier.size(22.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        "Contactar Vendedor",
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp
+                    )
                 }
             } else if (!isAuthenticated) {
                 Text(
@@ -413,39 +521,84 @@ fun DetalleAnuncioScreen(
             }
             } // Cierre del Column principal
     
-            // Modal de contacto (fuera del Column pero dentro del Box)
+            // Modal de contacto mejorado
             if (mostrarModalContacto) {
         AlertDialog(
             onDismissRequest = { mostrarModalContacto = false },
-            title = { Text("💬 Enviar Mensaje al Vendedor") },
+            title = { 
+                Text(
+                    "💬 Enviar Mensaje",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1A1A1A),
+                    letterSpacing = 0.5.sp
+                ) 
+            },
             text = {
-                Column {
-                    Text(
-                        text = anuncioData.titulo ?: "${anuncioData.modelo} ${anuncioData.anio}",
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 4.dp)
-                    )
-                    Text(
-                        text = formatter.format(anuncioData.precio),
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFFF0F4F8)
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp)
+                        ) {
+                            Text(
+                                text = anuncioData.titulo ?: "${anuncioData.modelo} ${anuncioData.anio}",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp,
+                                color = Color(0xFF1A1A1A),
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+                            Text(
+                                text = formatter.format(anuncioData.precio),
+                                color = Color(0xFF0066CC),
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
                     OutlinedTextField(
                         value = mensajeContacto,
                         onValueChange = { mensajeContacto = it },
                         label = { Text("Tu mensaje") },
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 4,
-                        maxLines = 6
+                        maxLines = 6,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFF0066CC),
+                            focusedLabelColor = Color(0xFF0066CC)
+                        )
                     )
-                    Text(
-                        text = "El vendedor recibirá una notificación con tu mensaje",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
+                    Surface(
+                        color = Color(0xFFE0F2FE),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text("ℹ️", fontSize = 16.sp)
+                            Text(
+                                text = "El vendedor recibirá una notificación",
+                                fontSize = 12.sp,
+                                color = Color(0xFF0369A1),
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
                 }
             },
+            shape = RoundedCornerShape(24.dp),
+            containerColor = Color.White,
             confirmButton = {
                 Button(
                     onClick = {
@@ -482,23 +635,49 @@ fun DetalleAnuncioScreen(
                             }
                         }
                     },
-                    enabled = mensajeContacto.isNotBlank() && !contactando
+                    enabled = mensajeContacto.isNotBlank() && !contactando,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF0066CC)
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = 4.dp,
+                        pressedElevation = 2.dp
+                    )
                 ) {
                     if (contactando) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
-                            color = MaterialTheme.colorScheme.onPrimary
+                            color = Color.White
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Enviando...")
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            "Enviando...",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     } else {
-                        Text("📤 Enviar Mensaje")
+                        Text(
+                            "📤 Enviar Mensaje",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.3.sp
+                        )
                     }
                 }
             },
             dismissButton = {
-                TextButton(onClick = { mostrarModalContacto = false }) {
-                    Text("Cancelar")
+                TextButton(
+                    onClick = { mostrarModalContacto = false },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = Color(0xFF6B7280)
+                    )
+                ) {
+                    Text(
+                        "Cancelar",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
             }
         )
@@ -512,19 +691,32 @@ fun SpecRow(label: String, value: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "$label:",
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Surface(
+                color = Color(0xFF0066CC).copy(alpha = 0.1f),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = label,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF0066CC),
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                )
+            }
+        }
         Text(
             text = value,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF1A1A1A)
         )
     }
 }

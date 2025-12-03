@@ -26,6 +26,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         
+        // Inicializar Supabase con el contexto de Android para persistencia de sesión
+        com.tecsup.checkauto.config.SupabaseConfig.initialize(this)
+        
         // Manejar deep links de Supabase para confirmación de email
         handleSupabaseDeepLink(intent)
         
@@ -107,14 +110,44 @@ fun AppNavigation() {
     var userName by remember { mutableStateOf<String?>(null) }
     var userEmail by remember { mutableStateOf<String?>(null) }
     
-    // Verificar autenticación al iniciar
+    // Verificar y restaurar autenticación al iniciar
     LaunchedEffect(Unit) {
-        val currentUser = com.tecsup.checkauto.service.SupabaseAuthService.getCurrentUser()
-        isAuthenticated = currentUser != null
-        userId = currentUser?.id
-        userEmail = currentUser?.email
-        userName = currentUser?.userMetadata?.get("nombre")?.toString() 
-            ?: currentUser?.email?.substringBefore("@")
+        try {
+            // Intentar restaurar la sesión guardada
+            val session = com.tecsup.checkauto.service.SupabaseAuthService.getCurrentSession()
+            if (session != null) {
+                // Hay una sesión guardada, verificar si es válida
+                val currentUser = com.tecsup.checkauto.service.SupabaseAuthService.getCurrentUser()
+                if (currentUser != null) {
+                    isAuthenticated = true
+                    userId = currentUser.id
+                    userEmail = currentUser.email
+                    userName = currentUser.userMetadata?.get("nombre")?.toString() 
+                        ?: currentUser.email?.substringBefore("@")
+                    Log.d("AppNavigation", "✅ Sesión restaurada: ${currentUser.email}")
+                } else {
+                    // Sesión inválida, limpiar estado
+                    isAuthenticated = false
+                    userId = null
+                    userEmail = null
+                    userName = null
+                    Log.d("AppNavigation", "⚠️ Sesión encontrada pero usuario no válido")
+                }
+            } else {
+                // No hay sesión guardada
+                isAuthenticated = false
+                userId = null
+                userEmail = null
+                userName = null
+                Log.d("AppNavigation", "ℹ️ No hay sesión guardada")
+            }
+        } catch (e: Exception) {
+            Log.e("AppNavigation", "Error al restaurar sesión: ${e.message}")
+            isAuthenticated = false
+            userId = null
+            userEmail = null
+            userName = null
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -126,6 +159,11 @@ fun AppNavigation() {
             SplashScreen(
                 onNavigateToLogin = {
                     navController.navigate("login") {
+                        popUpTo("splash") { inclusive = true }
+                    }
+                },
+                onNavigateToDashboard = {
+                    navController.navigate("dashboard") {
                         popUpTo("splash") { inclusive = true }
                     }
                 }
@@ -179,8 +217,12 @@ fun AppNavigation() {
         }
         composable("dashboard") {
             DashboardScreen(
-                onNavigateToAnuncios = {
-                    navController.navigate("anuncios")
+                onNavigateToAnuncios = { tipoVehiculo ->
+                    if (tipoVehiculo != null) {
+                        navController.navigate("anuncios/$tipoVehiculo")
+                    } else {
+                        navController.navigate("anuncios")
+                    }
                 },
                 onNavigateToBuscar = {
                     navController.navigate("buscar")
@@ -227,6 +269,26 @@ fun AppNavigation() {
                 userId = userId
             )
         }
+        
+        composable("anuncios/{tipoVehiculo}") { backStackEntry ->
+            val tipoVehiculo = backStackEntry.arguments?.getString("tipoVehiculo")
+            ListaAnunciosScreen(
+                tipoVehiculo = tipoVehiculo,
+                esMisAnuncios = false,
+                onAnuncioClick = { idAnuncio ->
+                    navController.navigate("detalle/$idAnuncio")
+                },
+                onContactar = { anuncio ->
+                    // Navegar al detalle del anuncio para contactar
+                    navController.navigate("detalle/${anuncio.idAnuncio}")
+                },
+                onEliminar = { idAnuncio ->
+                    // TODO: Implementar eliminación
+                },
+                isAuthenticated = isAuthenticated,
+                userId = userId
+            )
+        }
 
         composable("buscar") {
             PlateSearchScreen()
@@ -234,10 +296,10 @@ fun AppNavigation() {
 
         composable("publicar") {
             PublicarAutoScreen(
+                isAuthenticated = isAuthenticated,
                 onSuccess = {
                     navController.popBackStack()
-                },
-                isAuthenticated = isAuthenticated
+                }
             )
         }
 

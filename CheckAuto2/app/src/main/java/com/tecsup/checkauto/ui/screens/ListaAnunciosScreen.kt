@@ -1,5 +1,6 @@
 package com.tecsup.checkauto.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -50,8 +51,22 @@ fun ListaAnunciosScreen(
         isLoading = true
         errorMessage = null
         try {
+            // Si es "Mis Anuncios", el userId debe estar presente
+            if (esMisAnuncios && userId == null) {
+                errorMessage = "Debes estar autenticado para ver tus anuncios"
+                anuncios = emptyList()
+                isLoading = false
+                return@LaunchedEffect
+            }
+            
             val anunciosSupabase = if (esMisAnuncios && userId != null) {
-                SupabaseService.getAnunciosByUserId(userId)
+                android.util.Log.d("ListaAnunciosScreen", "Cargando anuncios del usuario: $userId")
+                val anunciosUsuario = SupabaseService.getAnunciosByUserId(userId)
+                android.util.Log.d("ListaAnunciosScreen", "Anuncios encontrados: ${anunciosUsuario.size}")
+                anunciosUsuario.forEach { anuncio ->
+                    android.util.Log.d("ListaAnunciosScreen", "Anuncio ID: ${anuncio.id_anuncio}, Usuario: ${anuncio.id_usuario}")
+                }
+                anunciosUsuario
             } else {
                 SupabaseService.getAnuncios()
             }
@@ -59,11 +74,21 @@ fun ListaAnunciosScreen(
             // Convertir y cargar imágenes para cada anuncio
             val anunciosConImagenes = anunciosSupabase.map { anuncioSupabase ->
                 val imagenesSupabase = try {
-                    SupabaseService.getImagenesByAnuncioId(anuncioSupabase.id_anuncio ?: 0)
+                    val imagenes = SupabaseService.getImagenesByAnuncioId(anuncioSupabase.id_anuncio ?: 0)
+                    android.util.Log.d("ListaAnunciosScreen", "Anuncio ${anuncioSupabase.id_anuncio}: ${imagenes.size} imágenes encontradas")
+                    imagenes.forEachIndexed { index, img ->
+                        android.util.Log.d("ListaAnunciosScreen", "  Imagen $index: url=${img.url_imagen}, id=${img.id_imagen}")
+                    }
+                    imagenes
                 } catch (e: Exception) {
+                    android.util.Log.e("ListaAnunciosScreen", "Error al obtener imágenes para anuncio ${anuncioSupabase.id_anuncio}: ${e.message}", e)
                     emptyList()
                 }
-                val imagenes = imagenesSupabase.map { ModelConverter.imagenSupabaseToImagen(it) }
+                val imagenes = imagenesSupabase.map { 
+                    val imagenConvertida = ModelConverter.imagenSupabaseToImagen(it)
+                    android.util.Log.d("ListaAnunciosScreen", "Imagen convertida: ${imagenConvertida.urlImagen}")
+                    imagenConvertida
+                }
                 ModelConverter.anuncioSupabaseToAnuncio(anuncioSupabase, imagenes)
             }
             
@@ -71,17 +96,31 @@ fun ListaAnunciosScreen(
             isLoading = false
         } catch (e: Exception) {
             errorMessage = "Error al cargar anuncios: ${e.message}"
+            android.util.Log.e("ListaAnunciosScreen", "Error al cargar anuncios", e)
             isLoading = false
         }
     }
     var imagenActual by remember { mutableStateOf(mapOf<Long, Int>()) }
     var tipoFiltro by remember { mutableStateOf(tipoVehiculo) }
 
-    // Filtrar anuncios por tipo si se especifica
+    // Filtrar anuncios por tipo y por usuario si es "Mis Anuncios"
     val anunciosFiltrados = remember(anuncios, tipoFiltro, esMisAnuncios, userId) {
         anuncios.filter { anuncio ->
+            // Filtro por tipo de vehículo
             val cumpleTipo = tipoFiltro == null || anuncio.tipoVehiculo?.equals(tipoFiltro, ignoreCase = true) == true
-            val esMio = if (esMisAnuncios) anuncio.idUsuario == userId else true
+            
+            // Filtro por usuario (solo si es "Mis Anuncios")
+            val esMio = if (esMisAnuncios) {
+                if (userId == null) {
+                    false // Si no hay userId, no mostrar nada
+                } else {
+                    // Comparación estricta del ID de usuario
+                    anuncio.idUsuario?.equals(userId, ignoreCase = false) == true
+                }
+            } else {
+                true // Si no es "Mis Anuncios", mostrar todos
+            }
+            
             cumpleTipo && esMio
         }
     }
@@ -91,23 +130,40 @@ fun ListaAnunciosScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Header
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        // Header mejorado
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
         ) {
-            Column {
+            Text(
+                text = if (tipoFiltro != null) "Vehículos $tipoFiltro" else if (esMisAnuncios) "Tus Anuncios" else "Vehículos en Venta",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1A1A1A),
+                letterSpacing = 0.5.sp,
+                modifier = Modifier.padding(bottom = 6.dp)
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Surface(
+                    color = Color(0xFF0066CC).copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = "${anunciosFiltrados.size} ${if (anunciosFiltrados.size == 1) "anuncio" else "anuncios"}",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF0066CC),
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
+                    )
+                }
                 Text(
-                    text = if (tipoFiltro != null) "Vehículos $tipoFiltro en Venta" else if (esMisAnuncios) "Tus Anuncios" else "Vehículos en Venta",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-                Text(
-                    text = "${anunciosFiltrados.size} ${if (anunciosFiltrados.size == 1) "anuncio disponible" else "anuncios disponibles"}",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    text = "disponibles",
+                    fontSize = 15.sp,
+                    color = Color(0xFF6B7280)
                 )
             }
         }
@@ -198,9 +254,21 @@ fun ListaAnunciosScreen(
                                             ModelConverter.anuncioSupabaseToAnuncio(anuncioSupabase, imagenes)
                                         }
                                         anuncios = anunciosConImagenes
+                                        errorMessage = null // Limpiar error si se eliminó exitosamente
                                     }
+                                } catch (e: SecurityException) {
+                                    errorMessage = "No tienes permiso para eliminar este anuncio"
+                                } catch (e: IllegalStateException) {
+                                    errorMessage = "Debes estar autenticado para eliminar un anuncio"
                                 } catch (e: Exception) {
-                                    errorMessage = "Error al eliminar: ${e.message}"
+                                    val mensaje = when {
+                                        e.message?.contains("row-level security") == true -> 
+                                            "Error de permisos. Verifica que seas el dueño del anuncio."
+                                        e.message?.contains("violates") == true -> 
+                                            "Error de permisos. No puedes eliminar este anuncio."
+                                        else -> "Error al eliminar: ${e.message}"
+                                    }
+                                    errorMessage = mensaje
                                 }
                             }
                             onEliminar(anuncio.idAnuncio ?: 0) 
@@ -239,18 +307,24 @@ fun AnuncioCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onAnuncioClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(12.dp)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 8.dp,
+            pressedElevation = 4.dp
+        ),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(0.dp)
         ) {
             // Imagen con controles
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .height(220.dp)
+                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
             ) {
                 if (imagenMostrada != null) {
                     Image(
@@ -258,6 +332,13 @@ fun AnuncioCard(
                             ImageRequest.Builder(context)
                                 .data(imagenMostrada)
                                 .crossfade(true)
+                                .listener(
+                                    onStart = { Log.d("ListaAnunciosScreen", "Cargando imagen: $imagenMostrada") },
+                                    onSuccess = { _, _ -> Log.d("ListaAnunciosScreen", "Imagen cargada exitosamente: $imagenMostrada") },
+                                    onError = { _, result -> 
+                                        Log.e("ListaAnunciosScreen", "Error al cargar imagen: $imagenMostrada - ${result.throwable.message}", result.throwable)
+                                    }
+                                )
                                 .build()
                         ),
                         contentDescription = anuncio.modelo,
@@ -265,6 +346,7 @@ fun AnuncioCard(
                         contentScale = ContentScale.Crop
                     )
                 } else {
+                    Log.d("ListaAnunciosScreen", "No hay imagen para mostrar para anuncio ${anuncio.idAnuncio}")
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceVariant,
                         modifier = Modifier.fillMaxSize()
@@ -284,8 +366,8 @@ fun AnuncioCard(
                 // Badge de tipo de vehículo
                 if (anuncio.tipoVehiculo != null) {
                     Surface(
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
-                        shape = RoundedCornerShape(4.dp),
+                        color = Color(0xFF0066CC).copy(alpha = 0.95f),
+                        shape = RoundedCornerShape(12.dp),
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .padding(8.dp)
@@ -354,94 +436,146 @@ fun AnuncioCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Título
-            Text(
-                text = anuncio.titulo ?: "${anuncio.modelo} ${anuncio.anio}",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
-            // Precio destacado
-            Text(
-                text = formatter.format(anuncio.precio),
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
-            // Detalles
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+            // Información del anuncio
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
             ) {
-                Column {
+                // Título
+                Text(
+                    text = anuncio.titulo ?: "${anuncio.modelo} ${anuncio.anio}",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1A1A1A),
+                    letterSpacing = 0.2.sp,
+                    modifier = Modifier.padding(bottom = 10.dp)
+                )
+
+                // Precio destacado
+                Text(
+                    text = formatter.format(anuncio.precio),
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0066CC),
+                    letterSpacing = 0.3.sp,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+
+                // Detalles
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
                     if (anuncio.tipoVehiculo != null) {
+                        Surface(
+                            color = Color(0xFFF0F4F8),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Text("🚗", fontSize = 16.sp)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = anuncio.tipoVehiculo,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color(0xFF4A5568)
+                                )
+                            }
+                        }
+                    }
+                    Surface(
+                        color = Color(0xFFF0F4F8),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(bottom = 4.dp)
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                         ) {
-                            Text("🚗 ", fontSize = 16.sp)
+                            Text("📊", fontSize = 16.sp)
+                            Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = anuncio.tipoVehiculo,
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                text = "${numberFormatter.format(anuncio.kilometraje)} km",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFF4A5568)
                             )
                         }
                     }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("📊 ", fontSize = 16.sp)
-                        Text(
-                            text = "${numberFormatter.format(anuncio.kilometraje)} km",
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                        )
-                    }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(8.dp))
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    color = Color(0xFFE2E8F0)
+                )
 
-            // Acciones
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Button(
-                    onClick = onAnuncioClick,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
+                // Acciones
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Text("Ver Detalles")
-                }
-                
-                if (esMiAnuncio) {
-                    IconButton(
-                        onClick = onEliminar,
-                        modifier = Modifier.size(48.dp)
+                    Button(
+                        onClick = onAnuncioClick,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF0066CC)
+                        ),
+                        shape = RoundedCornerShape(14.dp),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = 4.dp,
+                            pressedElevation = 2.dp
+                        )
                     ) {
-                        Icon(
-                            Icons.Default.Delete,
-                            contentDescription = "Eliminar",
-                            tint = MaterialTheme.colorScheme.error
+                        Text(
+                            "Ver Detalles",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.3.sp
                         )
                     }
-                } else if (isAuthenticated) {
-                    OutlinedButton(
-                        onClick = onContactar,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(Icons.Default.Email, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Contactar")
+                    
+                    if (esMiAnuncio) {
+                        IconButton(
+                            onClick = onEliminar,
+                            modifier = Modifier
+                                .size(52.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(Color(0xFFFFF5F5))
+                        ) {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = "Eliminar",
+                                tint = Color(0xFFDC2626),
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    } else if (isAuthenticated) {
+                        OutlinedButton(
+                            onClick = onContactar,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = Color(0xFF0066CC)
+                            ),
+                            border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF0066CC))
+                        ) {
+                            Icon(Icons.Default.Email, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                "Contactar",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
                     }
                 }
             }

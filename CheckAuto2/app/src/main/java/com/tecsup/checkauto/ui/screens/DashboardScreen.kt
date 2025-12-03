@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import kotlinx.coroutines.launch
@@ -32,7 +33,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
-    onNavigateToAnuncios: () -> Unit,
+    onNavigateToAnuncios: (String?) -> Unit,
     onNavigateToBuscar: () -> Unit,
     onNavigateToPublicar: () -> Unit,
     onNavigateToChat: () -> Unit = {},
@@ -212,15 +213,19 @@ fun DashboardScreen(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(56.dp),
+                                .height(60.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0xFF0066CC)
                             ),
-                            shape = RoundedCornerShape(16.dp)
+                            shape = RoundedCornerShape(18.dp),
+                            elevation = ButtonDefaults.buttonElevation(
+                                defaultElevation = 6.dp,
+                                pressedElevation = 4.dp
+                            )
                         ) {
-                            Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(24.dp))
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text("Buscar Autos", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                            Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(26.dp))
+                            Spacer(modifier = Modifier.width(14.dp))
+                            Text("Buscar Autos", fontSize = 17.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
                         }
                         Button(
                             onClick = {
@@ -230,16 +235,20 @@ fun DashboardScreen(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(56.dp),
+                                .height(60.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color.White,
                                 contentColor = Color(0xFF0066CC)
                             ),
-                            shape = RoundedCornerShape(16.dp)
+                            shape = RoundedCornerShape(18.dp),
+                            elevation = ButtonDefaults.buttonElevation(
+                                defaultElevation = 6.dp,
+                                pressedElevation = 4.dp
+                            )
                         ) {
-                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(24.dp))
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text("Publicar Anuncio", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(26.dp))
+                            Spacer(modifier = Modifier.width(14.dp))
+                            Text("Publicar Anuncio", fontSize = 17.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
                         }
                     }
                 }
@@ -339,7 +348,7 @@ fun DashboardScreen(
         }
     }
     
-    // Mapeo de emojis para tipos de vehículos
+    // Mapeo de emojis para tipos de vehículos (fallback si no hay imagen)
     val emojiMap = mapOf(
         "Hatchback" to "🚗",
         "Sedan" to "🚙",
@@ -349,47 +358,132 @@ fun DashboardScreen(
         "Deportivo" to "🏁"
     )
     
+    // Mapeo de recursos drawable por código de categoría
+    // Los nombres deben coincidir con los archivos en res/drawable/
+    val imagenResourceMap = mapOf(
+        "hatchback" to "ic_hatchback",
+        "sedan" to "ic_sedan",
+        "coupe" to "ic_coupe",
+        "suv" to "ic_suv",
+        "station-wagon" to "ic_station_wagon",
+        "deportivo" to "ic_deportivo"
+    )
+    
+    // Data class para manejar la información de cada tipo de vehículo
+    data class VehicleTypeInfo(
+        val nombre: String,
+        val imagenUrl: String?,
+        val imagenResourceId: Int?,
+        val emoji: String
+    )
+    
+    // Función helper para obtener el ID del recurso drawable
+    fun getDrawableResourceId(resourceName: String?): Int? {
+        if (resourceName == null) return null
+        return try {
+            val resId = context.resources.getIdentifier(
+                resourceName,
+                "drawable",
+                context.packageName
+            )
+            if (resId != 0) resId else null
+        } catch (_: Exception) {
+            null
+        }
+    }
+    
     val vehicleTypes = categoriasVehiculos.map { categoria ->
-        categoria.nombre to (emojiMap[categoria.nombre] ?: "🚗")
+        // Prioridad: url_imagen (URL externa) > imagen_url (URL externa) > recurso local por código > emoji
+        val imagenUrl = categoria.url_imagen ?: categoria.imagen_url
+        val imagenResourceName = categoria.codigo?.let { imagenResourceMap[it.lowercase()] }
+        val imagenResourceId = imagenResourceName?.let { getDrawableResourceId(it) }
+        
+        VehicleTypeInfo(
+            nombre = categoria.nombre,
+            imagenUrl = imagenUrl,
+            imagenResourceId = imagenResourceId,
+            emoji = emojiMap[categoria.nombre] ?: "🚗"
+        )
     }
 
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(3),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier.height(220.dp)
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.height(240.dp)
                     ) {
-                        items(vehicleTypes) { (type, emoji) ->
+                        items(vehicleTypes) { vehicleInfo ->
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
-                                        onNavigateToAnuncios()
+                                        // Pasar el nombre de la categoría para filtrar (se guarda así en los anuncios)
+                                        onNavigateToAnuncios(vehicleInfo.nombre)
                                     },
                                 colors = CardDefaults.cardColors(
                                     containerColor = Color.White
                                 ),
-                                shape = RoundedCornerShape(16.dp),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                                shape = RoundedCornerShape(20.dp),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                             ) {
-                                Column(
+                                Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(vertical = 20.dp, horizontal = 8.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
+                                        .background(Color.White)
+                                        .padding(12.dp),
+                                    contentAlignment = Alignment.Center
                                 ) {
-                                    Text(
-                                        text = emoji,
-                                        fontSize = 36.sp
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        text = type,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        textAlign = TextAlign.Center,
-                                        color = Color(0xFF333333)
-                                    )
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        // Prioridad: URL externa > recurso local > emoji
+                                        when {
+                                            vehicleInfo.imagenUrl != null -> {
+                                                // Imagen desde URL externa
+                                                Image(
+                                                    painter = rememberAsyncImagePainter(
+                                                        ImageRequest.Builder(context)
+                                                            .data(vehicleInfo.imagenUrl)
+                                                            .crossfade(true)
+                                                            .build()
+                                                    ),
+                                                    contentDescription = vehicleInfo.nombre,
+                                                    modifier = Modifier
+                                                        .size(80.dp)
+                                                        .clip(RoundedCornerShape(12.dp)),
+                                                    contentScale = ContentScale.Crop
+                                                )
+                                            }
+                                            vehicleInfo.imagenResourceId != null -> {
+                                                // Imagen desde recurso local
+                                                Image(
+                                                    painter = painterResource(id = vehicleInfo.imagenResourceId),
+                                                    contentDescription = vehicleInfo.nombre,
+                                                    modifier = Modifier
+                                                        .size(80.dp)
+                                                        .clip(RoundedCornerShape(12.dp)),
+                                                    contentScale = ContentScale.Fit
+                                                )
+                                            }
+                                            else -> {
+                                                // Fallback a emoji
+                                                Text(
+                                                    text = vehicleInfo.emoji,
+                                                    fontSize = 42.sp
+                                                )
+                                            }
+                                        }
+                                        Spacer(modifier = Modifier.height(10.dp))
+                                        Text(
+                                            text = vehicleInfo.nombre,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            textAlign = TextAlign.Center,
+                                            color = Color(0xFF1A1A1A),
+                                            letterSpacing = 0.3.sp
+                                        )
+                                    }
                                 }
                             }
                         }

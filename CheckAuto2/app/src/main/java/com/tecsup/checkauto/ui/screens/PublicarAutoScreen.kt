@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -15,6 +16,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -40,6 +44,7 @@ fun PublicarAutoScreen(
     val context = LocalContext.current
     
     // Variables de estado
+    var titulo by remember { mutableStateOf("") }
     var modelo by remember { mutableStateOf("") }
     var anio by remember { mutableStateOf("") }
     var kilometraje by remember { mutableStateOf("") }
@@ -179,131 +184,231 @@ fun PublicarAutoScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
     ) {
-        Text(
-            text = "Publicar Auto en Venta",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        Text(
-            text = "Completa el formulario para publicar tu vehículo",
-            fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-            modifier = Modifier.padding(bottom = 24.dp)
-        )
-
-        // Mensajes de éxito/error
-        if (success) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
+        // Header con gradiente
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFF0066CC),
+                            Color(0xFF0052A3)
+                        )
+                    )
                 )
-            ) {
+                .padding(horizontal = 20.dp, vertical = 24.dp)
+        ) {
+            Column {
                 Text(
-                    text = "¡Anuncio publicado exitosamente!",
-                    modifier = Modifier.padding(16.dp),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    text = "Publicar Auto en Venta",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    letterSpacing = 0.5.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Text(
+                    text = "Completa el formulario para publicar tu vehículo",
+                    fontSize = 15.sp,
+                    color = Color.White.copy(alpha = 0.9f),
+                    letterSpacing = 0.2.sp
                 )
             }
         }
+        
+        // Contenido del formulario
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        ) {
 
-        if (error != null) {
-            Card(
+            // Mensajes de éxito/error mejorados
+            if (success) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 20.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFF10B981).copy(alpha = 0.1f)
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text("✅", fontSize = 24.sp)
+                        Text(
+                            text = "¡Anuncio publicado exitosamente!",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF10B981)
+                        )
+                    }
+                }
+            }
+
+            if (error != null) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 20.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFDC2626).copy(alpha = 0.1f)
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text("❌", fontSize = 24.sp)
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Error",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFDC2626),
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+                            Text(
+                                text = error ?: "",
+                                fontSize = 14.sp,
+                                color = Color(0xFFDC2626).copy(alpha = 0.9f)
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Formulario mejorado
+            OutlinedTextField(
+                value = titulo,
+                onValueChange = { titulo = it },
+                label = { Text("Nombre del Auto *") },
+                placeholder = { Text("Ej: Toyota Corolla 2020") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer
+                    .padding(bottom = 18.dp),
+                singleLine = true,
+                enabled = !isLoading,
+                leadingIcon = { Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFF0066CC)) },
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF0066CC),
+                    focusedLabelColor = Color(0xFF0066CC)
                 )
+            )
+            
+            OutlinedTextField(
+                value = modelo,
+                onValueChange = { modelo = it },
+                label = { Text("Modelo *") },
+                placeholder = { Text("Ej: Corolla") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 18.dp),
+                singleLine = true,
+                enabled = !isLoading,
+                leadingIcon = { Icon(Icons.Default.Settings, contentDescription = null, tint = Color(0xFF0066CC)) },
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF0066CC),
+                    focusedLabelColor = Color(0xFF0066CC)
+                )
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
-                    text = "Error: $error",
-                    modifier = Modifier.padding(16.dp),
-                    color = MaterialTheme.colorScheme.onErrorContainer
+                OutlinedTextField(
+                    value = anio,
+                    onValueChange = { anio = it },
+                    label = { Text("Año *") },
+                    placeholder = { Text("Ej: 2020") },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true,
+                    enabled = !isLoading,
+                    shape = RoundedCornerShape(14.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFF0066CC),
+                        focusedLabelColor = Color(0xFF0066CC)
+                    )
+                )
+
+                OutlinedTextField(
+                    value = kilometraje,
+                    onValueChange = { kilometraje = it },
+                    label = { Text("Kilometraje *") },
+                    placeholder = { Text("Ej: 50000") },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true,
+                    enabled = !isLoading,
+                    shape = RoundedCornerShape(14.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFF0066CC),
+                        focusedLabelColor = Color(0xFF0066CC)
+                    )
                 )
             }
-        }
 
-        // Formulario
-        OutlinedTextField(
-            value = modelo,
-            onValueChange = { modelo = it },
-            label = { Text("Modelo *") },
-            placeholder = { Text("Ej: Toyota Corolla") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            singleLine = true,
-            enabled = !isLoading,
-            leadingIcon = { Icon(Icons.Default.Settings, contentDescription = null) }
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            OutlinedTextField(
-                value = anio,
-                onValueChange = { anio = it },
-                label = { Text("Año *") },
-                placeholder = { Text("Ej: 2020") },
-                modifier = Modifier.weight(1f),
-                singleLine = true,
-                enabled = !isLoading
-            )
+            Spacer(modifier = Modifier.height(18.dp))
 
             OutlinedTextField(
-                value = kilometraje,
-                onValueChange = { kilometraje = it },
-                label = { Text("Kilometraje *") },
-                placeholder = { Text("Ej: 50000") },
-                modifier = Modifier.weight(1f),
-                singleLine = true,
-                enabled = !isLoading
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = precio,
-            onValueChange = { precio = it },
-            label = { Text("Precio (S/) *") },
-            placeholder = { Text("Ej: 35000") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            singleLine = true,
-            enabled = !isLoading,
-            leadingIcon = { Icon(Icons.Default.Info, contentDescription = null) }
-        )
-
-        // Tipo de vehículo
-        var expandedTipo by remember { mutableStateOf(false) }
-        ExposedDropdownMenuBox(
-            expanded = expandedTipo,
-            onExpandedChange = { expandedTipo = !expandedTipo },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-        ) {
-            OutlinedTextField(
-                value = tipoVehiculo,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Categoría de Vehículo *") },
-                placeholder = { Text("Selecciona una categoría") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTipo) },
+                value = precio,
+                onValueChange = { precio = it },
+                label = { Text("Precio (S/) *") },
+                placeholder = { Text("Ej: 35000") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .menuAnchor(),
-                enabled = !isLoading
+                    .padding(bottom = 18.dp),
+                singleLine = true,
+                enabled = !isLoading,
+                leadingIcon = { Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFF0066CC)) },
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF0066CC),
+                    focusedLabelColor = Color(0xFF0066CC)
+                )
             )
+
+            // Tipo de vehículo mejorado
+            var expandedTipo by remember { mutableStateOf(false) }
+            ExposedDropdownMenuBox(
+                expanded = expandedTipo,
+                onExpandedChange = { expandedTipo = !expandedTipo },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 18.dp)
+            ) {
+                OutlinedTextField(
+                    value = tipoVehiculo,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Categoría de Vehículo *") },
+                    placeholder = { Text("Selecciona una categoría") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTipo) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    enabled = !isLoading,
+                    shape = RoundedCornerShape(14.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFF0066CC),
+                        focusedLabelColor = Color(0xFF0066CC)
+                    )
+                )
             ExposedDropdownMenu(
                 expanded = expandedTipo,
                 onDismissRequest = { expandedTipo = false }
@@ -334,88 +439,112 @@ fun PublicarAutoScreen(
             }
         }
 
-        OutlinedTextField(
-            value = descripcion,
-            onValueChange = { descripcion = it },
-            label = { Text("Descripción *") },
-            placeholder = { Text("Describe tu vehículo...") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            minLines = 4,
-            maxLines = 6,
-            enabled = !isLoading
-        )
-
-        OutlinedTextField(
-            value = emailContacto,
-            onValueChange = { emailContacto = it },
-            label = { Text("Email de Contacto") },
-            placeholder = { Text("Ej: vendedor@ejemplo.com") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            singleLine = true,
-            enabled = !isLoading,
-            leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) }
-        )
-
-        OutlinedTextField(
-            value = telefonoContacto,
-            onValueChange = { telefonoContacto = it },
-            label = { Text("Teléfono de Contacto") },
-            placeholder = { Text("Ej: +51 987 654 321") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            singleLine = true,
-            enabled = !isLoading,
-            leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null) }
-        )
-
-        // Selección de imágenes
-        Text(
-            text = "Imágenes * (2 imágenes requeridas)",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            // Imagen 1
-            ImageSelector(
-                imageUri = imagen1Uri,
-                label = "Imagen 1",
-                modifier = Modifier.weight(1f),
-                onSelectClick = {
-                    launcherImagen1.launch("image/*")
-                },
-                enabled = !isLoading
+            OutlinedTextField(
+                value = descripcion,
+                onValueChange = { descripcion = it },
+                label = { Text("Descripción *") },
+                placeholder = { Text("Describe tu vehículo...") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 18.dp),
+                minLines = 4,
+                maxLines = 6,
+                enabled = !isLoading,
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF0066CC),
+                    focusedLabelColor = Color(0xFF0066CC)
+                )
             )
 
-            // Imagen 2
-            ImageSelector(
-                imageUri = imagen2Uri,
-                label = "Imagen 2",
-                modifier = Modifier.weight(1f),
-                onSelectClick = {
-                    launcherImagen2.launch("image/*")
-                },
-                enabled = !isLoading
+            OutlinedTextField(
+                value = emailContacto,
+                onValueChange = { emailContacto = it },
+                label = { Text("Email de Contacto") },
+                placeholder = { Text("Ej: vendedor@ejemplo.com") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 18.dp),
+                singleLine = true,
+                enabled = !isLoading,
+                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = Color(0xFF0066CC)) },
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF0066CC),
+                    focusedLabelColor = Color(0xFF0066CC)
+                )
             )
-        }
 
-        // Botón de envío
-        Button(
-            onClick = {
+            OutlinedTextField(
+                value = telefonoContacto,
+                onValueChange = { telefonoContacto = it },
+                label = { Text("Teléfono de Contacto") },
+                placeholder = { Text("Ej: +51 987 654 321") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 18.dp),
+                singleLine = true,
+                enabled = !isLoading,
+                leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null, tint = Color(0xFF0066CC)) },
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF0066CC),
+                    focusedLabelColor = Color(0xFF0066CC)
+                )
+            )
+
+            // Selección de imágenes mejorada
+            Text(
+                text = "Imágenes *",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1A1A1A),
+                letterSpacing = 0.3.sp,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+            Text(
+                text = "Se requieren 2 imágenes",
+                fontSize = 14.sp,
+                color = Color(0xFF6B7280),
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Imagen 1
+                ImageSelector(
+                    imageUri = imagen1Uri,
+                    label = "Imagen 1",
+                    modifier = Modifier.weight(1f),
+                    onSelectClick = {
+                        launcherImagen1.launch("image/*")
+                    },
+                    enabled = !isLoading
+                )
+
+                // Imagen 2
+                ImageSelector(
+                    imageUri = imagen2Uri,
+                    label = "Imagen 2",
+                    modifier = Modifier.weight(1f),
+                    onSelectClick = {
+                        launcherImagen2.launch("image/*")
+                    },
+                    enabled = !isLoading
+                )
+            }
+
+            // Botón de envío mejorado
+            Button(
+                onClick = {
                 // Validaciones
-                when {
-                    modelo.isBlank() -> error = "El modelo es requerido"
+                                when {
+                                    titulo.isBlank() -> error = "El nombre del auto es requerido"
+                                    modelo.isBlank() -> error = "El modelo es requerido"
                     anio.isBlank() || anio.toIntOrNull() == null || anio.toInt() < 1900 || anio.toInt() > 2100 -> 
                         error = "El año debe ser válido (1900-2100)"
                     kilometraje.isBlank() || kilometraje.toIntOrNull() == null || kilometraje.toInt() < 0 -> 
@@ -445,6 +574,7 @@ fun PublicarAutoScreen(
                                 
                                 // Crear anuncio
                                 val anuncio = com.tecsup.checkauto.model.Anuncio(
+                                    titulo = titulo,
                                     modelo = modelo,
                                     anio = anio.toInt(),
                                     kilometraje = kilometraje.toInt(),
@@ -462,41 +592,79 @@ fun PublicarAutoScreen(
                                 // Subir imágenes
                                 val imagenesUri = listOfNotNull(imagen1Uri, imagen2Uri)
                                 val imagenesUrls = mutableListOf<String>()
+                                var imagenesGuardadas = 0
                                 
                                 imagenesUri.forEachIndexed { index, uri ->
                                     try {
+                                        android.util.Log.d("PublicarAutoScreen", "Procesando imagen ${index + 1} de ${imagenesUri.size}")
                                         val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
                                         val imageBytes = inputStream?.readBytes()
                                         
-                                        if (imageBytes != null) {
-                                            val extension = context.contentResolver.getType(uri)?.split("/")?.last() ?: "jpg"
-                                            val fileName = "${anuncioCreado.id_anuncio}/imagen${index + 1}.${extension}"
-                                            val imageUrl = SupabaseService.uploadImage(
-                                                SupabaseConfig.STORAGE_BUCKET_ANUNCIOS,
-                                                fileName,
-                                                imageBytes
-                                            )
-                                            imagenesUrls.add(imageUrl)
-                                            
-                                            // Guardar referencia en la tabla de imágenes
-                                            SupabaseService.addImagen(
-                                                com.tecsup.checkauto.service.ImagenSupabase(
-                                                    id_anuncio = anuncioCreado.id_anuncio ?: 0,
-                                                    url_imagen = imageUrl,
-                                                    orden = index
-                                                )
-                                            )
+                                        if (imageBytes == null) {
+                                            throw Exception("No se pudo leer la imagen ${index + 1}")
                                         }
+                                        
+                                        android.util.Log.d("PublicarAutoScreen", "Imagen ${index + 1} leída: ${imageBytes.size} bytes")
+                                        
+                                        val mimeType = context.contentResolver.getType(uri) ?: "image/jpeg"
+                                        val extension = mimeType.split("/").lastOrNull() ?: "jpg"
+                                        val fileName = "${anuncioCreado.id_anuncio}/imagen${index + 1}.${extension}"
+                                        
+                                        // Obtener nombre del archivo original si está disponible
+                                        val originalFileName = try {
+                                            val cursor = context.contentResolver.query(uri, null, null, null, null)
+                                            val nameIndex = cursor?.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                                            val name = if (nameIndex != null && nameIndex >= 0) {
+                                                cursor?.moveToFirst()
+                                                cursor?.getString(nameIndex)
+                                            } else null
+                                            cursor?.close()
+                                            name ?: "imagen${index + 1}.${extension}"
+                                        } catch (e: Exception) {
+                                            "imagen${index + 1}.${extension}"
+                                        }
+                                        
+                                        android.util.Log.d("PublicarAutoScreen", "Subiendo imagen ${index + 1} a Supabase Storage: $fileName")
+                                        val imageUrl = SupabaseService.uploadImage(
+                                            SupabaseConfig.STORAGE_BUCKET_ANUNCIOS,
+                                            fileName,
+                                            imageBytes
+                                        )
+                                        imagenesUrls.add(imageUrl)
+                                        android.util.Log.d("PublicarAutoScreen", "Imagen ${index + 1} subida exitosamente. URL: $imageUrl")
+                                        
+                                        // Guardar referencia en la tabla de imágenes con todos los campos
+                                        android.util.Log.d("PublicarAutoScreen", "Guardando imagen ${index + 1} en BD para anuncio ${anuncioCreado.id_anuncio}")
+                                        val imagenGuardada = SupabaseService.addImagen(
+                                            com.tecsup.checkauto.service.ImagenSupabase(
+                                                id_anuncio = anuncioCreado.id_anuncio ?: 0,
+                                                url_imagen = imageUrl,
+                                                nombre_archivo = originalFileName,
+                                                tipo_archivo = mimeType,
+                                                tamano_archivo = imageBytes.size.toLong(),
+                                                orden = index + 1 // Orden empieza en 1
+                                            )
+                                        )
+                                        imagenesGuardadas++
+                                        android.util.Log.d("PublicarAutoScreen", "✅ Imagen ${index + 1} guardada exitosamente en BD con ID: ${imagenGuardada.id_imagen}")
                                     } catch (e: Exception) {
-                                        // Continuar aunque falle una imagen
-                                        error = "Error al subir imagen ${index + 1}: ${e.message}"
+                                        android.util.Log.e("PublicarAutoScreen", "❌ Error al procesar imagen ${index + 1}: ${e.message}", e)
+                                        error = "Error al procesar imagen ${index + 1}: ${e.message}"
+                                        throw e // Re-lanzar para detener el proceso
                                     }
                                 }
+                                
+                                if (imagenesGuardadas == 0) {
+                                    throw Exception("No se pudieron guardar las imágenes. Verifica los permisos del bucket en Supabase.")
+                                }
+                                
+                                android.util.Log.d("PublicarAutoScreen", "✅ Total de imágenes guardadas: $imagenesGuardadas de ${imagenesUri.size}")
                                 
                                 success = true
                                 isLoading = false
                                 
                                 // Limpiar formulario
+                                titulo = ""
                                 modelo = ""
                                 anio = ""
                                 kilometraje = ""
@@ -517,22 +685,41 @@ fun PublicarAutoScreen(
                         }
                     }
                 }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            enabled = !isLoading,
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp),
+                enabled = !isLoading,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF0066CC)
+                ),
+                shape = RoundedCornerShape(16.dp),
+                elevation = ButtonDefaults.buttonElevation(
+                    defaultElevation = 6.dp,
+                    pressedElevation = 4.dp
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Publicando...")
-            } else {
-                Text("Publicar Anuncio")
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        "Publicando...",
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                } else {
+                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(22.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        "Publicar Anuncio",
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp
+                    )
+                }
             }
         }
     }
@@ -549,14 +736,18 @@ fun ImageSelector(
     val context = LocalContext.current
     Card(
         modifier = modifier
-            .height(150.dp)
+            .height(160.dp)
             .clickable(enabled = enabled) {
                 onSelectClick()
             },
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = if (imageUri != null) Color.White else Color(0xFFF0F4F8)
         ),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (imageUri != null) 6.dp else 2.dp,
+            pressedElevation = 4.dp
+        )
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -571,24 +762,58 @@ fun ImageSelector(
                             .build()
                     ),
                     contentDescription = label,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(16.dp)),
                     contentScale = ContentScale.Crop
                 )
-            } else {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
+                // Overlay con check
+                Surface(
+                    color = Color(0xFF10B981).copy(alpha = 0.9f),
+                    shape = RoundedCornerShape(bottomStart = 16.dp, topEnd = 16.dp),
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
                 ) {
                     Icon(
-                        Icons.Default.Add,
-                        contentDescription = null,
-                        modifier = Modifier.size(48.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        Icons.Default.Check,
+                        contentDescription = "Seleccionada",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .padding(6.dp)
+                            .size(20.dp)
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            } else {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Surface(
+                        color = Color(0xFF0066CC).copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .padding(8.dp),
+                            tint = Color(0xFF0066CC)
+                        )
+                    }
                     Text(
                         text = label,
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF6B7280)
+                    )
+                    Text(
+                        text = "Toca para seleccionar",
+                        fontSize = 11.sp,
+                        color = Color(0xFF9CA3AF),
+                        modifier = Modifier.padding(top = 4.dp)
                     )
                 }
             }

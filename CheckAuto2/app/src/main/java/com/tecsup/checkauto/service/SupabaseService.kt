@@ -96,7 +96,9 @@ data class CategoriaVehiculoSupabase(
     val codigo: String? = null,
     val descripcion: String? = null,
     val activo: Boolean = true,
-    val fecha_creacion: String? = null
+    val fecha_creacion: String? = null,
+    val url_imagen: String? = null,
+    val imagen_url: String? = null
 )
 
 // ========================================
@@ -136,6 +138,7 @@ object SupabaseService {
             .select {
                 filter {
                     eq("id_usuario", userId)
+                    eq("activo", true) // Solo anuncios activos
                 }
                 order("fecha_creacion", Order.DESCENDING)
             }
@@ -162,12 +165,37 @@ object SupabaseService {
     }
     
     suspend fun deleteAnuncio(id: Int) {
-        client.from("anuncios")
-            .update(mapOf("activo" to false)) {
-                filter {
-                    eq("id_anuncio", id)
+        // Verificar que el usuario esté autenticado
+        val currentUserId = SupabaseAuthService.getCurrentUserId()
+        if (currentUserId == null) {
+            throw IllegalStateException("Debes estar autenticado para eliminar un anuncio")
+        }
+        
+        // Verificar que el anuncio pertenezca al usuario actual
+        val anuncio = getAnuncioById(id)
+        if (anuncio == null) {
+            throw IllegalArgumentException("El anuncio no existe")
+        }
+        
+        if (anuncio.id_usuario != currentUserId) {
+            throw SecurityException("No tienes permiso para eliminar este anuncio")
+        }
+        
+        // Marcar el anuncio como inactivo (soft delete)
+        android.util.Log.d("SupabaseService", "Eliminando anuncio $id del usuario $currentUserId")
+        try {
+            client.from("anuncios")
+                .update(mapOf("activo" to false)) {
+                    filter {
+                        eq("id_anuncio", id)
+                        eq("id_usuario", currentUserId) // Asegurar que solo se elimine si es del usuario
+                    }
                 }
-            }
+            android.util.Log.d("SupabaseService", "Anuncio $id eliminado exitosamente")
+        } catch (e: Exception) {
+            android.util.Log.e("SupabaseService", "Error al eliminar anuncio: ${e.message}", e)
+            throw e
+        }
     }
     
     // ========================================
@@ -175,22 +203,41 @@ object SupabaseService {
     // ========================================
     
     suspend fun getImagenesByAnuncioId(anuncioId: Int): List<ImagenSupabase> {
-        return client.from("imagenes")
-            .select {
-                filter {
-                    eq("id_anuncio", anuncioId)
+        android.util.Log.d("SupabaseService", "Buscando imágenes para anuncio ID: $anuncioId")
+        return try {
+            val imagenes = client.from("imagenes")
+                .select {
+                    filter {
+                        eq("id_anuncio", anuncioId)
+                    }
+                    order("orden", Order.ASCENDING)
                 }
-                order("orden", Order.ASCENDING)
+                .decodeList<ImagenSupabase>()
+            android.util.Log.d("SupabaseService", "Encontradas ${imagenes.size} imágenes para anuncio $anuncioId")
+            imagenes.forEachIndexed { index, img ->
+                android.util.Log.d("SupabaseService", "  Imagen $index: id=${img.id_imagen}, url=${img.url_imagen}, orden=${img.orden}")
             }
-            .decodeList<ImagenSupabase>()
+            imagenes
+        } catch (e: Exception) {
+            android.util.Log.e("SupabaseService", "Error al obtener imágenes para anuncio $anuncioId: ${e.message}", e)
+            emptyList()
+        }
     }
     
     suspend fun addImagen(imagen: ImagenSupabase): ImagenSupabase {
-        return client.from("imagenes")
-            .insert(imagen) {
-                select()
-            }
-            .decodeSingle<ImagenSupabase>()
+        android.util.Log.d("SupabaseService", "Guardando imagen: id_anuncio=${imagen.id_anuncio}, url=${imagen.url_imagen}, nombre=${imagen.nombre_archivo}, tamaño=${imagen.tamano_archivo}")
+        return try {
+            val result = client.from("imagenes")
+                .insert(imagen) {
+                    select()
+                }
+                .decodeSingle<ImagenSupabase>()
+            android.util.Log.d("SupabaseService", "Imagen guardada exitosamente: id=${result.id_imagen}")
+            result
+        } catch (e: Exception) {
+            android.util.Log.e("SupabaseService", "Error al guardar imagen: ${e.message}", e)
+            throw e
+        }
     }
     
     suspend fun deleteImagen(id: Int) {
@@ -318,11 +365,19 @@ object SupabaseService {
         path: String,
         data: ByteArray
     ): String {
+        android.util.Log.d("SupabaseService", "Subiendo imagen: bucket=$bucket, path=$path, tamaño=${data.size} bytes")
         val storage = client.storage.from(bucket)
-        storage.upload(path, data) {
-            upsert = true
+        try {
+            storage.upload(path, data) {
+                upsert = true
+            }
+            val publicUrl = storage.publicUrl(path)
+            android.util.Log.d("SupabaseService", "Imagen subida exitosamente. URL: $publicUrl")
+            return publicUrl
+        } catch (e: Exception) {
+            android.util.Log.e("SupabaseService", "Error al subir imagen: ${e.message}", e)
+            throw e
         }
-        return storage.publicUrl(path)
     }
     
     /**

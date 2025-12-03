@@ -61,10 +61,19 @@ class PlacaSoapService {
                 
                 val errorMsg = when {
                     response.code == 500 -> {
-                        if (soapError.isNotEmpty()) {
-                            "Error de la API: $soapError. Verifica que la placa sea válida o que las credenciales sean correctas."
-                        } else {
-                            "Error del servidor (500). La API de placas puede estar temporalmente no disponible. Intenta más tarde."
+                        when {
+                            soapError.contains("Out of credit", ignoreCase = true) -> {
+                                "El servicio de búsqueda de placas no está disponible temporalmente debido a falta de créditos en la cuenta de la API. Por favor, contacta al administrador o intenta más tarde."
+                            }
+                            soapError.contains("Peru Lookup failed", ignoreCase = true) -> {
+                                "No se pudo encontrar información para esta placa. Verifica que la placa sea válida."
+                            }
+                            soapError.isNotEmpty() -> {
+                                "Error de la API: $soapError. Verifica que la placa sea válida."
+                            }
+                            else -> {
+                                "Error del servidor (500). La API de placas puede estar temporalmente no disponible. Intenta más tarde."
+                            }
                         }
                     }
                     response.code == 401 -> "Error de autenticación (401). Verifica las credenciales de la API."
