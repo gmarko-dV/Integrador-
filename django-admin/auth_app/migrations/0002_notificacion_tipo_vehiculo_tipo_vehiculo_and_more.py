@@ -8,15 +8,18 @@ from django.db import migrations, models
 
 def add_tipo_field_if_not_exists(apps, schema_editor):
     """Agregar campo tipo solo si no existe"""
+    # SQLite no requiere esta operación - el campo se agrega automáticamente
+    if schema_editor.connection.vendor == 'sqlite':
+        return
+    
     with schema_editor.connection.cursor() as cursor:
-        # Verificar si la columna ya existe
+        # Verificar si la columna ya existe (PostgreSQL)
         cursor.execute("""
             SELECT column_name 
             FROM information_schema.columns 
             WHERE table_name='notificaciones' AND column_name='tipo'
         """)
         if not cursor.fetchone():
-            # Si no existe, agregarla
             cursor.execute("""
                 ALTER TABLE notificaciones 
                 ADD COLUMN tipo VARCHAR(50) DEFAULT 'interes'
@@ -25,6 +28,9 @@ def add_tipo_field_if_not_exists(apps, schema_editor):
 
 def remove_tipo_field_if_exists(apps, schema_editor):
     """Eliminar campo tipo si existe (para rollback)"""
+    if schema_editor.connection.vendor == 'sqlite':
+        return
+    
     with schema_editor.connection.cursor() as cursor:
         cursor.execute("""
             SELECT column_name 
@@ -37,15 +43,16 @@ def remove_tipo_field_if_exists(apps, schema_editor):
 
 def add_tipo_vehiculo_field_if_not_exists(apps, schema_editor):
     """Agregar campo tipo_vehiculo solo si no existe"""
+    if schema_editor.connection.vendor == 'sqlite':
+        return
+    
     with schema_editor.connection.cursor() as cursor:
-        # Verificar si la columna ya existe
         cursor.execute("""
             SELECT column_name 
             FROM information_schema.columns 
             WHERE table_name='vehiculos' AND column_name='tipo_vehiculo'
         """)
         if not cursor.fetchone():
-            # Si no existe, agregarla
             cursor.execute("""
                 ALTER TABLE vehiculos 
                 ADD COLUMN tipo_vehiculo VARCHAR(50)
@@ -54,6 +61,9 @@ def add_tipo_vehiculo_field_if_not_exists(apps, schema_editor):
 
 def remove_tipo_vehiculo_field_if_exists(apps, schema_editor):
     """Eliminar campo tipo_vehiculo si existe (para rollback)"""
+    if schema_editor.connection.vendor == 'sqlite':
+        return
+    
     with schema_editor.connection.cursor() as cursor:
         cursor.execute("""
             SELECT column_name 

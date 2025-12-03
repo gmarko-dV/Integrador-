@@ -28,7 +28,7 @@ public class Imagen {
     @Column(name = "tipo_archivo", length = 50)
     private String tipoArchivo;
     
-    @Column(name = "tamaño_archivo")
+    @Column(name = "tamano_archivo")
     private Long tamanoArchivo;
     
     @Column(name = "fecha_subida")

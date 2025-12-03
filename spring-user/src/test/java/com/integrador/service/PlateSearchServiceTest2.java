@@ -35,7 +35,7 @@ class PlateSearchServiceTest2 {
     @BeforeEach
     void setUp() {
         testPlateNumber = "XYZ789";
-        testUserId = "auth0|789012";
+        testUserId = "550e8400-e29b-41d4-a716-446655440002";
     }
 
     @Test

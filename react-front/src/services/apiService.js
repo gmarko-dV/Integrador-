@@ -117,12 +117,6 @@ export const authService = {
     return response.data;
   },
 
-  // Obtener configuración de Auth0 desde Django
-  async getAuthConfig() {
-    const response = await djangoApi.get('/auth/config');
-    return response.data;
-  },
-
   // Health check de los servicios
   async healthCheck() {
     const springHealth = await springApi.get('/public/health');

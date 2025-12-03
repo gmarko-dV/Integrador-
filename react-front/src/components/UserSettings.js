@@ -31,12 +31,12 @@ const UserSettings = ({ onClose }) => {
       // Obtener perfil desde Django
       const profile = await authService.getUserProfile();
       
-      // Si no hay first_name y last_name, intentar obtener desde Auth0
+      // Si no hay first_name y last_name, intentar obtener desde Supabase
       let firstName = profile.first_name || '';
       let lastName = profile.last_name || '';
       
       if (!firstName && !lastName && user?.name) {
-        // Dividir el nombre completo de Auth0
+        // Dividir el nombre completo
         const nameParts = user.name.split(' ', 2);
         firstName = nameParts[0] || '';
         lastName = nameParts.slice(1).join(' ') || '';
@@ -60,7 +60,7 @@ const UserSettings = ({ onClose }) => {
         setError('Error al cargar el perfil del usuario');
       }
       
-      // Usar datos de Auth0 como fallback
+      // Usar datos de Supabase como fallback
       if (user?.name) {
         const nameParts = user.name.split(' ', 2);
         setFormData({
@@ -197,17 +197,10 @@ const UserSettings = ({ onClose }) => {
 
   const handleChangePassword = async () => {
     try {
-      // Usar loginWithRedirect del SDK de Auth0 para manejar correctamente el state
-      // Esto redirige al Universal Login con la pantalla de cambio de contraseña
-      await loginWithRedirect({
-        authorizationParams: {
-          screen_hint: 'change_password',
-          prompt: 'login'
-        },
-        appState: {
-          returnTo: '/configuracion'
-        }
-      });
+      // Usar resetPassword de Supabase para enviar email de cambio de contraseña
+      const { resetPassword } = await import('./AuthProvider').then(m => ({ resetPassword: m.useAuth }));
+      // Redirigir a la página de recuperación de contraseña
+      window.location.href = '/login?reset=true';
     } catch (err) {
       console.error('Error al redirigir para cambio de contraseña:', err);
       setError('No se pudo redirigir para cambiar la contraseña. Por favor, intenta nuevamente.');
@@ -298,7 +291,7 @@ const UserSettings = ({ onClose }) => {
                   className="user-settings-disabled"
                 />
                 <small className="user-settings-help-text">
-                  El email no se puede cambiar desde aquí. Debes cambiarlo en Auth0.
+                  El email no se puede cambiar desde aquí.
                 </small>
               </div>
 
@@ -327,7 +320,7 @@ const UserSettings = ({ onClose }) => {
           <section className="user-settings-section">
             <h3>Cambiar Contraseña</h3>
             <div className="user-settings-password-info">
-              <p>Para cambiar tu contraseña, serás redirigido a la página de Auth0 donde podrás actualizarla de forma segura.</p>
+              <p>Para cambiar tu contraseña, serás redirigido a la página de login donde podrás solicitar un enlace de recuperación.</p>
             </div>
             <div className="user-settings-form-actions">
               <button 

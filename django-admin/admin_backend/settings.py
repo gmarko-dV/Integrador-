@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-3i*$nga8#^fz#dw22*^++l&nt@-2b&8iti1!78t)!h79o1h&0e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
 
 # Application definition
@@ -76,18 +76,21 @@ WSGI_APPLICATION = 'admin_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Supabase PostgreSQL - Conexión DIRECTA (no pooler)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
-        'USER': 'postgres.kkjjgvqqzxothhojvzss',
+        'USER': 'postgres',
         'PASSWORD': 'LOgineosnash18',
-        'HOST': 'aws-1-us-east-2.pooler.supabase.com',
-        'PORT': '6543',
+        'HOST': 'db.kkjjgvqqzxothhojvzss.supabase.co',
+        'PORT': '5432',
         'OPTIONS': {
             'client_encoding': 'UTF8',
-            'connect_timeout': 10,
+            'connect_timeout': 60,
+            'sslmode': 'require',
         },
+        'CONN_MAX_AGE': 0,
     }
 }
 
@@ -140,13 +143,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Supabase Configuración
 SUPABASE_URL = 'https://kkjjgvqqzxothhojvzss.supabase.co'
 SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtrampndnFxenhvdGhob2p2enNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyNTkyNjQsImV4cCI6MjA3OTgzNTI2NH0.DR-bCWKczVoYuXbAFS_LWewJEb41E84AvAOVd7T_8sA'
+# JWT Secret de Supabase (se encuentra en Project Settings > API > JWT Secret)
+# Por defecto, Supabase permite verificar tokens usando el anon key como secret para HS256
+SUPABASE_JWT_SECRET = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtrampndnFxenhvdGhob2p2enNzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDI1OTI2NCwiZXhwIjoyMDc5ODM1MjY0fQ'
 
-# Auth0 Configuración (mantener para compatibilidad temporal)
-AUTH0_DOMAIN = 'dev-gmarko.us.auth0.com'  
-AUTH0_CLIENT_ID = 'q4z3HBJ8q0yVsUGCI9zyXskGA26Kus4b'
-AUTH0_CLIENT_SECRET = 'TgPxpZmbLG-odXNg9ZxgZr8ie6nzCilfhyE1dUPtmEs3mycACIPAKY4kuwetW1DA'
-API_IDENTIFIER = 'q4z3HBJ8q0yVsUGCI9zyXskGA26Kus4b'  
-ALGORITHMS = ['RS256'] 
 
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = True

@@ -41,7 +41,7 @@ class PlateSearchServiceTest1 {
     void setUp() {
         objectMapper = new ObjectMapper();
         testPlateNumber = "ABC123";
-        testUserId = "auth0|123456";
+        testUserId = "550e8400-e29b-41d4-a716-446655440001";
     }
 
     @Test

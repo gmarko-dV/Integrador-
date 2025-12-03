@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from './AuthProvider';
 import { API_ENDPOINTS } from '../config/api';
-import SpringLogin from './SpringLogin';
 import './PlateSearch.css';
 
 const PlateSearch = () => {
@@ -76,7 +75,18 @@ const PlateSearch = () => {
   };
 
   if (!isAuthenticated) {
-    return <SpringLogin />;
+    return (
+      <div className="plate-search-login-required">
+        <h3>🔐 Iniciar Sesión Requerido</h3>
+        <p>Debes iniciar sesión para buscar placas de vehículos.</p>
+        <button 
+          onClick={() => window.location.href = '/login'}
+          className="plate-search-button"
+        >
+          Iniciar Sesión
+        </button>
+      </div>
+    );
   }
 
   return (

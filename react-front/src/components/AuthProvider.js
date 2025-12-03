@@ -4,7 +4,7 @@ import { supabase } from '../config/supabase';
 // Crear contexto de autenticación
 const AuthContext = createContext({});
 
-// Hook para usar el contexto de autenticación (compatible con la API de Auth0)
+// Hook para usar el contexto de autenticación
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -54,7 +54,7 @@ const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  // Función para login con redirect (similar a Auth0)
+  // Función para login con redirect
   const loginWithRedirect = async (options = {}) => {
     try {
       // Por defecto, ir al login con email/password
@@ -177,7 +177,7 @@ const AuthProvider = ({ children }) => {
     isLoading,
     isAuthenticated,
     
-    // Funciones principales (compatibles con Auth0)
+    // Funciones principales
     loginWithRedirect,
     logout,
     getIdTokenClaims,
