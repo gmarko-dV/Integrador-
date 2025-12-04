@@ -32,10 +32,53 @@ const LogoutButton = () => {
 };
 
 const Profile = () => {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, supabase } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [displayName, setDisplayName] = useState('');
   const menuRef = useRef(null);
   const navigate = useNavigate();
+
+  // Actualizar displayName cuando cambia el user
+  useEffect(() => {
+    if (user) {
+      const name = user?.name || user?.email?.split('@')[0] || 'Usuario';
+      setDisplayName(name);
+    }
+  }, [user]);
+
+  // Escuchar eventos de actualización de perfil
+  useEffect(() => {
+    const handleProfileUpdate = (event) => {
+      if (event.detail?.fullName) {
+        setDisplayName(event.detail.fullName);
+      } else if (event.detail?.firstName && event.detail?.lastName) {
+        setDisplayName(`${event.detail.firstName} ${event.detail.lastName}`.trim());
+      }
+      
+      // Actualizar user_metadata en Supabase para que persista
+      if (supabase && event.detail?.firstName && event.detail?.lastName) {
+        const fullName = `${event.detail.firstName} ${event.detail.lastName}`.trim();
+        supabase.auth.updateUser({
+          data: {
+            nombre: fullName,
+            full_name: fullName,
+            first_name: event.detail.firstName,
+            last_name: event.detail.lastName
+          }
+        }).catch(err => {
+          console.error('Error actualizando user_metadata en Supabase:', err);
+        });
+      }
+    };
+
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    document.addEventListener('profileUpdated', handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate);
+      document.removeEventListener('profileUpdated', handleProfileUpdate);
+    };
+  }, [supabase]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -63,13 +106,10 @@ const Profile = () => {
 
   // Obtener inicial para el avatar
   const getInitial = () => {
-    if (user?.name) return user.name.charAt(0).toUpperCase();
+    if (displayName) return displayName.charAt(0).toUpperCase();
     if (user?.email) return user.email.charAt(0).toUpperCase();
     return 'U';
   };
-
-  // Obtener nombre para mostrar
-  const displayName = user?.name || user?.email?.split('@')[0] || 'Usuario';
 
   return (
     <div className="profile-container" ref={menuRef}>

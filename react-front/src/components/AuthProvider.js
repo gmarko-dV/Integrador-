@@ -40,7 +40,6 @@ const AuthProvider = ({ children }) => {
     // Escuchar cambios de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth event:', event);
         setSession(session);
         setUser(session?.user ?? null);
         setIsAuthenticated(!!session?.user);
@@ -142,7 +141,6 @@ const AuthProvider = ({ children }) => {
         if (tokenParts.length === 3) {
           // Decodificar el payload (segunda parte del JWT)
           const payload = JSON.parse(atob(tokenParts[1]));
-          console.log('🔍 JWT Payload decodificado:', payload);
           
           return {
             __raw: session.access_token,

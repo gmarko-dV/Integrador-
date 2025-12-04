@@ -6,7 +6,6 @@ import Login from './components/Login';
 import Callback from './components/Callback';
 import ListaAnunciosPage from './components/ListaAnunciosPage';
 import DetalleAnuncio from './components/DetalleAnuncio';
-import ChatIA from './components/ChatIA';
 import UserSettingsPage from './components/UserSettingsPage';
 import { setupAuthInterceptor } from './services/apiService';
 import './App.css';
@@ -18,7 +17,6 @@ const AppContent = () => {
   useEffect(() => {
     // Configurar el interceptor globalmente cuando el usuario se autentica
     if (isAuthenticated && getIdTokenClaims) {
-      console.log('🔐 Configurando interceptor de autenticación globalmente');
       setupAuthInterceptor(getIdTokenClaims);
     }
   }, [isAuthenticated, getIdTokenClaims]);
@@ -32,7 +30,6 @@ const AppContent = () => {
           <Route path="/callback" element={<Callback />} />
           <Route path="/anuncios" element={<ListaAnunciosPage />} />
           <Route path="/anuncio/:idAnuncio" element={<DetalleAnuncio />} />
-          <Route path="/chat" element={<ChatIA />} />
           <Route path="/configuracion" element={<UserSettingsPage />} />
         </Routes>
       </div>

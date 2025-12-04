@@ -71,29 +71,35 @@ const ListaAnunciosPage = () => {
                 >
                   Publicar Auto
                 </a>
-                <a 
-                  href="/chat" 
-                  className="nav-link"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate('/chat');
-                  }}
-                >
-                  Chat IA
-                </a>
               </>
             ) : (
               <a 
-                href="/anuncios" 
+                href="#buscar" 
                 className="nav-link"
                 onClick={(e) => {
                   e.preventDefault();
-                  navigate('/anuncios');
+                  navigate('/?tab=buscar');
                 }}
               >
                 Buscar Autos
               </a>
             )}
+            <a 
+              href="#contacto" 
+              className="nav-link"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/?tab=contacto');
+                setTimeout(() => {
+                  const contentSection = document.querySelector('.content-section');
+                  if (contentSection) {
+                    contentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }, 100);
+              }}
+            >
+              Contacto
+            </a>
           </nav>
 
           <div className="header-right">

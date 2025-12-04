@@ -58,7 +58,6 @@ export const setupAuthInterceptor = (getIdTokenClaims) => {
       
       // Si es un endpoint público GET, NO agregar token
       if (isPublicAnunciosGet) {
-        console.log('ℹ️ Endpoint público de anuncios, no se agrega token:', config.url);
         return config;
       }
       
@@ -69,7 +68,6 @@ export const setupAuthInterceptor = (getIdTokenClaims) => {
         if (claims && claims.__raw) {
           const token = claims.__raw;
           config.headers.Authorization = `Bearer ${token}`;
-          console.log('✅ Token agregado a la petición:', config.url);
         } else {
           console.warn('⚠️ No se pudo obtener el token de autenticación');
         }

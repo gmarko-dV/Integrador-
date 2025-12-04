@@ -3,7 +3,6 @@ import { useAuth } from './AuthProvider';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LoginButton, Profile } from './AuthComponents';
 import { NotificationDropdown } from './Notificaciones';
-import BackendInfo from './BackendInfo';
 import PlateSearch from './PlateSearch';
 import PublicarAuto from './PublicarAuto';
 import ListaAnuncios from './ListaAnuncios';
@@ -73,30 +72,17 @@ const Dashboard = () => {
   }, [isAuthenticated, getIdTokenClaims]);
 
   const handleSearch = () => {
-    if (isAuthenticated) {
-      // Si está autenticado, navegar a la página principal con la pestaña de buscar placa activa
-      navigate('/?tab=buscar');
-      setActiveTab('buscar');
-      // Hacer scroll suave hacia la sección de contenido
-      setTimeout(() => {
-        const contentSection = document.querySelector('.content-section');
-        if (contentSection) {
-          contentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 100);
-    } else {
-      // Si no está autenticado, redirigir al login
-      loginWithRedirect({
-        authorizationParams: {
-          prompt: 'login',
-          screen_hint: 'signup',
-          scope: 'openid profile email offline_access'
-        },
-        appState: {
-          returnTo: '/?tab=buscar'
-        }
-      });
-    }
+    // Navegar a la página principal con la pestaña de buscar placa activa
+    // Si no está autenticado, PlateSearch mostrará el mensaje de login requerido
+    navigate('/?tab=buscar');
+    setActiveTab('buscar');
+    // Hacer scroll suave hacia la sección de contenido
+    setTimeout(() => {
+      const contentSection = document.querySelector('.content-section');
+      if (contentSection) {
+        contentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   };
 
   const handlePublicar = () => {

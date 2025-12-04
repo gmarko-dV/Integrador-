@@ -49,7 +49,6 @@ const ListaAnuncios = () => {
   useEffect(() => {
     // Si el userId cambió, limpiar todo inmediatamente
     if (userId !== userIdAnterior) {
-      console.log('🔄 Limpiando anuncios - userId cambió de', userIdAnterior, 'a', userId);
       setAnuncios([]);
       setAnunciosFiltrados([]);
       setLoading(true);
@@ -62,7 +61,6 @@ const ListaAnuncios = () => {
   useEffect(() => {
     // Si cambió el estado de esMisAnuncios, limpiar inmediatamente
     if (esMisAnuncios !== esMisAnunciosAnterior && esMisAnunciosAnterior !== null) {
-      console.log('🔄 Limpiando anuncios - cambio de vista de', esMisAnunciosAnterior, 'a', esMisAnuncios);
       setAnuncios([]);
       setAnunciosFiltrados([]);
       setLoading(true);
@@ -123,15 +121,11 @@ const ListaAnuncios = () => {
       try {
         const claims = await getIdTokenClaims();
         const userIdFromToken = claims.sub;
-        console.log('🔍 UserId obtenido del token:', userIdFromToken);
-        console.log('🔍 Tipo de userId:', typeof userIdFromToken);
-        console.log('🔍 Claims completos:', claims);
         setUserId(userIdFromToken);
       } catch (error) {
         console.error('Error al obtener userId:', error);
       }
     } else {
-      console.log('⚠️ Usuario no autenticado o getIdTokenClaims no disponible');
       setUserId(null);
     }
   };
@@ -165,21 +159,11 @@ const ListaAnuncios = () => {
         const response = await anuncioService.obtenerMisAnuncios();
         if (response.success) {
           const anunciosRecibidos = response.anuncios || [];
-          console.log('📦 Anuncios recibidos del backend:', anunciosRecibidos.length);
-          anunciosRecibidos.forEach(anuncio => {
-            console.log(`  - Anuncio ID: ${anuncio.idAnuncio}, Usuario en BD: "${anuncio.idUsuario}", Usuario actual: "${userId}"`);
-            console.log(`    Coincide: ${anuncio.idUsuario === userId}, Tipo: ${typeof anuncio.idUsuario} vs ${typeof userId}`);
-          });
           
           // Filtrar SOLO los anuncios del usuario actual como medida de seguridad
           const misAnuncios = anunciosRecibidos.filter(anuncio => {
-            const coincide = String(anuncio.idUsuario).trim() === String(userId).trim();
-            if (!coincide) {
-              console.log(`❌ Anuncio ${anuncio.idAnuncio} NO pertenece al usuario. BD: "${anuncio.idUsuario}" vs Token: "${userId}"`);
-            }
-            return coincide;
+            return String(anuncio.idUsuario).trim() === String(userId).trim();
           });
-          console.log('✅ Anuncios filtrados (solo del usuario):', misAnuncios.length);
           setAnuncios(misAnuncios);
           setAnunciosFiltrados(misAnuncios);
         } else {

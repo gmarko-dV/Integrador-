@@ -167,11 +167,6 @@ const UserSettings = ({ onClose }) => {
           window.dispatchEvent(updateEvent);
           document.dispatchEvent(updateEvent);
         }, 800);
-        
-        // Recargar la página después de un tiempo para reflejar los cambios
-        setTimeout(() => {
-          window.location.reload();
-        }, 3000);
       } else {
         setError(response.error || 'Error al actualizar el perfil');
       }

@@ -77,16 +77,6 @@ const UserSettingsPage = () => {
                 >
                   Publicar Auto
                 </a>
-                <a 
-                  href="/chat" 
-                  className="nav-link"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate('/chat');
-                  }}
-                >
-                  Chat IA
-                </a>
               </>
             ) : (
               <a href="#buscar" className="nav-link">Buscar Autos</a>

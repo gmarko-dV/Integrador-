@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from './AuthProvider';
+import { LoginButton } from './AuthComponents';
 import { API_ENDPOINTS } from '../config/api';
 import './PlateSearch.css';
 
@@ -77,14 +78,14 @@ const PlateSearch = () => {
   if (!isAuthenticated) {
     return (
       <div className="plate-search-login-required">
-        <h3>🔐 Iniciar Sesión Requerido</h3>
-        <p>Debes iniciar sesión para buscar placas de vehículos.</p>
-        <button 
-          onClick={() => window.location.href = '/login'}
-          className="plate-search-button"
-        >
-          Iniciar Sesión
-        </button>
+        <div className="plate-search-login-card">
+          <span className="plate-search-lock-icon">🔒</span>
+          <h3>Iniciar Sesión Requerido</h3>
+          <p>Debes iniciar sesión para buscar placas de vehículos.</p>
+          <div className="plate-search-login-button-wrapper">
+            <LoginButton />
+          </div>
+        </div>
       </div>
     );
   }
