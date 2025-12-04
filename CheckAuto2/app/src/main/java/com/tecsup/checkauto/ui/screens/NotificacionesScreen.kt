@@ -85,238 +85,268 @@ fun NotificacionesScreen(
 
     val cantidadNoLeidas = notificaciones.count { !it.leida }
 
-    Column(
-        modifier = Modifier.fillMaxSize()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF1A1F2E), // Azul muy oscuro que complementa el header
+                        Color(0xFF0F1419)  // Negro azulado más suave
+                    )
+                )
+            )
     ) {
-        // Header mejorado con gradiente
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFF0066CC),
-                            Color(0xFF0052A3)
-                        )
-                    )
-                )
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Row(
+            // Header azul claro como la web
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = onBack,
-                    modifier = Modifier
-                        .background(
-                            Color.White.copy(alpha = 0.2f),
-                            RoundedCornerShape(12.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color(0xFF0066CC),
+                                Color(0xFF0052A3)
+                            )
                         )
-                ) {
-                    Icon(
-                        Icons.Default.ArrowBack,
-                        contentDescription = "Volver",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
                     )
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = "Notificaciones",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    letterSpacing = 0.5.sp,
-                    modifier = Modifier.weight(1f)
-                )
-                if (cantidadNoLeidas > 0) {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFFDC2626)
-                        ),
-                        shape = RoundedCornerShape(16.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                    ) {
-                        Text(
-                            text = if (cantidadNoLeidas > 99) "99+" else cantidadNoLeidas.toString(),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                        )
-                    }
-                }
-            }
-        }
-
-        if (errorMessage != null) {
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFDC2626).copy(alpha = 0.1f)
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("❌", fontSize = 24.sp)
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Error",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFFDC2626),
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
-                        Text(
-                            text = errorMessage ?: "",
-                            fontSize = 14.sp,
-                            color = Color(0xFFDC2626).copy(alpha = 0.9f)
+                    IconButton(
+                        onClick = onBack,
+                        modifier = Modifier
+                            .background(
+                                Color(0xFF0066CC).copy(alpha = 0.2f),
+                                RoundedCornerShape(12.dp)
+                            )
+                    ) {
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = Color.White,
+                            modifier = Modifier.size(22.dp)
                         )
                     }
-                }
-            }
-        }
-
-        if (isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else if (notificaciones.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(32.dp)
-                ) {
-                    Surface(
-                        color = Color(0xFFF0F4F8),
-                        shape = RoundedCornerShape(50),
-                        modifier = Modifier.size(120.dp)
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxSize()
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Notificaciones",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White,
+                        letterSpacing = 0.3.sp,
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (cantidadNoLeidas > 0) {
+                        Surface(
+                            color = Color(0xFFFF6B6B),
+                            shape = RoundedCornerShape(12.dp)
                         ) {
                             Text(
-                                text = "🔔",
-                                fontSize = 64.sp
+                                text = if (cantidadNoLeidas > 99) "99+" else cantidadNoLeidas.toString(),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Text(
-                        text = "No tienes notificaciones",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1A1A1A),
-                        letterSpacing = 0.3.sp
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Cuando recibas mensajes sobre tus anuncios, aparecerán aquí",
-                        fontSize = 15.sp,
-                        color = Color(0xFF6B7280),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                    )
                 }
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Botón para marcar todas como leídas mejorado
-                if (cantidadNoLeidas > 0) {
-                    item {
-                        Button(
-                            onClick = {
-                                if (vendedorId != null) {
-                                    scope.launch {
-                                        try {
-                                            SupabaseService.markAllNotificacionesAsRead(vendedorId)
-                                            // Recargar notificaciones
-                                            val notificacionesSupabase = SupabaseService.getNotificacionesByVendedor(vendedorId)
-                                            notificaciones = notificacionesSupabase.map { notif ->
-                                                Notificacion(
-                                                    idNotificacion = notif.id_notificacion?.toLong() ?: 0L,
-                                                    titulo = notif.titulo,
-                                                    mensaje = notif.mensaje ?: "",
-                                                    nombreComprador = notif.nombre_comprador,
-                                                    emailComprador = notif.email_comprador,
-                                                    fechaCreacion = notif.fecha_creacion ?: "",
-                                                    leida = notif.leido || notif.leida,
-                                                    idAnuncio = notif.id_anuncio?.toLong()
-                                                )
+
+            if (errorMessage != null) {
+                Surface(
+                    color = Color(0xFFFF6B6B).copy(alpha = 0.15f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        Color(0xFFFF6B6B).copy(alpha = 0.3f)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text("❌", fontSize = 24.sp)
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Error",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFDC2626),
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+                            Text(
+                                text = errorMessage ?: "",
+                                fontSize = 14.sp,
+                                color = Color(0xFFDC2626).copy(alpha = 0.9f)
+                            )
+                        }
+                    }
+                }
+            }
+
+            if (isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = Color(0xFF0066CC)
+                    )
+                }
+            } else if (notificaciones.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(32.dp)
+                    ) {
+                        Surface(
+                            color = Color(0xFF0066CC).copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(50),
+                            modifier = Modifier.size(120.dp),
+                            border = androidx.compose.foundation.BorderStroke(
+                                2.dp,
+                                Color(0xFF0066CC).copy(alpha = 0.3f)
+                            )
+                        ) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Text(
+                                    text = "🔔",
+                                    fontSize = 64.sp
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text(
+                            text = "No tienes notificaciones",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White,
+                            letterSpacing = 0.2.sp
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Cuando recibas mensajes sobre tus anuncios, aparecerán aquí",
+                            fontSize = 14.sp,
+                            color = Color.White.copy(alpha = 0.6f),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Botón para marcar todas como leídas mejorado
+                    if (cantidadNoLeidas > 0) {
+                        item {
+                            Surface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        if (vendedorId != null) {
+                                            scope.launch {
+                                                try {
+                                                    SupabaseService.markAllNotificacionesAsRead(vendedorId)
+                                                    // Recargar notificaciones
+                                                    val notificacionesSupabase = SupabaseService.getNotificacionesByVendedor(vendedorId)
+                                                    notificaciones = notificacionesSupabase.map { notif ->
+                                                        Notificacion(
+                                                            idNotificacion = notif.id_notificacion?.toLong() ?: 0L,
+                                                            titulo = notif.titulo,
+                                                            mensaje = notif.mensaje ?: "",
+                                                            nombreComprador = notif.nombre_comprador,
+                                                            emailComprador = notif.email_comprador,
+                                                            fechaCreacion = notif.fecha_creacion ?: "",
+                                                            leida = notif.leido || notif.leida,
+                                                            idAnuncio = notif.id_anuncio?.toLong()
+                                                        )
+                                                    }
+                                                } catch (e: Exception) {
+                                                    errorMessage = "Error: ${e.message}"
+                                                }
                                             }
-                                        } catch (e: Exception) {
-                                            errorMessage = "Error: ${e.message}"
                                         }
+                                    },
+                                color = Color(0xFF0066CC).copy(alpha = 0.2f),
+                                shape = RoundedCornerShape(14.dp),
+                                border = androidx.compose.foundation.BorderStroke(
+                                    1.5.dp,
+                                    Color(0xFF0066CC).copy(alpha = 0.5f)
+                                )
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(14.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        Icons.Default.CheckCircle,
+                                        contentDescription = null,
+                                        tint = Color(0xFF0066CC),
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Text(
+                                        "Marcar todas como leídas",
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = Color.White,
+                                        letterSpacing = 0.2.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    items(notificaciones) { notificacion ->
+                        NotificacionCard(
+                            notificacion = notificacion,
+                            onMarkAsRead = {
+                                scope.launch {
+                                    try {
+                                        notificacion.idNotificacion.toInt().let { id ->
+                                            SupabaseService.markNotificacionAsRead(id)
+                                            // Actualizar estado local
+                                            notificaciones = notificaciones.map { n ->
+                                                if (n.idNotificacion == notificacion.idNotificacion) {
+                                                    n.copy(leida = true)
+                                                } else n
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+                                        errorMessage = "Error: ${e.message}"
                                     }
                                 }
                             },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF0066CC)
-                            ),
-                            shape = RoundedCornerShape(16.dp),
-                            elevation = ButtonDefaults.buttonElevation(
-                                defaultElevation = 6.dp,
-                                pressedElevation = 4.dp
-                            )
-                        ) {
-                            Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(22.dp))
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                "Marcar todas como leídas",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 0.3.sp
-                            )
-                        }
-                    }
-                }
-
-                items(notificaciones) { notificacion ->
-                    NotificacionCard(
-                        notificacion = notificacion,
-                        onMarkAsRead = {
-                            scope.launch {
-                                try {
-                                    notificacion.idNotificacion.toInt().let { id ->
-                                        SupabaseService.markNotificacionAsRead(id)
-                                        // Actualizar estado local
-                                        notificaciones = notificaciones.map { n ->
-                                            if (n.idNotificacion == notificacion.idNotificacion) {
-                                                n.copy(leida = true)
-                                            } else n
-                                        }
-                                    }
-                                } catch (e: Exception) {
-                                    errorMessage = "Error: ${e.message}"
-                                }
+                            onAnuncioClick = {
+                                notificacion.idAnuncio?.let { onAnuncioClick(it) }
                             }
-                        },
-                        onAnuncioClick = {
-                            notificacion.idAnuncio?.let { onAnuncioClick(it) }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
@@ -329,26 +359,27 @@ fun NotificacionCard(
     onMarkAsRead: () -> Unit,
     onAnuncioClick: () -> Unit
 ) {
-    Card(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { if (notificacion.idAnuncio != null) onAnuncioClick() },
-        colors = CardDefaults.cardColors(
-            containerColor = if (!notificacion.leida) 
-                Color(0xFFE0F2FE)
-            else 
-                Color.White
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = if (!notificacion.leida) 8.dp else 4.dp,
-            pressedElevation = 4.dp
-        ),
-        shape = RoundedCornerShape(20.dp)
+        color = if (!notificacion.leida) 
+            Color(0xFF0066CC).copy(alpha = 0.12f)
+        else 
+            Color.White.copy(alpha = 0.08f),
+        shape = RoundedCornerShape(16.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            if (!notificacion.leida)
+                Color(0xFF0066CC).copy(alpha = 0.3f)
+            else
+                Color.White.copy(alpha = 0.15f)
+        )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp)
+                .padding(16.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -360,7 +391,7 @@ fun NotificacionCard(
                     Surface(
                         color = Color(0xFF0066CC),
                         shape = RoundedCornerShape(50),
-                        modifier = Modifier.size(12.dp)
+                        modifier = Modifier.size(10.dp)
                     ) {}
                 }
                 
@@ -370,42 +401,46 @@ fun NotificacionCard(
                     if (notificacion.titulo != null) {
                         Text(
                             text = notificacion.titulo,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1A1A1A),
-                            letterSpacing = 0.2.sp,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White,
+                            letterSpacing = 0.1.sp,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
                     }
 
                     if (notificacion.nombreComprador != null || notificacion.emailComprador != null) {
                         Surface(
-                            color = Color(0xFFF0F4F8),
+                            color = Color(0xFF0066CC).copy(alpha = 0.15f),
                             shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier.padding(bottom = 10.dp)
+                            modifier = Modifier.padding(bottom = 10.dp),
+                            border = androidx.compose.foundation.BorderStroke(
+                                0.5.dp,
+                                Color(0xFF0066CC).copy(alpha = 0.3f)
+                            )
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
                                 Icon(
                                     Icons.Default.Person,
                                     contentDescription = null,
                                     tint = Color(0xFF0066CC),
-                                    modifier = Modifier.size(16.dp)
+                                    modifier = Modifier.size(14.dp)
                                 )
                                 Text(
                                     text = notificacion.nombreComprador ?: notificacion.emailComprador ?: "",
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = Color(0xFF4A5568)
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = Color.White.copy(alpha = 0.8f)
                                 )
                                 if (notificacion.nombreComprador != null && notificacion.emailComprador != null) {
                                     Text(
                                         text = "• ${notificacion.emailComprador}",
-                                        fontSize = 12.sp,
-                                        color = Color(0xFF6B7280)
+                                        fontSize = 11.sp,
+                                        color = Color.White.copy(alpha = 0.6f)
                                     )
                                 }
                             }
@@ -414,9 +449,9 @@ fun NotificacionCard(
 
                     Text(
                         text = notificacion.mensaje,
-                        fontSize = 15.sp,
-                        color = Color(0xFF4A5568),
-                        lineHeight = 22.sp,
+                        fontSize = 14.sp,
+                        color = Color.White.copy(alpha = 0.8f),
+                        lineHeight = 20.sp,
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
 
@@ -427,14 +462,14 @@ fun NotificacionCard(
                         Icon(
                             Icons.Default.Info,
                             contentDescription = null,
-                            tint = Color(0xFF9CA3AF),
-                            modifier = Modifier.size(14.dp)
+                            tint = Color.White.copy(alpha = 0.4f),
+                            modifier = Modifier.size(12.dp)
                         )
                         Text(
                             text = formatFecha(notificacion.fechaCreacion),
-                            fontSize = 12.sp,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Medium,
-                            color = Color(0xFF9CA3AF)
+                            color = Color.White.copy(alpha = 0.5f)
                         )
                     }
                 }
@@ -443,40 +478,59 @@ fun NotificacionCard(
                     IconButton(
                         onClick = onMarkAsRead,
                         modifier = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF0066CC).copy(alpha = 0.1f))
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color(0xFF0066CC).copy(alpha = 0.2f))
                     ) {
                         Icon(
                             Icons.Default.Done,
                             contentDescription = "Marcar como leída",
                             tint = Color(0xFF0066CC),
-                            modifier = Modifier.size(22.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
             }
 
             if (notificacion.idAnuncio != null) {
-                Spacer(modifier = Modifier.height(16.dp))
-                HorizontalDivider(color = Color(0xFFE2E8F0), thickness = 1.dp)
+                Spacer(modifier = Modifier.height(14.dp))
+                HorizontalDivider(
+                    color = Color.White.copy(alpha = 0.1f),
+                    thickness = 1.dp
+                )
                 Spacer(modifier = Modifier.height(12.dp))
-                OutlinedButton(
-                    onClick = onAnuncioClick,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color(0xFF0066CC)
-                    ),
-                    border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF0066CC))
-                ) {
-                    Icon(Icons.Default.Info, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        "Ver anuncio",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = onAnuncioClick),
+                    color = Color(0xFF0066CC).copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(12.dp),
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        Color(0xFF0066CC).copy(alpha = 0.4f)
                     )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Info,
+                            contentDescription = null,
+                            tint = Color(0xFF0066CC),
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            "Ver anuncio",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White
+                        )
+                    }
                 }
             }
         }
@@ -493,4 +547,3 @@ fun formatFecha(fecha: String): String {
         fecha
     }
 }
-

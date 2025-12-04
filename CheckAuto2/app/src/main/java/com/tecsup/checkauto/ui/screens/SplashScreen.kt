@@ -56,8 +56,8 @@ fun SplashScreen(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF0066CC),
-                        Color(0xFF004499)
+                        Color(0xFF1A1F2E), // Azul muy oscuro que complementa el header
+                        Color(0xFF0F1419)  // Negro azulado más suave
                     )
                 )
             ),

@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -129,181 +130,227 @@ fun ListaAnunciosScreen(
         }
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        // Header mejorado
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp)
-        ) {
-            Text(
-                text = if (tipoFiltro != null) "Vehículos $tipoFiltro" else if (esMisAnuncios) "Tus Anuncios" else "Vehículos en Venta",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A1A1A),
-                letterSpacing = 0.5.sp,
-                modifier = Modifier.padding(bottom = 6.dp)
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Surface(
-                    color = Color(0xFF0066CC).copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text(
-                        text = "${anunciosFiltrados.size} ${if (anunciosFiltrados.size == 1) "anuncio" else "anuncios"}",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF0066CC),
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF1A1F2E), // Azul muy oscuro que complementa el header
+                        Color(0xFF0F1419)  // Negro azulado más suave
                     )
-                }
-                Text(
-                    text = "disponibles",
-                    fontSize = 15.sp,
-                    color = Color(0xFF6B7280)
                 )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (errorMessage != null) {
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer
-                ),
+            )
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Header azul claro como la web
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            ) {
-                Text(
-                    text = errorMessage ?: "",
-                    color = MaterialTheme.colorScheme.onErrorContainer,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-        }
-
-        if (isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else if (anunciosFiltrados.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color(0xFF0066CC),
+                                Color(0xFF0052A3)
+                            )
+                        )
+                    )
             ) {
                 Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 16.dp)
                 ) {
                     Text(
-                        text = "🚗",
-                        fontSize = 64.sp
+                        text = if (tipoFiltro != null) "Vehículos $tipoFiltro" else if (esMisAnuncios) "Tus Anuncios" else "Vehículos en Venta",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White,
+                        letterSpacing = 0.3.sp,
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Surface(
+                            color = Color.White.copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(
+                                text = "${anunciosFiltrados.size} ${if (anunciosFiltrados.size == 1) "anuncio" else "anuncios"}",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            )
+                        }
+                        Text(
+                            text = "disponibles",
+                            fontSize = 14.sp,
+                            color = Color.White.copy(alpha = 0.8f)
+                        )
+                    }
+                }
+            }
+
+            if (errorMessage != null) {
+                Surface(
+                    color = Color(0xFFFF6B6B).copy(alpha = 0.15f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        Color(0xFFFF6B6B).copy(alpha = 0.3f)
+                    )
+                ) {
                     Text(
-                        text = if (esMisAnuncios) 
-                            "Aún no tienes anuncios publicados"
-                        else if (tipoFiltro != null) 
-                            "No hay anuncios disponibles para $tipoFiltro en este momento."
-                        else 
-                            "No hay anuncios disponibles en este momento.",
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        text = errorMessage ?: "",
+                        color = Color.White,
+                        modifier = Modifier.padding(16.dp)
                     )
                 }
             }
-        } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(anunciosFiltrados) { anuncio ->
-                    AnuncioCard(
-                        anuncio = anuncio,
-                        imagenActual = imagenActual[anuncio.idAnuncio] ?: 0,
-                        onImagenChange = { idAnuncio, index ->
-                            imagenActual = imagenActual + (idAnuncio to index)
-                        },
-                        onAnuncioClick = { onAnuncioClick(anuncio.idAnuncio ?: 0) },
-                        onContactar = { onContactar(anuncio) },
-                        onEliminar = { 
-                            scope.launch {
-                                try {
-                                    anuncio.idAnuncio?.let { id ->
-                                        // Obtener token de autenticación
-                                        val accessToken = SupabaseAuthService.getAccessToken()
-                                        if (accessToken == null) {
-                                            errorMessage = "Debes estar autenticado para eliminar un anuncio"
-                                            return@launch
-                                        }
-                                        
-                                        // Usar el servicio del backend de Spring Boot
-                                        val anuncioService = AnuncioService()
-                                        val result = anuncioService.deleteAnuncio(id, accessToken)
-                                        
-                                        if (result.isSuccess) {
-                                            // Recargar anuncios después de eliminar
-                                            val anunciosSupabase = if (esMisAnuncios && userId != null) {
-                                                SupabaseService.getAnunciosByUserId(userId)
-                                            } else {
-                                                SupabaseService.getAnuncios()
-                                            }
-                                            val anunciosConImagenes = anunciosSupabase.map { anuncioSupabase ->
-                                                val imagenesSupabase = try {
-                                                    SupabaseService.getImagenesByAnuncioId(anuncioSupabase.id_anuncio ?: 0)
-                                                } catch (e: Exception) {
-                                                    emptyList()
-                                                }
-                                                val imagenes = imagenesSupabase.map { ModelConverter.imagenSupabaseToImagen(it) }
-                                                ModelConverter.anuncioSupabaseToAnuncio(anuncioSupabase, imagenes)
-                                            }
-                                            anuncios = anunciosConImagenes
-                                            errorMessage = null // Limpiar error si se eliminó exitosamente
-                                        } else {
-                                            val exception = result.exceptionOrNull()
-                                            val mensaje = when {
-                                                exception?.message?.contains("permiso", ignoreCase = true) == true ||
-                                                exception?.message?.contains("permission", ignoreCase = true) == true ||
-                                                exception?.message?.contains("dueño", ignoreCase = true) == true ||
-                                                exception?.message?.contains("owner", ignoreCase = true) == true ->
-                                                    "Error de permisos. Verifica que seas el dueño del anuncio."
-                                                exception?.message?.contains("autenticado", ignoreCase = true) == true ||
-                                                exception?.message?.contains("authenticated", ignoreCase = true) == true ||
-                                                exception?.message?.contains("401") == true ->
-                                                    "Debes estar autenticado para eliminar un anuncio"
-                                                else -> exception?.message ?: "Error al eliminar el anuncio"
-                                            }
-                                            errorMessage = mensaje
-                                        }
-                                    }
-                                } catch (e: Exception) {
-                                    android.util.Log.e("ListaAnunciosScreen", "Error al eliminar anuncio: ${e.message}", e)
-                                    val mensaje = when {
-                                        e.message?.contains("row-level security", ignoreCase = true) == true -> 
-                                            "Error de permisos. Verifica que seas el dueño del anuncio."
-                                        e.message?.contains("violates", ignoreCase = true) == true -> 
-                                            "Error de permisos. No puedes eliminar este anuncio."
-                                        else -> "Error al eliminar: ${e.message ?: "Error desconocido"}"
-                                    }
-                                    errorMessage = mensaje
-                                }
-                            }
-                            onEliminar(anuncio.idAnuncio ?: 0) 
-                        },
-                        esMiAnuncio = esMisAnuncios && anuncio.idUsuario == userId,
-                        isAuthenticated = isAuthenticated
+
+            if (isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = Color(0xFF0066CC)
                     )
+                }
+            } else if (anunciosFiltrados.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(32.dp)
+                    ) {
+                        Surface(
+                            color = Color(0xFF0066CC).copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(50),
+                            modifier = Modifier.size(120.dp),
+                            border = androidx.compose.foundation.BorderStroke(
+                                2.dp,
+                                Color(0xFF0066CC).copy(alpha = 0.3f)
+                            )
+                        ) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Text(
+                                    text = "🚗",
+                                    fontSize = 64.sp
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text(
+                            text = if (esMisAnuncios) 
+                                "Aún no tienes anuncios publicados"
+                            else if (tipoFiltro != null) 
+                                "No hay anuncios disponibles para $tipoFiltro"
+                            else 
+                                "No hay anuncios disponibles",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(anunciosFiltrados) { anuncio ->
+                        AnuncioCard(
+                            anuncio = anuncio,
+                            imagenActual = imagenActual[anuncio.idAnuncio] ?: 0,
+                            onImagenChange = { idAnuncio: Long, index: Int ->
+                                imagenActual = imagenActual + (idAnuncio to index)
+                            },
+                            onAnuncioClick = { onAnuncioClick(anuncio.idAnuncio ?: 0) },
+                            onContactar = { onContactar(anuncio) },
+                            onEliminar = { 
+                                scope.launch {
+                                    try {
+                                        anuncio.idAnuncio?.let { id ->
+                                            // Obtener token de autenticación
+                                            val accessToken = SupabaseAuthService.getAccessToken()
+                                            if (accessToken == null) {
+                                                errorMessage = "Debes estar autenticado para eliminar un anuncio"
+                                                return@launch
+                                            }
+                                            
+                                            // Usar el servicio del backend de Spring Boot
+                                            val anuncioService = AnuncioService()
+                                            val result = anuncioService.deleteAnuncio(id, accessToken)
+                                            
+                                            if (result.isSuccess) {
+                                                // Recargar anuncios después de eliminar
+                                                val anunciosSupabase = if (esMisAnuncios && userId != null) {
+                                                    SupabaseService.getAnunciosByUserId(userId)
+                                                } else {
+                                                    SupabaseService.getAnuncios()
+                                                }
+                                                val anunciosConImagenes = anunciosSupabase.map { anuncioSupabase ->
+                                                    val imagenesSupabase = try {
+                                                        SupabaseService.getImagenesByAnuncioId(anuncioSupabase.id_anuncio ?: 0)
+                                                    } catch (e: Exception) {
+                                                        emptyList()
+                                                    }
+                                                    val imagenes = imagenesSupabase.map { ModelConverter.imagenSupabaseToImagen(it) }
+                                                    ModelConverter.anuncioSupabaseToAnuncio(anuncioSupabase, imagenes)
+                                                }
+                                                anuncios = anunciosConImagenes
+                                                errorMessage = null // Limpiar error si se eliminó exitosamente
+                                            } else {
+                                                val exception = result.exceptionOrNull()
+                                                val mensaje = when {
+                                                    exception?.message?.contains("permiso", ignoreCase = true) == true ||
+                                                    exception?.message?.contains("permission", ignoreCase = true) == true ||
+                                                    exception?.message?.contains("dueño", ignoreCase = true) == true ||
+                                                    exception?.message?.contains("owner", ignoreCase = true) == true ->
+                                                        "Error de permisos. Verifica que seas el dueño del anuncio."
+                                                    exception?.message?.contains("autenticado", ignoreCase = true) == true ||
+                                                    exception?.message?.contains("authenticated", ignoreCase = true) == true ||
+                                                    exception?.message?.contains("401") == true ->
+                                                        "Debes estar autenticado para eliminar un anuncio"
+                                                    else -> exception?.message ?: "Error al eliminar el anuncio"
+                                                }
+                                                errorMessage = mensaje
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+                                        android.util.Log.e("ListaAnunciosScreen", "Error al eliminar anuncio: ${e.message}", e)
+                                        val mensaje = when {
+                                            e.message?.contains("row-level security", ignoreCase = true) == true -> 
+                                                "Error de permisos. Verifica que seas el dueño del anuncio."
+                                            e.message?.contains("violates", ignoreCase = true) == true -> 
+                                                "Error de permisos. No puedes eliminar este anuncio."
+                                            else -> "Error al eliminar: ${e.message ?: "Error desconocido"}"
+                                        }
+                                        errorMessage = mensaje
+                                    }
+                                }
+                                onEliminar(anuncio.idAnuncio ?: 0) 
+                            },
+                            esMiAnuncio = esMisAnuncios && anuncio.idUsuario == userId,
+                            isAuthenticated = isAuthenticated
+                        )
+                    }
                 }
             }
         }
@@ -331,17 +378,15 @@ fun AnuncioCard(
         imagenes.getOrNull(imagenActual)?.urlImagen
     } else null
 
-    Card(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onAnuncioClick),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 8.dp,
-            pressedElevation = 4.dp
-        ),
+        color = Color.White.copy(alpha = 0.08f),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            Color.White.copy(alpha = 0.15f)
         )
     ) {
         Column(
@@ -494,7 +539,7 @@ fun AnuncioCard(
                     text = anuncio.titulo ?: "${anuncio.modelo} ${anuncio.anio}",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1A1A1A),
+                    color = Color.White,
                     letterSpacing = 0.2.sp,
                     modifier = Modifier.padding(bottom = 10.dp)
                 )
@@ -518,9 +563,13 @@ fun AnuncioCard(
                 ) {
                     if (anuncio.tipoVehiculo != null) {
                         Surface(
-                            color = Color(0xFFF0F4F8),
+                            color = Color(0xFF0066CC).copy(alpha = 0.15f),
                             shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.padding(vertical = 4.dp)
+                            modifier = Modifier.padding(vertical = 4.dp),
+                            border = androidx.compose.foundation.BorderStroke(
+                                0.5.dp,
+                                Color(0xFF0066CC).copy(alpha = 0.3f)
+                            )
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -532,15 +581,19 @@ fun AnuncioCard(
                                     text = anuncio.tipoVehiculo,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = Color(0xFF4A5568)
+                                    color = Color.White.copy(alpha = 0.9f)
                                 )
                             }
                         }
                     }
                     Surface(
-                        color = Color(0xFFF0F4F8),
+                        color = Color(0xFF0066CC).copy(alpha = 0.15f),
                         shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.padding(vertical = 4.dp)
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        border = androidx.compose.foundation.BorderStroke(
+                            0.5.dp,
+                            Color(0xFF0066CC).copy(alpha = 0.3f)
+                        )
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -552,7 +605,7 @@ fun AnuncioCard(
                                 text = "${numberFormatter.format(anuncio.kilometraje)} km",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFF4A5568)
+                                color = Color.White.copy(alpha = 0.9f)
                             )
                         }
                     }
@@ -560,7 +613,7 @@ fun AnuncioCard(
 
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 8.dp),
-                    color = Color(0xFFE2E8F0)
+                    color = Color.White.copy(alpha = 0.1f)
                 )
 
                 // Acciones
@@ -591,37 +644,60 @@ fun AnuncioCard(
                     }
                     
                     if (esMiAnuncio) {
-                        IconButton(
+                        Surface(
                             onClick = onEliminar,
-                            modifier = Modifier
-                                .size(52.dp)
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(Color(0xFFFFF5F5))
-                        ) {
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = "Eliminar",
-                                tint = Color(0xFFDC2626),
-                                modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(52.dp),
+                            color = Color(0xFFFF6B6B).copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(14.dp),
+                            border = androidx.compose.foundation.BorderStroke(
+                                1.dp,
+                                Color(0xFFFF6B6B).copy(alpha = 0.4f)
                             )
+                        ) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = "Eliminar",
+                                    tint = Color(0xFFFF6B6B),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
                         }
                     } else if (isAuthenticated) {
-                        OutlinedButton(
+                        Surface(
                             onClick = onContactar,
                             modifier = Modifier.weight(1f),
+                            color = Color(0xFF0066CC).copy(alpha = 0.15f),
                             shape = RoundedCornerShape(14.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = Color(0xFF0066CC)
-                            ),
-                            border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF0066CC))
-                        ) {
-                            Icon(Icons.Default.Email, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                "Contactar",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.SemiBold
+                            border = androidx.compose.foundation.BorderStroke(
+                                1.5.dp,
+                                Color(0xFF0066CC).copy(alpha = 0.5f)
                             )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 12.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Default.Email,
+                                    contentDescription = null,
+                                    tint = Color(0xFF0066CC),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    "Contactar",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color.White
+                                )
+                            }
                         }
                     }
                 }

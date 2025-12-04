@@ -32,7 +32,16 @@ fun PlateSearchScreen() {
     
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF1A1F2E), // Azul muy oscuro que complementa el header
+                        Color(0xFF0F1419)  // Negro azulado más suave
+                    )
+                )
+            )
     ) {
         // Header con gradiente (fijo)
         Box(
@@ -95,15 +104,16 @@ fun PlateSearchScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-            // Formulario de búsqueda mejorado
-            Card(
+            // Formulario de búsqueda mejorado con glassmorphism
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 20.dp),
                 shape = RoundedCornerShape(20.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White
+                color = Color.White.copy(alpha = 0.08f),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    Color.White.copy(alpha = 0.15f)
                 )
             ) {
                 Column(
@@ -112,8 +122,8 @@ fun PlateSearchScreen() {
                     OutlinedTextField(
                         value = plateNumber,
                         onValueChange = { plateNumber = it.uppercase() },
-                        label = { Text("Número de Placa") },
-                        placeholder = { Text("Ej: ABC123, T3V213") },
+                        label = { Text("Número de Placa", color = Color.White.copy(alpha = 0.7f)) },
+                        placeholder = { Text("Ej: ABC123, T3V213", color = Color.White.copy(alpha = 0.5f)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         enabled = !isLoading,
@@ -126,8 +136,12 @@ fun PlateSearchScreen() {
                         },
                         shape = RoundedCornerShape(14.dp),
                         colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White.copy(alpha = 0.8f),
                             focusedBorderColor = Color(0xFF0066CC),
-                            focusedLabelColor = Color(0xFF0066CC)
+                            unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                            focusedLabelColor = Color(0xFF0066CC),
+                            unfocusedLabelColor = Color.White.copy(alpha = 0.7f)
                         )
                     )
                 }
@@ -269,13 +283,14 @@ fun PlateSearchScreen() {
             val errorValue = error
             if (errorValue != null && !errorValue.contains("Modo de prueba", ignoreCase = true)) {
                 Spacer(modifier = Modifier.height(20.dp))
-                Card(
+                Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFDC2626).copy(alpha = 0.1f)
-                    ),
+                    color = Color(0xFFFF6B6B).copy(alpha = 0.15f),
                     shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        Color(0xFFFF6B6B).copy(alpha = 0.3f)
+                    )
                 ) {
                     Row(
                         modifier = Modifier
@@ -290,13 +305,13 @@ fun PlateSearchScreen() {
                                 text = "Error",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFFDC2626),
+                                color = Color.White,
                                 modifier = Modifier.padding(bottom = 4.dp)
                             )
                             Text(
                                 text = errorValue ?: "",
                                 fontSize = 14.sp,
-                                color = Color(0xFFDC2626).copy(alpha = 0.9f)
+                                color = Color.White.copy(alpha = 0.9f)
                             )
                         }
                     }
@@ -318,12 +333,13 @@ fun PlateSearchScreen() {
 
 @Composable
 fun VehicleDetailsCard(vehicle: Vehiculo) {
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        color = Color.White.copy(alpha = 0.08f),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            Color.White.copy(alpha = 0.15f)
         )
     ) {
         Column(
@@ -352,7 +368,7 @@ fun VehicleDetailsCard(vehicle: Vehiculo) {
                     text = "Información del Vehículo",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1A1A1A),
+                    color = Color.White,
                     letterSpacing = 0.5.sp
                 )
             }
@@ -360,13 +376,14 @@ fun VehicleDetailsCard(vehicle: Vehiculo) {
             Spacer(modifier = Modifier.height(20.dp))
 
             // Información básica mejorada
-            Card(
+            Surface(
                 modifier = Modifier.fillMaxWidth(),
+                color = Color(0xFF0066CC).copy(alpha = 0.15f),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFF0F4F8)
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                border = androidx.compose.foundation.BorderStroke(
+                    0.5.dp,
+                    Color(0xFF0066CC).copy(alpha = 0.3f)
+                )
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp)
@@ -375,7 +392,7 @@ fun VehicleDetailsCard(vehicle: Vehiculo) {
                         text = "${vehicle.marca ?: "N/A"} ${vehicle.modelo ?: ""}",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1A1A1A),
+                        color = Color.White,
                         letterSpacing = 0.3.sp
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -412,7 +429,7 @@ fun VehicleDetailsCard(vehicle: Vehiculo) {
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            HorizontalDivider(color = Color(0xFFE2E8F0), thickness = 1.dp)
+            HorizontalDivider(color = Color.White.copy(alpha = 0.1f), thickness = 1.dp)
             Spacer(modifier = Modifier.height(20.dp))
 
             // Especificaciones mejoradas
@@ -420,17 +437,18 @@ fun VehicleDetailsCard(vehicle: Vehiculo) {
                 text = "Especificaciones",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A1A1A),
+                color = Color.White,
                 letterSpacing = 0.3.sp,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
-            Card(
+            Surface(
                 modifier = Modifier.fillMaxWidth(),
+                color = Color.White.copy(alpha = 0.08f),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFF8F9FA)
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                border = androidx.compose.foundation.BorderStroke(
+                    0.5.dp,
+                    Color.White.copy(alpha = 0.15f)
+                )
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
@@ -448,28 +466,29 @@ fun VehicleDetailsCard(vehicle: Vehiculo) {
 
             if (vehicle.descripcion_api != null) {
                 Spacer(modifier = Modifier.height(24.dp))
-                HorizontalDivider(color = Color(0xFFE2E8F0), thickness = 1.dp)
+                HorizontalDivider(color = Color.White.copy(alpha = 0.1f), thickness = 1.dp)
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(
                     text = "Descripción",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1A1A1A),
+                    color = Color.White,
                     letterSpacing = 0.3.sp,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
-                Card(
+                Surface(
                     modifier = Modifier.fillMaxWidth(),
+                    color = Color.White.copy(alpha = 0.08f),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFF8F9FA)
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    border = androidx.compose.foundation.BorderStroke(
+                        0.5.dp,
+                        Color.White.copy(alpha = 0.15f)
+                    )
                 ) {
                     Text(
                         text = vehicle.descripcion_api,
                         fontSize = 15.sp,
-                        color = Color(0xFF4A5568),
+                        color = Color.White.copy(alpha = 0.9f),
                         lineHeight = 24.sp,
                         modifier = Modifier.padding(16.dp)
                     )
@@ -509,7 +528,7 @@ fun VehicleSpecItem(label: String, value: String) {
             text = value,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1A1A1A),
+            color = Color.White.copy(alpha = 0.9f),
             textAlign = TextAlign.End
         )
     }

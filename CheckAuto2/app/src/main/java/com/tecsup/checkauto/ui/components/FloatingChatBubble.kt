@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import com.tecsup.checkauto.R
 import com.tecsup.checkauto.service.DeepSeekService
 import kotlinx.coroutines.launch
@@ -116,20 +118,41 @@ fun FloatingChatBubble() {
                     decorFitsSystemWindows = false
                 )
             ) {
-                Card(
+                Surface(
                     modifier = Modifier
                         .fillMaxWidth(0.9f)
                         .fillMaxHeight(0.8f),
                     shape = RoundedCornerShape(24.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                    color = Color.White.copy(alpha = 0.08f),
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        Color.White.copy(alpha = 0.15f)
+                    )
                 ) {
                     Column(
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color(0xFF1A1F2E), // Azul muy oscuro que complementa el header
+                                        Color(0xFF0F1419)  // Negro azulado más suave
+                                    )
+                                )
+                            )
                     ) {
-                        // Header
-                        Surface(
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.fillMaxWidth()
+                        // Header con gradiente azul
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    Brush.verticalGradient(
+                                        colors = listOf(
+                                            Color(0xFF0066CC),
+                                            Color(0xFF0052A3)
+                                        )
+                                    )
+                                )
                         ) {
                             Row(
                                 modifier = Modifier
@@ -189,10 +212,15 @@ fun FloatingChatBubble() {
                             }
                         }
                         
-                        // Input
+                        // Input con glassmorphism mejorado
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
-                            color = MaterialTheme.colorScheme.surface
+                            color = Color.White.copy(alpha = 0.08f),
+                            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+                            border = androidx.compose.foundation.BorderStroke(
+                                1.dp,
+                                Color.White.copy(alpha = 0.15f)
+                            )
                         ) {
                             Row(
                                 modifier = Modifier
@@ -205,10 +233,18 @@ fun FloatingChatBubble() {
                                     value = inputMessage,
                                     onValueChange = { inputMessage = it },
                                     modifier = Modifier.weight(1f),
-                                    placeholder = { Text("Escribe tu mensaje...") },
+                                    placeholder = { Text("Escribe tu mensaje...", color = Color.White.copy(alpha = 0.5f)) },
                                     maxLines = 3,
                                     enabled = !isLoading,
                                     shape = RoundedCornerShape(24.dp),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedTextColor = Color.White,
+                                        unfocusedTextColor = Color.White.copy(alpha = 0.8f),
+                                        focusedBorderColor = Color(0xFF0066CC),
+                                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                                        focusedLabelColor = Color(0xFF0066CC),
+                                        unfocusedLabelColor = Color.White.copy(alpha = 0.7f)
+                                    ),
                                     trailingIcon = {
                                         if (inputMessage.isNotBlank()) {
                                             IconButton(
@@ -219,6 +255,7 @@ fun FloatingChatBubble() {
                                                 Icon(
                                                     Icons.Default.Clear,
                                                     contentDescription = "Limpiar",
+                                                    tint = Color.White.copy(alpha = 0.7f),
                                                     modifier = Modifier.size(20.dp)
                                                 )
                                             }
@@ -268,7 +305,7 @@ fun FloatingChatBubble() {
                                         }
                                     },
                                     modifier = Modifier.size(48.dp),
-                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    containerColor = Color(0xFF0066CC),
                                     shape = CircleShape
                                 ) {
                                     if (isLoading) {
@@ -303,21 +340,25 @@ fun ChatMessageBubble(message: ChatMessage) {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
     ) {
-        Card(
+        Surface(
             modifier = Modifier.widthIn(max = 280.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = if (isUser) 
-                    MaterialTheme.colorScheme.primary 
-                else 
-                    MaterialTheme.colorScheme.surfaceVariant
-            ),
+            color = if (isUser) 
+                Color(0xFF0066CC).copy(alpha = 0.9f)
+            else 
+                Color.White.copy(alpha = 0.12f),
             shape = RoundedCornerShape(
                 topStart = 16.dp,
                 topEnd = 16.dp,
                 bottomStart = if (isUser) 16.dp else 4.dp,
                 bottomEnd = if (isUser) 4.dp else 16.dp
             ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            border = androidx.compose.foundation.BorderStroke(
+                1.dp,
+                if (isUser)
+                    Color(0xFF0066CC).copy(alpha = 0.5f)
+                else
+                    Color.White.copy(alpha = 0.2f)
+            )
         ) {
             Row(
                 modifier = Modifier.padding(12.dp),
@@ -325,20 +366,25 @@ fun ChatMessageBubble(message: ChatMessage) {
                 verticalAlignment = Alignment.Top
             ) {
                 if (!isUser) {
-                    Image(
-                        painter = painterResource(id = R.drawable.chatbot_movile),
-                        contentDescription = null,
-                        modifier = Modifier.size(32.dp),
-                        contentScale = ContentScale.Fit
-                    )
+                    Surface(
+                        color = Color(0xFF0066CC).copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(50),
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.chatbot_movile),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(4.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
                 }
                 Text(
                     text = message.content,
                     modifier = Modifier.weight(1f),
-                    color = if (isUser) 
-                        MaterialTheme.colorScheme.onPrimary 
-                    else 
-                        MaterialTheme.colorScheme.onSurface,
+                    color = Color.White,
                     fontSize = 14.sp,
                     lineHeight = 20.sp
                 )

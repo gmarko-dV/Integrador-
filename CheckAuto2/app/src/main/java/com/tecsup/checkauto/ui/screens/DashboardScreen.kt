@@ -102,9 +102,9 @@ fun DashboardScreen(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // Header
+            // Header negro
             Surface(
-                color = Color.Black.copy(alpha = 0.85f),
+                color = Color.Black,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column {
@@ -118,9 +118,9 @@ fun DashboardScreen(
                         Text(
                             text = "checkAuto",
                             color = Color.White,
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = (-0.5).sp
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.2.sp
                         )
 
                         Row(
@@ -130,17 +130,25 @@ fun DashboardScreen(
                             if (isAuthenticated) {
                                 // Notificaciones con badge
                                 Box {
-                                    IconButton(onClick = onNavigateToNotificaciones) {
+                                    IconButton(
+                                        onClick = onNavigateToNotificaciones,
+                                        modifier = Modifier
+                                            .background(
+                                                Color(0xFF0066CC).copy(alpha = 0.2f),
+                                                RoundedCornerShape(12.dp)
+                                            )
+                                    ) {
                                         Icon(
                                             Icons.Default.Notifications,
                                             contentDescription = "Notificaciones",
-                                            tint = Color.White
+                                            tint = Color.White,
+                                            modifier = Modifier.size(22.dp)
                                         )
                                     }
                                     // Badge de notificaciones no leídas
                                     if (cantidadNoLeidas > 0) {
                                         Surface(
-                                            color = MaterialTheme.colorScheme.error,
+                                            color = Color(0xFFFF6B6B),
                                             shape = RoundedCornerShape(10.dp),
                                             modifier = Modifier
                                                 .align(Alignment.TopEnd)
@@ -157,16 +165,38 @@ fun DashboardScreen(
                                     }
                                 }
                                 // Perfil
-                                IconButton(onClick = onNavigateToConfiguracion) {
+                                IconButton(
+                                    onClick = onNavigateToConfiguracion,
+                                    modifier = Modifier
+                                        .background(
+                                            Color(0xFF0066CC).copy(alpha = 0.2f),
+                                            RoundedCornerShape(12.dp)
+                                        )
+                                ) {
                                     Icon(
                                         Icons.Default.AccountCircle,
                                         contentDescription = "Perfil",
-                                        tint = Color.White
+                                        tint = Color.White,
+                                        modifier = Modifier.size(22.dp)
                                     )
                                 }
                             } else {
-                                TextButton(onClick = onLogin) {
-                                    Text("Iniciar Sesión", color = Color.White)
+                                Surface(
+                                    onClick = onLogin,
+                                    color = Color(0xFF0066CC).copy(alpha = 0.2f),
+                                    shape = RoundedCornerShape(10.dp),
+                                    border = androidx.compose.foundation.BorderStroke(
+                                        1.dp,
+                                        Color(0xFF0066CC).copy(alpha = 0.5f)
+                                    )
+                                ) {
+                                    Text(
+                                        "Iniciar Sesión",
+                                        color = Color.White,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                                    )
                                 }
                             }
                         }
@@ -205,7 +235,7 @@ fun DashboardScreen(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Button(
+                        Surface(
                             onClick = {
                                 selectedTab = 1
                                 showVehicleTypes = false
@@ -213,21 +243,38 @@ fun DashboardScreen(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(60.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF0066CC)
-                            ),
-                            shape = RoundedCornerShape(18.dp),
-                            elevation = ButtonDefaults.buttonElevation(
-                                defaultElevation = 6.dp,
-                                pressedElevation = 4.dp
+                                .height(56.dp),
+                            color = Color(0xFF0066CC),
+                            shape = RoundedCornerShape(16.dp),
+                            border = androidx.compose.foundation.BorderStroke(
+                                1.5.dp,
+                                Color(0xFF0052A3)
                             )
                         ) {
-                            Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(26.dp))
-                            Spacer(modifier = Modifier.width(14.dp))
-                            Text("Buscar Autos", fontSize = 17.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Default.Search,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    "Buscar Autos",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color.White,
+                                    letterSpacing = 0.3.sp
+                                )
+                            }
                         }
-                        Button(
+                        Surface(
                             onClick = {
                                 selectedTab = 2
                                 showVehicleTypes = false
@@ -235,20 +282,36 @@ fun DashboardScreen(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(60.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.White,
-                                contentColor = Color(0xFF0066CC)
-                            ),
-                            shape = RoundedCornerShape(18.dp),
-                            elevation = ButtonDefaults.buttonElevation(
-                                defaultElevation = 6.dp,
-                                pressedElevation = 4.dp
+                                .height(56.dp),
+                            color = Color(0xFF1A1A1A),
+                            shape = RoundedCornerShape(16.dp),
+                            border = androidx.compose.foundation.BorderStroke(
+                                1.5.dp,
+                                Color.White.copy(alpha = 0.6f)
                             )
                         ) {
-                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(26.dp))
-                            Spacer(modifier = Modifier.width(14.dp))
-                            Text("Publicar Anuncio", fontSize = 17.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Default.Add,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    "Publicar Anuncio",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color.White,
+                                    letterSpacing = 0.3.sp
+                                )
+                            }
                         }
                     }
                 }
@@ -413,23 +476,23 @@ fun DashboardScreen(
                         modifier = Modifier.height(240.dp)
                     ) {
                         items(vehicleTypes) { vehicleInfo ->
-                            Card(
+                            Surface(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
                                         // Pasar el nombre de la categoría para filtrar (se guarda así en los anuncios)
                                         onNavigateToAnuncios(vehicleInfo.nombre)
                                     },
-                                colors = CardDefaults.cardColors(
-                                    containerColor = Color.White
-                                ),
-                                shape = RoundedCornerShape(20.dp),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                                color = Color(0xFF1A1A1A).copy(alpha = 0.85f),
+                                shape = RoundedCornerShape(16.dp),
+                                border = androidx.compose.foundation.BorderStroke(
+                                    1.dp,
+                                    Color.White.copy(alpha = 0.3f)
+                                )
                             ) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .background(Color.White)
                                         .padding(12.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -478,10 +541,10 @@ fun DashboardScreen(
                                         Text(
                                             text = vehicleInfo.nombre,
                                             fontSize = 12.sp,
-                                            fontWeight = FontWeight.Bold,
+                                            fontWeight = FontWeight.SemiBold,
                                             textAlign = TextAlign.Center,
-                                            color = Color(0xFF1A1A1A),
-                                            letterSpacing = 0.3.sp
+                                            color = Color.White,
+                                            letterSpacing = 0.2.sp
                                         )
                                     }
                                 }
@@ -539,8 +602,16 @@ fun DashboardScreen(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
-                color = Color.White.copy(alpha = 0.95f),
+                    .weight(1f)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color(0xFF1A1F2E), // Azul muy oscuro que complementa el header
+                                Color(0xFF0F1419)  // Negro azulado más suave
+                            )
+                        )
+                    ),
+                color = Color.Transparent,
                 shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
             ) {
                 when (selectedTab) {

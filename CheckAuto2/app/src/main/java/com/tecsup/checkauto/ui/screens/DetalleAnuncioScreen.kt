@@ -140,7 +140,18 @@ fun DetalleAnuncioScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFF1A1F2E), // Azul muy oscuro que complementa el header
+                            Color(0xFF0F1419)  // Negro azulado más suave
+                        )
+                    )
+                )
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -323,7 +334,7 @@ fun DetalleAnuncioScreen(
                         text = anuncioData.titulo ?: "${anuncioData.modelo} ${anuncioData.anio}",
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1A1A1A),
+                        color = Color.White,
                         letterSpacing = 0.3.sp,
                         lineHeight = 34.sp
                     )
@@ -332,7 +343,7 @@ fun DetalleAnuncioScreen(
                             text = anuncioData.modelo,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = Color(0xFF6B7280),
+                            color = Color.White.copy(alpha = 0.7f),
                             modifier = Modifier.padding(top = 4.dp)
                         )
                     }
@@ -383,7 +394,7 @@ fun DetalleAnuncioScreen(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            HorizontalDivider(color = Color(0xFFE2E8F0), thickness = 1.dp)
+            HorizontalDivider(color = Color.White.copy(alpha = 0.1f), thickness = 1.dp)
 
             // Especificaciones mejoradas
             Spacer(modifier = Modifier.height(20.dp))
@@ -391,18 +402,19 @@ fun DetalleAnuncioScreen(
                 text = "Especificaciones",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A1A1A),
+                color = Color.White,
                 letterSpacing = 0.5.sp,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            Card(
+            Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFF8F9FA)
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                color = Color.White.copy(alpha = 0.08f),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    Color.White.copy(alpha = 0.15f)
+                )
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
@@ -416,7 +428,7 @@ fun DetalleAnuncioScreen(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            HorizontalDivider(color = Color(0xFFE2E8F0), thickness = 1.dp)
+            HorizontalDivider(color = Color.White.copy(alpha = 0.1f), thickness = 1.dp)
 
             // Descripción mejorada
             Spacer(modifier = Modifier.height(20.dp))
@@ -424,22 +436,23 @@ fun DetalleAnuncioScreen(
                 text = "Descripción",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A1A1A),
+                color = Color.White,
                 letterSpacing = 0.5.sp,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
-            Card(
+            Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFF8F9FA)
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                color = Color.White.copy(alpha = 0.08f),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    Color.White.copy(alpha = 0.15f)
+                )
             ) {
                 Text(
                     text = anuncioData.descripcion,
                     fontSize = 15.sp,
-                    color = Color(0xFF4A5568),
+                    color = Color.White.copy(alpha = 0.8f),
                     lineHeight = 24.sp,
                     modifier = Modifier.padding(16.dp)
                 )
@@ -448,23 +461,24 @@ fun DetalleAnuncioScreen(
             // Datos de contacto (solo si está autenticado)
             if (isAuthenticated && (anuncioData.emailContacto != null || anuncioData.telefonoContacto != null)) {
                 Spacer(modifier = Modifier.height(24.dp))
-                HorizontalDivider(color = Color(0xFFE2E8F0), thickness = 1.dp)
+                HorizontalDivider(color = Color.White.copy(alpha = 0.1f), thickness = 1.dp)
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(
                     text = "Datos de Contacto",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1A1A1A),
+                    color = Color.White,
                     letterSpacing = 0.5.sp,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
-                Card(
+                Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFF8F9FA)
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    color = Color.White.copy(alpha = 0.08f),
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        Color.White.copy(alpha = 0.15f)
+                    )
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
@@ -514,7 +528,7 @@ fun DetalleAnuncioScreen(
                 Text(
                     text = "Inicia sesión para contactar al vendedor",
                     fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    color = Color.White.copy(alpha = 0.6f),
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
@@ -716,7 +730,7 @@ fun SpecRow(label: String, value: String) {
             text = value,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1A1A1A)
+            color = Color.White.copy(alpha = 0.9f)
         )
     }
 }

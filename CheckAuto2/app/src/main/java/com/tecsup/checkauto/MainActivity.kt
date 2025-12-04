@@ -332,6 +332,12 @@ fun AppNavigation() {
                 },
                 onNavigateToMisAnuncios = {
                     navController.navigate("mis-anuncios")
+                },
+                onNavigateToAyudaSoporte = {
+                    navController.navigate("ayuda-soporte")
+                },
+                onNavigateToAcercaDe = {
+                    navController.navigate("acerca-de")
                 }
             )
         }
@@ -380,6 +386,24 @@ fun AppNavigation() {
                 esPropietario = false, // Se calcula dentro de la pantalla
                 isAuthenticated = isAuthenticated,
                 userId = userId
+            )
+        }
+
+        composable("ayuda-soporte") {
+            AyudaSoporteScreen(
+                userEmail = userEmail,
+                userName = userName,
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable("acerca-de") {
+            AcercaDeScreen(
+                onBack = {
+                    navController.popBackStack()
+                }
             )
         }
     }

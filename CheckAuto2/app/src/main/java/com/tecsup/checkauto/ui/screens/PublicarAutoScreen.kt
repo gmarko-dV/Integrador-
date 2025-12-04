@@ -180,11 +180,23 @@ fun PublicarAutoScreen(
         return
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF1A1F2E), // Azul muy oscuro que complementa el header
+                        Color(0xFF0F1419)  // Negro azulado más suave
+                    )
+                )
+            )
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
         // Header con gradiente
         Box(
             modifier = Modifier
@@ -226,15 +238,16 @@ fun PublicarAutoScreen(
 
             // Mensajes de éxito/error mejorados
             if (success) {
-                Card(
+                Surface(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 20.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFF10B981).copy(alpha = 0.1f)
-                    ),
+                    color = Color(0xFF4CAF50).copy(alpha = 0.15f),
                     shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        Color(0xFF4CAF50).copy(alpha = 0.3f)
+                    )
                 ) {
                     Row(
                         modifier = Modifier
@@ -248,22 +261,23 @@ fun PublicarAutoScreen(
                             text = "¡Anuncio publicado exitosamente!",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = Color(0xFF10B981)
+                            color = Color.White
                         )
                     }
                 }
             }
 
             if (error != null) {
-                Card(
+                Surface(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 20.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFDC2626).copy(alpha = 0.1f)
-                    ),
+                    color = Color(0xFFFF6B6B).copy(alpha = 0.15f),
                     shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        Color(0xFFFF6B6B).copy(alpha = 0.3f)
+                    )
                 ) {
                     Row(
                         modifier = Modifier
@@ -278,25 +292,25 @@ fun PublicarAutoScreen(
                                 text = "Error",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFFDC2626),
+                                color = Color.White,
                                 modifier = Modifier.padding(bottom = 4.dp)
                             )
                             Text(
                                 text = error ?: "",
                                 fontSize = 14.sp,
-                                color = Color(0xFFDC2626).copy(alpha = 0.9f)
+                                color = Color.White.copy(alpha = 0.9f)
                             )
                         }
                     }
                 }
             }
 
-            // Formulario mejorado
+            // Formulario mejorado con glassmorphism
             OutlinedTextField(
                 value = titulo,
                 onValueChange = { titulo = it },
-                label = { Text("Nombre del Auto *") },
-                placeholder = { Text("Ej: Toyota Corolla 2020") },
+                label = { Text("Nombre del Auto *", color = Color.White.copy(alpha = 0.7f)) },
+                placeholder = { Text("Ej: Toyota Corolla 2020", color = Color.White.copy(alpha = 0.5f)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 18.dp),
@@ -305,16 +319,20 @@ fun PublicarAutoScreen(
                 leadingIcon = { Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFF0066CC)) },
                 shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White.copy(alpha = 0.8f),
                     focusedBorderColor = Color(0xFF0066CC),
-                    focusedLabelColor = Color(0xFF0066CC)
+                    unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                    focusedLabelColor = Color(0xFF0066CC),
+                    unfocusedLabelColor = Color.White.copy(alpha = 0.7f)
                 )
             )
             
             OutlinedTextField(
                 value = modelo,
                 onValueChange = { modelo = it },
-                label = { Text("Modelo *") },
-                placeholder = { Text("Ej: Corolla") },
+                label = { Text("Modelo *", color = Color.White.copy(alpha = 0.7f)) },
+                placeholder = { Text("Ej: Corolla", color = Color.White.copy(alpha = 0.5f)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 18.dp),
@@ -323,8 +341,12 @@ fun PublicarAutoScreen(
                 leadingIcon = { Icon(Icons.Default.Settings, contentDescription = null, tint = Color(0xFF0066CC)) },
                 shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White.copy(alpha = 0.8f),
                     focusedBorderColor = Color(0xFF0066CC),
-                    focusedLabelColor = Color(0xFF0066CC)
+                    unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                    focusedLabelColor = Color(0xFF0066CC),
+                    unfocusedLabelColor = Color.White.copy(alpha = 0.7f)
                 )
             )
 
@@ -335,30 +357,38 @@ fun PublicarAutoScreen(
                 OutlinedTextField(
                     value = anio,
                     onValueChange = { anio = it },
-                    label = { Text("Año *") },
-                    placeholder = { Text("Ej: 2020") },
+                    label = { Text("Año *", color = Color.White.copy(alpha = 0.7f)) },
+                    placeholder = { Text("Ej: 2020", color = Color.White.copy(alpha = 0.5f)) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     enabled = !isLoading,
                     shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White.copy(alpha = 0.8f),
                         focusedBorderColor = Color(0xFF0066CC),
-                        focusedLabelColor = Color(0xFF0066CC)
+                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                        focusedLabelColor = Color(0xFF0066CC),
+                        unfocusedLabelColor = Color.White.copy(alpha = 0.7f)
                     )
                 )
 
                 OutlinedTextField(
                     value = kilometraje,
                     onValueChange = { kilometraje = it },
-                    label = { Text("Kilometraje *") },
-                    placeholder = { Text("Ej: 50000") },
+                    label = { Text("Kilometraje *", color = Color.White.copy(alpha = 0.7f)) },
+                    placeholder = { Text("Ej: 50000", color = Color.White.copy(alpha = 0.5f)) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     enabled = !isLoading,
                     shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White.copy(alpha = 0.8f),
                         focusedBorderColor = Color(0xFF0066CC),
-                        focusedLabelColor = Color(0xFF0066CC)
+                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                        focusedLabelColor = Color(0xFF0066CC),
+                        unfocusedLabelColor = Color.White.copy(alpha = 0.7f)
                     )
                 )
             }
@@ -368,8 +398,8 @@ fun PublicarAutoScreen(
             OutlinedTextField(
                 value = precio,
                 onValueChange = { precio = it },
-                label = { Text("Precio (S/) *") },
-                placeholder = { Text("Ej: 35000") },
+                label = { Text("Precio (S/) *", color = Color.White.copy(alpha = 0.7f)) },
+                placeholder = { Text("Ej: 35000", color = Color.White.copy(alpha = 0.5f)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 18.dp),
@@ -378,8 +408,12 @@ fun PublicarAutoScreen(
                 leadingIcon = { Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFF0066CC)) },
                 shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White.copy(alpha = 0.8f),
                     focusedBorderColor = Color(0xFF0066CC),
-                    focusedLabelColor = Color(0xFF0066CC)
+                    unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                    focusedLabelColor = Color(0xFF0066CC),
+                    unfocusedLabelColor = Color.White.copy(alpha = 0.7f)
                 )
             )
 
@@ -396,8 +430,8 @@ fun PublicarAutoScreen(
                     value = tipoVehiculo,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Categoría de Vehículo *") },
-                    placeholder = { Text("Selecciona una categoría") },
+                    label = { Text("Categoría de Vehículo *", color = Color.White.copy(alpha = 0.7f)) },
+                    placeholder = { Text("Selecciona una categoría", color = Color.White.copy(alpha = 0.5f)) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTipo) },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -405,8 +439,12 @@ fun PublicarAutoScreen(
                     enabled = !isLoading,
                     shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White.copy(alpha = 0.8f),
                         focusedBorderColor = Color(0xFF0066CC),
-                        focusedLabelColor = Color(0xFF0066CC)
+                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                        focusedLabelColor = Color(0xFF0066CC),
+                        unfocusedLabelColor = Color.White.copy(alpha = 0.7f)
                     )
                 )
             ExposedDropdownMenu(
@@ -442,8 +480,8 @@ fun PublicarAutoScreen(
             OutlinedTextField(
                 value = descripcion,
                 onValueChange = { descripcion = it },
-                label = { Text("Descripción *") },
-                placeholder = { Text("Describe tu vehículo...") },
+                label = { Text("Descripción *", color = Color.White.copy(alpha = 0.7f)) },
+                placeholder = { Text("Describe tu vehículo...", color = Color.White.copy(alpha = 0.5f)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 18.dp),
@@ -452,16 +490,20 @@ fun PublicarAutoScreen(
                 enabled = !isLoading,
                 shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White.copy(alpha = 0.8f),
                     focusedBorderColor = Color(0xFF0066CC),
-                    focusedLabelColor = Color(0xFF0066CC)
+                    unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                    focusedLabelColor = Color(0xFF0066CC),
+                    unfocusedLabelColor = Color.White.copy(alpha = 0.7f)
                 )
             )
 
             OutlinedTextField(
                 value = emailContacto,
                 onValueChange = { emailContacto = it },
-                label = { Text("Email de Contacto") },
-                placeholder = { Text("Ej: vendedor@ejemplo.com") },
+                label = { Text("Email de Contacto", color = Color.White.copy(alpha = 0.7f)) },
+                placeholder = { Text("Ej: vendedor@ejemplo.com", color = Color.White.copy(alpha = 0.5f)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 18.dp),
@@ -470,16 +512,20 @@ fun PublicarAutoScreen(
                 leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = Color(0xFF0066CC)) },
                 shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White.copy(alpha = 0.8f),
                     focusedBorderColor = Color(0xFF0066CC),
-                    focusedLabelColor = Color(0xFF0066CC)
+                    unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                    focusedLabelColor = Color(0xFF0066CC),
+                    unfocusedLabelColor = Color.White.copy(alpha = 0.7f)
                 )
             )
 
             OutlinedTextField(
                 value = telefonoContacto,
                 onValueChange = { telefonoContacto = it },
-                label = { Text("Teléfono de Contacto") },
-                placeholder = { Text("Ej: +51 987 654 321") },
+                label = { Text("Teléfono de Contacto", color = Color.White.copy(alpha = 0.7f)) },
+                placeholder = { Text("Ej: +51 987 654 321", color = Color.White.copy(alpha = 0.5f)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 18.dp),
@@ -488,8 +534,12 @@ fun PublicarAutoScreen(
                 leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null, tint = Color(0xFF0066CC)) },
                 shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White.copy(alpha = 0.8f),
                     focusedBorderColor = Color(0xFF0066CC),
-                    focusedLabelColor = Color(0xFF0066CC)
+                    unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                    focusedLabelColor = Color(0xFF0066CC),
+                    unfocusedLabelColor = Color.White.copy(alpha = 0.7f)
                 )
             )
 
@@ -498,14 +548,14 @@ fun PublicarAutoScreen(
                 text = "Imágenes *",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A1A1A),
+                color = Color.White,
                 letterSpacing = 0.3.sp,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
             Text(
                 text = "Se requieren 2 imágenes",
                 fontSize = 14.sp,
-                color = Color(0xFF6B7280),
+                color = Color.White.copy(alpha = 0.7f),
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
@@ -722,6 +772,7 @@ fun PublicarAutoScreen(
                 }
             }
         }
+        }
     }
 }
 
@@ -734,19 +785,23 @@ fun ImageSelector(
     enabled: Boolean = true
 ) {
     val context = LocalContext.current
-    Card(
+    Surface(
         modifier = modifier
             .height(160.dp)
             .clickable(enabled = enabled) {
                 onSelectClick()
             },
-        colors = CardDefaults.cardColors(
-            containerColor = if (imageUri != null) Color.White else Color(0xFFF0F4F8)
-        ),
+        color = if (imageUri != null) 
+            Color.White.copy(alpha = 0.1f) 
+        else 
+            Color.White.copy(alpha = 0.08f),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = if (imageUri != null) 6.dp else 2.dp,
-            pressedElevation = 4.dp
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            if (imageUri != null)
+                Color(0xFF0066CC).copy(alpha = 0.4f)
+            else
+                Color.White.copy(alpha = 0.15f)
         )
     ) {
         Box(
@@ -807,12 +862,12 @@ fun ImageSelector(
                         text = label,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF6B7280)
+                        color = Color.White.copy(alpha = 0.8f)
                     )
                     Text(
                         text = "Toca para seleccionar",
                         fontSize = 11.sp,
-                        color = Color(0xFF9CA3AF),
+                        color = Color.White.copy(alpha = 0.6f),
                         modifier = Modifier.padding(top = 4.dp)
                     )
                 }
