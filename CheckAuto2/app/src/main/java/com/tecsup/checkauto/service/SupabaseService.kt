@@ -26,6 +26,7 @@ data class AnuncioSupabase(
     val email_contacto: String? = null,
     val telefono_contacto: String? = null,
     val tipo_vehiculo: String? = null,
+    val id_categoria: Int? = null,
     val fecha_creacion: String? = null,
     val fecha_actualizacion: String? = null,
     val activo: Boolean = true

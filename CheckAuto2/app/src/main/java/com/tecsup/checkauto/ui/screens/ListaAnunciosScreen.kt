@@ -75,21 +75,23 @@ fun ListaAnunciosScreen(
             val anunciosConImagenes = anunciosSupabase.map { anuncioSupabase ->
                 val imagenesSupabase = try {
                     val imagenes = SupabaseService.getImagenesByAnuncioId(anuncioSupabase.id_anuncio ?: 0)
-                    android.util.Log.d("ListaAnunciosScreen", "Anuncio ${anuncioSupabase.id_anuncio}: ${imagenes.size} imágenes encontradas")
+                    android.util.Log.d("ListaAnunciosScreen", "📸 Anuncio ${anuncioSupabase.id_anuncio}: ${imagenes.size} imágenes encontradas en BD")
                     imagenes.forEachIndexed { index, img ->
-                        android.util.Log.d("ListaAnunciosScreen", "  Imagen $index: url=${img.url_imagen}, id=${img.id_imagen}")
+                        android.util.Log.d("ListaAnunciosScreen", "  📷 Imagen $index: id=${img.id_imagen}, url_original=${img.url_imagen}, orden=${img.orden}")
                     }
                     imagenes
                 } catch (e: Exception) {
-                    android.util.Log.e("ListaAnunciosScreen", "Error al obtener imágenes para anuncio ${anuncioSupabase.id_anuncio}: ${e.message}", e)
+                    android.util.Log.e("ListaAnunciosScreen", "❌ Error al obtener imágenes para anuncio ${anuncioSupabase.id_anuncio}: ${e.message}", e)
                     emptyList()
                 }
                 val imagenes = imagenesSupabase.map { 
                     val imagenConvertida = ModelConverter.imagenSupabaseToImagen(it)
-                    android.util.Log.d("ListaAnunciosScreen", "Imagen convertida: ${imagenConvertida.urlImagen}")
+                    android.util.Log.d("ListaAnunciosScreen", "✅ Imagen convertida para anuncio ${anuncioSupabase.id_anuncio}: url_normalizada=${imagenConvertida.urlImagen}")
                     imagenConvertida
                 }
-                ModelConverter.anuncioSupabaseToAnuncio(anuncioSupabase, imagenes)
+                val anuncioFinal = ModelConverter.anuncioSupabaseToAnuncio(anuncioSupabase, imagenes)
+                android.util.Log.d("ListaAnunciosScreen", "📋 Anuncio ${anuncioSupabase.id_anuncio} finalizado: ${anuncioFinal.imagenes?.size ?: 0} imágenes asignadas")
+                anuncioFinal
             }
             
             anuncios = anunciosConImagenes
@@ -326,17 +328,23 @@ fun AnuncioCard(
                     .height(220.dp)
                     .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
             ) {
-                if (imagenMostrada != null) {
+                if (imagenMostrada != null && imagenMostrada.isNotBlank()) {
                     Image(
                         painter = rememberAsyncImagePainter(
                             ImageRequest.Builder(context)
                                 .data(imagenMostrada)
                                 .crossfade(true)
+                                .error(android.R.drawable.ic_menu_report_image)
+                                .placeholder(android.R.drawable.ic_menu_gallery)
                                 .listener(
-                                    onStart = { Log.d("ListaAnunciosScreen", "Cargando imagen: $imagenMostrada") },
-                                    onSuccess = { _, _ -> Log.d("ListaAnunciosScreen", "Imagen cargada exitosamente: $imagenMostrada") },
+                                    onStart = { 
+                                        Log.d("ListaAnunciosScreen", "Cargando imagen para anuncio ${anuncio.idAnuncio}: $imagenMostrada") 
+                                    },
+                                    onSuccess = { _, _ -> 
+                                        Log.d("ListaAnunciosScreen", "✅ Imagen cargada exitosamente para anuncio ${anuncio.idAnuncio}: $imagenMostrada") 
+                                    },
                                     onError = { _, result -> 
-                                        Log.e("ListaAnunciosScreen", "Error al cargar imagen: $imagenMostrada - ${result.throwable.message}", result.throwable)
+                                        Log.e("ListaAnunciosScreen", "❌ Error al cargar imagen para anuncio ${anuncio.idAnuncio}: $imagenMostrada - ${result.throwable.message}", result.throwable)
                                     }
                                 )
                                 .build()
@@ -346,7 +354,7 @@ fun AnuncioCard(
                         contentScale = ContentScale.Crop
                     )
                 } else {
-                    Log.d("ListaAnunciosScreen", "No hay imagen para mostrar para anuncio ${anuncio.idAnuncio}")
+                    Log.d("ListaAnunciosScreen", "⚠️ No hay imagen para mostrar para anuncio ${anuncio.idAnuncio} (tiene ${imagenes.size} imágenes en total)")
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceVariant,
                         modifier = Modifier.fillMaxSize()
@@ -355,10 +363,23 @@ fun AnuncioCard(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier.fillMaxSize()
                         ) {
-                            Text(
-                                text = "🚗",
-                                fontSize = 64.sp
-                            )
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "🚗",
+                                    fontSize = 64.sp
+                                )
+                                if (imagenes.isEmpty()) {
+                                    Text(
+                                        text = "Sin imagen",
+                                        fontSize = 12.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(top = 8.dp)
+                                    )
+                                }
+                            }
                         }
                     }
                 }

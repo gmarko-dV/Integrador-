@@ -51,11 +51,16 @@ export const setupAuthInterceptor = (getIdTokenClaims) => {
         if (claims && claims.__raw) {
           const token = claims.__raw;
           config.headers.Authorization = `Bearer ${token}`;
+          console.log('✅ Token agregado a la petición:', config.url);
+        } else {
+          console.warn('⚠️ No se pudo obtener el token de autenticación');
         }
+      } else {
+        console.warn('⚠️ getIdTokenClaimsFn no está configurado');
       }
     } catch (error) {
       // No lanzar el error para que la petición continúe (pero fallará con 401)
-      console.error('Error al agregar token:', error);
+      console.error('❌ Error al agregar token:', error);
     }
     return config;
   };

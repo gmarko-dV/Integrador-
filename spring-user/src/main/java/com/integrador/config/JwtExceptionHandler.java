@@ -15,12 +15,37 @@ public class JwtExceptionHandler implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
         
-        System.out.println("=== ERROR DE AUTENTICACIÓN ===");
+        System.out.println("\n❌ ========== ERROR DE AUTENTICACIÓN ==========");
         System.out.println("Request URI: " + request.getRequestURI());
-        System.out.println("Authorization header: " + request.getHeader("Authorization"));
+        System.out.println("Method: " + request.getMethod());
+        
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null) {
+            System.out.println("Authorization header presente: SÍ");
+            if (authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                System.out.println("Token (primeros 50 chars): " + token.substring(0, Math.min(50, token.length())) + "...");
+                System.out.println("Token completo length: " + token.length());
+            } else {
+                System.out.println("Authorization header no empieza con 'Bearer '");
+            }
+        } else {
+            System.out.println("Authorization header presente: NO");
+        }
+        
         System.out.println("Error: " + authException.getMessage());
         System.out.println("Exception class: " + authException.getClass().getName());
-        authException.printStackTrace();
+        
+        // Log de la causa raíz si existe
+        Throwable cause = authException.getCause();
+        if (cause != null) {
+            System.out.println("Causa: " + cause.getClass().getName() + " - " + cause.getMessage());
+            cause.printStackTrace();
+        } else {
+            authException.printStackTrace();
+        }
+        
+        System.out.println("==========================================\n");
         
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");

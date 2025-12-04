@@ -30,7 +30,8 @@ object ModelConverter {
             idUsuario = anuncioSupabase.id_usuario,
             imagenes = imagenes,
             titulo = anuncioSupabase.titulo,
-            tipoVehiculo = anuncioSupabase.tipo_vehiculo
+            tipoVehiculo = anuncioSupabase.tipo_vehiculo,
+            idCategoria = anuncioSupabase.id_categoria
         )
     }
     
@@ -50,6 +51,7 @@ object ModelConverter {
             email_contacto = anuncio.emailContacto,
             telefono_contacto = anuncio.telefonoContacto,
             tipo_vehiculo = anuncio.tipoVehiculo,
+            id_categoria = anuncio.idCategoria,
             fecha_creacion = anuncio.fechaCreacion,
             activo = true
         )
@@ -77,6 +79,11 @@ object ModelConverter {
      * Las URLs relativas /uploads/... se convierten a Supabase Storage.
      */
     private fun normalizarUrlImagen(url: String): String {
+        if (url.isBlank()) {
+            android.util.Log.w("ModelConverter", "URL de imagen vacía o nula")
+            return url
+        }
+        
         android.util.Log.d("ModelConverter", "Normalizando URL de imagen original: $url")
         
         val urlNormalizada = when {
@@ -112,7 +119,10 @@ object ModelConverter {
                 supabaseUrl
             }
             // Si no empieza con /, puede ser un path relativo del bucket (sin / inicial)
+            // También puede ser un UUID o nombre de archivo sin path
             else -> {
+                // Si parece un UUID o nombre de archivo, intentar buscarlo directamente en el bucket
+                // Primero intentar como path directo
                 val supabaseUrl = "${SupabaseConfig.SUPABASE_URL}/storage/v1/object/public/${SupabaseConfig.STORAGE_BUCKET_ANUNCIOS}/$url"
                 android.util.Log.d("ModelConverter", "Path relativo convertido a Supabase Storage: $supabaseUrl")
                 supabaseUrl

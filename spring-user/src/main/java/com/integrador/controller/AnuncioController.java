@@ -63,16 +63,17 @@ public class AnuncioController {
                 System.out.println("User ID from JWT: " + userId);
                 System.out.println("Email from JWT: " + email);
                 
-                // Validar dominio del email si está presente en el token
-                if (email != null) {
-                    String allowedDomain = "tecsup.edu.pe";
-                    if (!email.toLowerCase().endsWith("@" + allowedDomain.toLowerCase())) {
-                        System.out.println("ERROR: Email no permitido en JWT: " + email);
-                        return ResponseEntity.status(403)
-                            .body(Map.of("error", "Email no pertenece al dominio institucional permitido"));
-                    }
-                    System.out.println("Email validado correctamente en JWT");
-                }
+                // Validar dominio del email si está presente en el token (opcional - comentado para permitir cualquier email)
+                // if (email != null) {
+                //     String allowedDomain = "tecsup.edu.pe";
+                //     if (!email.toLowerCase().endsWith("@" + allowedDomain.toLowerCase())) {
+                //         System.out.println("ERROR: Email no permitido en JWT: " + email);
+                //         return ResponseEntity.status(403)
+                //             .body(Map.of("error", "Email no pertenece al dominio institucional permitido"));
+                //     }
+                //     System.out.println("Email validado correctamente en JWT");
+                // }
+                System.out.println("Email del usuario: " + email);
             } else if (authentication.getPrincipal() instanceof OAuth2User) {
                 // Autenticación con OAuth2
                 OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();

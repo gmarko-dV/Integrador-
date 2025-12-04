@@ -113,7 +113,7 @@ class Imagen(models.Model):
     url_imagen = models.TextField(db_column='url_imagen')
     nombre_archivo = models.CharField(max_length=255, blank=True, null=True, db_column='nombre_archivo')
     tipo_archivo = models.CharField(max_length=50, blank=True, null=True, db_column='tipo_archivo')
-    tamano_archivo = models.BigIntegerField(blank=True, null=True, db_column='tamaño_archivo')
+    tamano_archivo = models.BigIntegerField(blank=True, null=True, db_column='tamano_archivo')
     fecha_subida = models.DateTimeField(auto_now_add=True, db_column='fecha_subida')
     orden = models.IntegerField(default=0, db_column='orden')
 

@@ -37,8 +37,11 @@ public class SecurityConfig {
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/plate-search/**").permitAll()
-                .requestMatchers("/api/anuncios/**").permitAll() // Permitir ver anuncios sin autenticación
+                .requestMatchers("/api/anuncios", "/api/anuncios/").permitAll() // GET: ver anuncios sin autenticación
+                .requestMatchers("/api/anuncios/{id}").permitAll() // GET: ver anuncio específico sin autenticación
+                .requestMatchers("/api/anuncios/**").authenticated() // POST, PUT, DELETE: requieren autenticación
                 .requestMatchers("/api/chat/**").permitAll() // Permitir acceso al chat de IA sin autenticación
+                .requestMatchers("/api/notificaciones/**").authenticated() // Notificaciones requieren autenticación
                 .requestMatchers("/login/oauth2/code/**").permitAll()
                 .requestMatchers("/uploads/**").permitAll() // Permitir acceso a imágenes subidas
                 .requestMatchers("/error").permitAll() // Permitir página de error

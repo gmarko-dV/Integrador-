@@ -13,7 +13,8 @@ data class Anuncio(
     val idUsuario: String? = null,
     val imagenes: List<Imagen>? = null,
     val titulo: String? = null,
-    val tipoVehiculo: String? = null
+    val tipoVehiculo: String? = null,
+    val idCategoria: Int? = null
 )
 
 data class Imagen(
