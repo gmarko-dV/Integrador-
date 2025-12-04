@@ -119,7 +119,14 @@ const ChatIA = ({ isFloating = false, onClose }) => {
       <div className="chat-ia-header">
         <div className="chat-ia-header-content">
           <div className="chat-ia-header-title">
-            <h2>🤖 Asistente Virtual de Vehículos</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <img 
+                src="/chatbot-web.png" 
+                alt="Chatbot" 
+                style={{ width: '32px', height: '32px', objectFit: 'contain' }}
+              />
+              <h2>Asistente Virtual de Vehículos</h2>
+            </div>
           </div>
           {isFloating && onClose && (
             <button 
@@ -146,7 +153,14 @@ const ChatIA = ({ isFloating = false, onClose }) => {
             className={`chat-message ${message.role === 'user' ? 'user-message' : 'assistant-message'}`}
           >
             <div className="message-content">
-              {message.content}
+              {message.role === 'assistant' && (
+                <img 
+                  src="/chatbot-web.png" 
+                  alt="Chatbot" 
+                  className="chatbot-avatar"
+                />
+              )}
+              <span className="message-text">{message.content}</span>
             </div>
           </div>
         ))}

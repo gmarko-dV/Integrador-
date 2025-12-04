@@ -10,9 +10,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tecsup.checkauto.R
 import kotlinx.coroutines.delay
 
 @Composable
@@ -64,23 +67,15 @@ fun SplashScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Logo placeholder - puedes reemplazar con un Image si tienes el logo
-            Box(
+            // Logo de la aplicación
+            Image(
+                painter = painterResource(id = R.drawable.logo_movile),
+                contentDescription = "CheckAuto Logo",
                 modifier = Modifier
-                    .size(120.dp)
-                    .background(
-                        Color.White.copy(alpha = alpha),
-                        shape = androidx.compose.foundation.shape.CircleShape
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "CA",
-                    fontSize = 48.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF0066CC)
-                )
-            }
+                    .size(200.dp)
+                    .padding(16.dp),
+                contentScale = ContentScale.Fit
+            )
             
             Spacer(modifier = Modifier.height(24.dp))
             

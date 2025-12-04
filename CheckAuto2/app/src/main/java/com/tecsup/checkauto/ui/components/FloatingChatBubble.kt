@@ -80,21 +80,14 @@ fun FloatingChatBubble() {
             // 3. Colócalo en: CheckAuto2/app/src/main/res/drawable/logo_ia.png
             // 4. Descomenta las líneas de Image y comenta las de Icon
             
-            // Usar logo (descomentar después de copiar el archivo):
-            // Image(
-            //     painter = painterResource(id = R.drawable.logo_ia),
-            //     contentDescription = "Chat IA",
-            //     modifier = Modifier
-            //         .size(40.dp)
-            //         .padding(8.dp),
-            //     contentScale = ContentScale.Fit
-            // )
-            
-            // Icono temporal (comentar después de agregar el logo):
-            Icon(
-                Icons.Default.Info,
+            // Logo del chatbot
+            Image(
+                painter = painterResource(id = R.drawable.chatbot_movile),
                 contentDescription = "Chat IA",
-                tint = Color.White
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(0.dp),
+                contentScale = ContentScale.Crop
             )
         }
         
@@ -149,11 +142,11 @@ fun FloatingChatBubble() {
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    Icon(
-                                        Icons.Default.Star,
+                                    Image(
+                                        painter = painterResource(id = R.drawable.chatbot_movile),
                                         contentDescription = null,
-                                        tint = Color.White,
-                                        modifier = Modifier.size(24.dp)
+                                        modifier = Modifier.size(32.dp),
+                                        contentScale = ContentScale.Fit
                                     )
                                     Text(
                                         text = "Asistente CheckAuto",
@@ -326,16 +319,30 @@ fun ChatMessageBubble(message: ChatMessage) {
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
-            Text(
-                text = message.content,
+            Row(
                 modifier = Modifier.padding(12.dp),
-                color = if (isUser) 
-                    MaterialTheme.colorScheme.onPrimary 
-                else 
-                    MaterialTheme.colorScheme.onSurface,
-                fontSize = 14.sp,
-                lineHeight = 20.sp
-            )
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                if (!isUser) {
+                    Image(
+                        painter = painterResource(id = R.drawable.chatbot_movile),
+                        contentDescription = null,
+                        modifier = Modifier.size(32.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+                Text(
+                    text = message.content,
+                    modifier = Modifier.weight(1f),
+                    color = if (isUser) 
+                        MaterialTheme.colorScheme.onPrimary 
+                    else 
+                        MaterialTheme.colorScheme.onSurface,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp
+                )
+            }
         }
     }
 }

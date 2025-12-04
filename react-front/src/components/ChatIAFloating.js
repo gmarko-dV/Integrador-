@@ -43,7 +43,7 @@ const ChatIAFloating = () => {
           type="button"
         >
           <img 
-            src={`${process.env.PUBLIC_URL}/logo-ia.png`} 
+            src="/chatbot-web.png" 
             alt="Chat IA" 
             className="chat-ia-logo"
             onError={(e) => {

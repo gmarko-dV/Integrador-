@@ -56,9 +56,10 @@
 .chat-ia-logo {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  padding: 12px;
+  object-fit: cover;
+  padding: 0;
   box-sizing: border-box;
+  border-radius: 50%;
 }
 
 .chat-ia-floating-button:hover {
@@ -267,6 +268,29 @@
   max-width: 70%;
   word-wrap: break-word;
   line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  position: relative;
+  box-sizing: border-box;
+}
+
+.assistant-message .message-content .message-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.assistant-message .message-content .chatbot-avatar {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  object-fit: contain;
+  display: block;
+  margin: 0;
+  padding: 0;
+  align-self: flex-start;
+  border-radius: 0;
+  background: transparent;
 }
 
 /* ============================================

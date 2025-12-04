@@ -142,8 +142,7 @@ export const NotificationDropdown = () => {
         onClick={() => setIsOpen(!isOpen)}
         title="Ver notificaciones"
       >
-        <span className="notification-bell-icon">●</span>
-        <span className="notification-arrow-icon">▼</span>
+        <span className="notification-bell-icon">🔔</span>
         {cantidadNoLeidas > 0 && (
           <span className="notification-badge">{cantidadNoLeidas}</span>
         )}
