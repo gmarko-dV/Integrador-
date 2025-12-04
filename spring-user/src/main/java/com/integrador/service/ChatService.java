@@ -22,11 +22,11 @@ public class ChatService {
     @Autowired
     private AnuncioService anuncioService;
     
-    @Value("${openai.api.key:}")
-    private String openaiApiKey;
+    @Value("${deepseek.api.key:}")
+    private String deepseekApiKey;
     
-    @Value("${openai.api.url:https://api.openai.com/v1/chat/completions}")
-    private String openaiApiUrl;
+    @Value("${deepseek.api.url:https://api.deepseek.com/v1/chat/completions}")
+    private String deepseekApiUrl;
     
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -62,8 +62,8 @@ public class ChatService {
             // Agregar el mensaje actual del usuario
             messages.add(Map.of("role", "user", "content", userMessage));
             
-            // Llamar a OpenAI
-            String aiResponse = callOpenAI(messages);
+            // Llamar a DeepSeek
+            String aiResponse = callDeepSeek(messages);
             
             // Extraer IDs de anuncios recomendados
             List<Long> recommendedIds = extractRecommendedIds(aiResponse);
@@ -74,7 +74,7 @@ public class ChatService {
             return new ChatResponse(cleanResponse, recommendedIds);
             
         } catch (Exception e) {
-            // Si falla la llamada a OpenAI, usar un sistema de recomendación básico
+            // Si falla la llamada a DeepSeek, usar un sistema de recomendación básico
             return fallbackRecommendation(userMessage);
         }
     }
@@ -102,25 +102,25 @@ public class ChatService {
         return context.toString();
     }
     
-    private String callOpenAI(List<Map<String, String>> messages) throws Exception {
-        if (openaiApiKey == null || openaiApiKey.isEmpty()) {
-            throw new Exception("OpenAI API key no configurada");
+    private String callDeepSeek(List<Map<String, String>> messages) throws Exception {
+        if (deepseekApiKey == null || deepseekApiKey.isEmpty()) {
+            throw new Exception("DeepSeek API key no configurada");
         }
         
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", "gpt-3.5-turbo");
+        requestBody.put("model", "deepseek-chat");
         requestBody.put("messages", messages);
         requestBody.put("temperature", 0.7);
-        requestBody.put("max_tokens", 500);
+        requestBody.put("max_tokens", 2000);
         
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(openaiApiKey);
+        headers.setBearerAuth(deepseekApiKey);
         
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
         
         ResponseEntity<String> response = restTemplate.exchange(
-            openaiApiUrl,
+            deepseekApiUrl,
             HttpMethod.POST,
             request,
             String.class
@@ -130,7 +130,7 @@ public class ChatService {
             JsonNode jsonNode = objectMapper.readTree(response.getBody());
             return jsonNode.get("choices").get(0).get("message").get("content").asText();
         } else {
-            throw new Exception("Error al llamar a OpenAI: " + response.getStatusCode());
+            throw new Exception("Error al llamar a DeepSeek: " + response.getStatusCode());
         }
     }
     

@@ -162,17 +162,17 @@ export const imagenesService = {
   // Subir imagen al storage de Supabase
   async uploadToStorage(file, fileName) {
     const { data, error } = await supabase.storage
-      .from('anuncios-images')
+      .from('anuncios')
       .upload(fileName, file, {
         cacheControl: '3600',
-        upsert: false
+        upsert: true
       });
 
     if (error) throw error;
     
     // Obtener URL pública
     const { data: urlData } = supabase.storage
-      .from('anuncios-images')
+      .from('anuncios')
       .getPublicUrl(fileName);
 
     return urlData.publicUrl;

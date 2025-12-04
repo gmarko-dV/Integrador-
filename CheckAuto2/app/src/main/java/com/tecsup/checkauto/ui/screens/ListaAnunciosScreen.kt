@@ -1,6 +1,8 @@
 package com.tecsup.checkauto.ui.screens
 
 import android.util.Log
+import com.tecsup.checkauto.service.AnuncioService
+import com.tecsup.checkauto.service.SupabaseAuthService
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -238,37 +240,61 @@ fun ListaAnunciosScreen(
                         onEliminar = { 
                             scope.launch {
                                 try {
-                                    anuncio.idAnuncio?.toInt()?.let { id ->
-                                        SupabaseService.deleteAnuncio(id)
-                                        // Recargar anuncios
-                                        val anunciosSupabase = if (esMisAnuncios && userId != null) {
-                                            SupabaseService.getAnunciosByUserId(userId)
-                                        } else {
-                                            SupabaseService.getAnuncios()
+                                    anuncio.idAnuncio?.let { id ->
+                                        // Obtener token de autenticación
+                                        val accessToken = SupabaseAuthService.getAccessToken()
+                                        if (accessToken == null) {
+                                            errorMessage = "Debes estar autenticado para eliminar un anuncio"
+                                            return@launch
                                         }
-                                        val anunciosConImagenes = anunciosSupabase.map { anuncioSupabase ->
-                                            val imagenesSupabase = try {
-                                                SupabaseService.getImagenesByAnuncioId(anuncioSupabase.id_anuncio ?: 0)
-                                            } catch (e: Exception) {
-                                                emptyList()
+                                        
+                                        // Usar el servicio del backend de Spring Boot
+                                        val anuncioService = AnuncioService()
+                                        val result = anuncioService.deleteAnuncio(id, accessToken)
+                                        
+                                        if (result.isSuccess) {
+                                            // Recargar anuncios después de eliminar
+                                            val anunciosSupabase = if (esMisAnuncios && userId != null) {
+                                                SupabaseService.getAnunciosByUserId(userId)
+                                            } else {
+                                                SupabaseService.getAnuncios()
                                             }
-                                            val imagenes = imagenesSupabase.map { ModelConverter.imagenSupabaseToImagen(it) }
-                                            ModelConverter.anuncioSupabaseToAnuncio(anuncioSupabase, imagenes)
+                                            val anunciosConImagenes = anunciosSupabase.map { anuncioSupabase ->
+                                                val imagenesSupabase = try {
+                                                    SupabaseService.getImagenesByAnuncioId(anuncioSupabase.id_anuncio ?: 0)
+                                                } catch (e: Exception) {
+                                                    emptyList()
+                                                }
+                                                val imagenes = imagenesSupabase.map { ModelConverter.imagenSupabaseToImagen(it) }
+                                                ModelConverter.anuncioSupabaseToAnuncio(anuncioSupabase, imagenes)
+                                            }
+                                            anuncios = anunciosConImagenes
+                                            errorMessage = null // Limpiar error si se eliminó exitosamente
+                                        } else {
+                                            val exception = result.exceptionOrNull()
+                                            val mensaje = when {
+                                                exception?.message?.contains("permiso", ignoreCase = true) == true ||
+                                                exception?.message?.contains("permission", ignoreCase = true) == true ||
+                                                exception?.message?.contains("dueño", ignoreCase = true) == true ||
+                                                exception?.message?.contains("owner", ignoreCase = true) == true ->
+                                                    "Error de permisos. Verifica que seas el dueño del anuncio."
+                                                exception?.message?.contains("autenticado", ignoreCase = true) == true ||
+                                                exception?.message?.contains("authenticated", ignoreCase = true) == true ||
+                                                exception?.message?.contains("401") == true ->
+                                                    "Debes estar autenticado para eliminar un anuncio"
+                                                else -> exception?.message ?: "Error al eliminar el anuncio"
+                                            }
+                                            errorMessage = mensaje
                                         }
-                                        anuncios = anunciosConImagenes
-                                        errorMessage = null // Limpiar error si se eliminó exitosamente
                                     }
-                                } catch (e: SecurityException) {
-                                    errorMessage = "No tienes permiso para eliminar este anuncio"
-                                } catch (e: IllegalStateException) {
-                                    errorMessage = "Debes estar autenticado para eliminar un anuncio"
                                 } catch (e: Exception) {
+                                    android.util.Log.e("ListaAnunciosScreen", "Error al eliminar anuncio: ${e.message}", e)
                                     val mensaje = when {
-                                        e.message?.contains("row-level security") == true -> 
+                                        e.message?.contains("row-level security", ignoreCase = true) == true -> 
                                             "Error de permisos. Verifica que seas el dueño del anuncio."
-                                        e.message?.contains("violates") == true -> 
+                                        e.message?.contains("violates", ignoreCase = true) == true -> 
                                             "Error de permisos. No puedes eliminar este anuncio."
-                                        else -> "Error al eliminar: ${e.message}"
+                                        else -> "Error al eliminar: ${e.message ?: "Error desconocido"}"
                                     }
                                     errorMessage = mensaje
                                 }

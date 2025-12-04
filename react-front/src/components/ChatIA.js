@@ -2,9 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import chatService from '../services/chatService';
 import anuncioService from '../services/anuncioApiService';
+import { normalizeImageUrl } from '../utils/imageUtils';
 import './ChatIA.css';
 
-const ChatIA = () => {
+const ChatIA = ({ isFloating = false, onClose }) => {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
@@ -114,9 +115,27 @@ const ChatIA = () => {
   };
 
   return (
-    <div className="chat-ia-container">
+    <div className={`chat-ia-container ${isFloating ? 'chat-ia-floating' : ''}`}>
       <div className="chat-ia-header">
-        <h2>🤖 Asistente Virtual de Vehículos</h2>
+        <div className="chat-ia-header-content">
+          <div className="chat-ia-header-title">
+            <h2>🤖 Asistente Virtual de Vehículos</h2>
+          </div>
+          {isFloating && onClose && (
+            <button 
+              className="chat-ia-close-btn" 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+              }} 
+              aria-label="Cerrar chat"
+              type="button"
+            >
+              ✕
+            </button>
+          )}
+        </div>
         <p>Pregúntame sobre las características que buscas y te ayudaré a encontrar el auto perfecto</p>
       </div>
 
@@ -155,7 +174,7 @@ const ChatIA = () => {
               <div key={anuncio.idAnuncio} className="recommendation-card">
                 {anuncio.imagenes && anuncio.imagenes.length > 0 && (
                   <img
-                    src={`http://localhost:8080${anuncio.imagenes[0].urlImagen}`}
+                    src={normalizeImageUrl(anuncio.imagenes[0].urlImagen)}
                     alt={anuncio.titulo || anuncio.modelo}
                     className="recommendation-image"
                     onError={(e) => {

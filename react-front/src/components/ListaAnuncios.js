@@ -4,6 +4,7 @@ import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import anuncioService from '../services/anuncioApiService';
 import notificacionService from '../services/notificacionService';
 import { setupAuthInterceptor } from '../services/apiService';
+import { normalizeImageUrl } from '../utils/imageUtils';
 import './ListaAnuncios.css';
 
 const ListaAnuncios = () => {
@@ -17,12 +18,14 @@ const ListaAnuncios = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [userIdAnterior, setUserIdAnterior] = useState(null);
   const [eliminando, setEliminando] = useState(null);
   const [imagenActual, setImagenActual] = useState({}); // { idAnuncio: indiceImagen }
   const [contactando, setContactando] = useState(null); // { idAnuncio: true/false }
   const [mostrarModalContacto, setMostrarModalContacto] = useState(false);
   const [anuncioSeleccionado, setAnuncioSeleccionado] = useState(null);
   const [mensajeContacto, setMensajeContacto] = useState('');
+  const [esMisAnunciosAnterior, setEsMisAnunciosAnterior] = useState(null);
   
   // Detectar si estamos en "Mis Anuncios" (desde Dashboard con tab=anuncios)
   // Recalcular cada vez que cambien los searchParams
@@ -42,8 +45,40 @@ const ListaAnuncios = () => {
     }
   }, [isAuthenticated, getIdTokenClaims]);
 
+  // Limpiar anuncios cuando cambia el usuario o la autenticación
+  useEffect(() => {
+    // Si el userId cambió, limpiar todo inmediatamente
+    if (userId !== userIdAnterior) {
+      console.log('🔄 Limpiando anuncios - userId cambió de', userIdAnterior, 'a', userId);
+      setAnuncios([]);
+      setAnunciosFiltrados([]);
+      setLoading(true);
+      setError(null);
+      setUserIdAnterior(userId);
+    }
+  }, [userId, userIdAnterior]);
+
+  // Limpiar anuncios inmediatamente cuando cambia esMisAnuncios
+  useEffect(() => {
+    // Si cambió el estado de esMisAnuncios, limpiar inmediatamente
+    if (esMisAnuncios !== esMisAnunciosAnterior && esMisAnunciosAnterior !== null) {
+      console.log('🔄 Limpiando anuncios - cambio de vista de', esMisAnunciosAnterior, 'a', esMisAnuncios);
+      setAnuncios([]);
+      setAnunciosFiltrados([]);
+      setLoading(true);
+      setError(null);
+    }
+    setEsMisAnunciosAnterior(esMisAnuncios);
+    
+    // Cleanup: limpiar cuando el componente se desmonte o cambie de vista
+    return () => {
+      // No limpiar aquí porque podría interferir con la carga de datos
+    };
+  }, [esMisAnuncios, esMisAnunciosAnterior]);
+
   useEffect(() => {
     // Cargar anuncios cuando cambie la autenticación, esMisAnuncios o userId
+    // Este useEffect se ejecuta después del de limpieza, asegurando que los datos se limpien primero
     if (esMisAnuncios) {
       // Si estamos en "Mis Anuncios", SOLO cargar los anuncios del usuario
       if (!isAuthenticated) {
@@ -55,8 +90,10 @@ const ListaAnuncios = () => {
         // Solo cargar cuando tengamos el userId
         cargarAnuncios();
       } else {
-        // Esperar a que se obtenga el userId
+        // Esperar a que se obtenga el userId - mantener loading en true
         setLoading(true);
+        setAnuncios([]);
+        setAnunciosFiltrados([]);
       }
     } else {
       // Para otras vistas (no Mis Anuncios), cargar todos los anuncios
@@ -85,10 +122,17 @@ const ListaAnuncios = () => {
     if (isAuthenticated && getIdTokenClaims) {
       try {
         const claims = await getIdTokenClaims();
-        setUserId(claims.sub);
+        const userIdFromToken = claims.sub;
+        console.log('🔍 UserId obtenido del token:', userIdFromToken);
+        console.log('🔍 Tipo de userId:', typeof userIdFromToken);
+        console.log('🔍 Claims completos:', claims);
+        setUserId(userIdFromToken);
       } catch (error) {
         console.error('Error al obtener userId:', error);
       }
+    } else {
+      console.log('⚠️ Usuario no autenticado o getIdTokenClaims no disponible');
+      setUserId(null);
     }
   };
 
@@ -96,40 +140,64 @@ const ListaAnuncios = () => {
     try {
       setLoading(true);
       setError(null);
+      // Limpiar anuncios ANTES de cargar nuevos para evitar mostrar datos antiguos
+      setAnuncios([]);
+      setAnunciosFiltrados([]);
       
       // Si es "Mis Anuncios", SOLO cargar los anuncios del usuario
       if (esMisAnuncios) {
         if (!isAuthenticated) {
           setError('Debes iniciar sesión para ver tus anuncios');
           setAnuncios([]);
+          setAnunciosFiltrados([]);
+          setLoading(false);
           return;
         }
         
         if (!userId) {
           setError('Error: No se pudo identificar al usuario');
           setAnuncios([]);
+          setAnunciosFiltrados([]);
+          setLoading(false);
           return;
         }
         
         const response = await anuncioService.obtenerMisAnuncios();
         if (response.success) {
           const anunciosRecibidos = response.anuncios || [];
+          console.log('📦 Anuncios recibidos del backend:', anunciosRecibidos.length);
+          anunciosRecibidos.forEach(anuncio => {
+            console.log(`  - Anuncio ID: ${anuncio.idAnuncio}, Usuario en BD: "${anuncio.idUsuario}", Usuario actual: "${userId}"`);
+            console.log(`    Coincide: ${anuncio.idUsuario === userId}, Tipo: ${typeof anuncio.idUsuario} vs ${typeof userId}`);
+          });
+          
           // Filtrar SOLO los anuncios del usuario actual como medida de seguridad
           const misAnuncios = anunciosRecibidos.filter(anuncio => {
-            return anuncio.idUsuario === userId;
+            const coincide = String(anuncio.idUsuario).trim() === String(userId).trim();
+            if (!coincide) {
+              console.log(`❌ Anuncio ${anuncio.idAnuncio} NO pertenece al usuario. BD: "${anuncio.idUsuario}" vs Token: "${userId}"`);
+            }
+            return coincide;
           });
+          console.log('✅ Anuncios filtrados (solo del usuario):', misAnuncios.length);
           setAnuncios(misAnuncios);
+          setAnunciosFiltrados(misAnuncios);
         } else {
           setError('Error al cargar tus anuncios');
           setAnuncios([]);
+          setAnunciosFiltrados([]);
         }
       } else {
         // Cargar todos los anuncios (para otras vistas)
         const response = await anuncioService.obtenerTodosLosAnuncios();
         if (response.success) {
-          setAnuncios(response.anuncios || []);
+          const todosLosAnuncios = response.anuncios || [];
+          setAnuncios(todosLosAnuncios);
+          setAnunciosFiltrados(todosLosAnuncios);
         } else {
           setError('Error al cargar los anuncios');
+          setAnuncios([]);
+          setAnunciosFiltrados([]);
         }
       }
     } catch (err) {
@@ -137,8 +205,11 @@ const ListaAnuncios = () => {
       if (esMisAnuncios) {
         setError('Error al cargar tus anuncios. Por favor, intenta nuevamente.');
         setAnuncios([]);
+        setAnunciosFiltrados([]);
       } else {
         setError('Error al cargar los anuncios. Por favor, intenta nuevamente.');
+        setAnuncios([]);
+        setAnunciosFiltrados([]);
       }
     } finally {
       setLoading(false);
@@ -302,7 +373,8 @@ const ListaAnuncios = () => {
   }
 
   // En "Mis Anuncios" siempre mostrar los anuncios sin filtrar por tipo
-  const anunciosAMostrar = esMisAnuncios ? anuncios : (tipoVehiculo ? anunciosFiltrados : anuncios);
+  // Asegurar que no se muestren datos si estamos en estado de carga o si cambió la vista
+  const anunciosAMostrar = loading ? [] : (esMisAnuncios ? anuncios : (tipoVehiculo ? anunciosFiltrados : anuncios));
 
   if (anunciosAMostrar.length === 0) {
     return (
@@ -347,7 +419,7 @@ const ListaAnuncios = () => {
                       </div>
                     )}
                     <img
-                      src={`http://localhost:8080${imagenMostrada?.urlImagen || anuncio.imagenes[0].urlImagen}`}
+                      src={normalizeImageUrl(imagenMostrada?.urlImagen || anuncio.imagenes[0].urlImagen)}
                       alt={anuncio.titulo || anuncio.modelo}
                       className="anuncio-imagen"
                       onError={(e) => {

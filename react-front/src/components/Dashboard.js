@@ -9,6 +9,7 @@ import PublicarAuto from './PublicarAuto';
 import ListaAnuncios from './ListaAnuncios';
 import AnunciosPreview from './AnunciosPreview';
 import Contacto from './Contacto';
+import ChatIAFloating from './ChatIAFloating';
 import { authService, setupAuthInterceptor } from '../services/apiService';
 import './Dashboard.css';
 
@@ -223,16 +224,6 @@ const Dashboard = () => {
                 >
                   Publicar Auto
                 </a>
-                <a 
-                  href="/chat" 
-                  className="nav-link"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate('/chat');
-                  }}
-                >
-                  Chat IA
-                </a>
               </>
             ) : (
               <a 
@@ -416,6 +407,9 @@ const Dashboard = () => {
       <footer className="dashboard-footer">
         <p>© 2025 checkAuto. Todos los derechos reservados.</p>
       </footer>
+
+      {/* Burbuja flotante del Chat IA */}
+      <ChatIAFloating />
     </div>
   );
 };

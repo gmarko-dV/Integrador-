@@ -40,7 +40,27 @@ public class JwtExceptionHandler implements AuthenticationEntryPoint {
         Throwable cause = authException.getCause();
         if (cause != null) {
             System.out.println("Causa: " + cause.getClass().getName() + " - " + cause.getMessage());
+            System.out.println("Causa completa:");
             cause.printStackTrace();
+            
+            // Si es un error de JWT, intentar decodificar el token para ver qué algoritmo usa
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                try {
+                    // Decodificar el header del JWT para ver el algoritmo
+                    String[] parts = token.split("\\.");
+                    if (parts.length >= 2) {
+                        String header = new String(java.util.Base64.getUrlDecoder().decode(parts[0]));
+                        System.out.println("🔍 JWT Header decodificado: " + header);
+                        
+                        // Intentar decodificar el payload también
+                        String payload = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
+                        System.out.println("🔍 JWT Payload decodificado (primeros 200 chars): " + payload.substring(0, Math.min(200, payload.length())));
+                    }
+                } catch (Exception e) {
+                    System.out.println("No se pudo decodificar el JWT para diagnóstico: " + e.getMessage());
+                }
+            }
         } else {
             authException.printStackTrace();
         }

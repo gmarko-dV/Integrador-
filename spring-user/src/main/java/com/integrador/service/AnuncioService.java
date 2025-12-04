@@ -7,6 +7,7 @@ import com.integrador.repository.AnuncioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -116,21 +117,54 @@ public class AnuncioService {
         System.out.println("=== SERVICIO: obtenerAnunciosPorUsuario ===");
         System.out.println("Buscando anuncios para userId: '" + idUsuario + "'");
         System.out.println("Longitud del userId: " + (idUsuario != null ? idUsuario.length() : 0));
+        System.out.println("Tipo del userId: " + (idUsuario != null ? idUsuario.getClass().getName() : "null"));
         
-        List<Anuncio> anuncios = anuncioRepository.findByIdUsuario(idUsuario);
+        // Limpiar espacios en blanco si los hay y crear variable final para usar en lambdas
+        final String userIdFinal = (idUsuario != null) ? idUsuario.trim() : null;
+        
+        if (userIdFinal == null || userIdFinal.isEmpty()) {
+            System.out.println("ERROR: userId es null o vacío");
+            return new java.util.ArrayList<>();
+        }
+        
+        System.out.println("🔍 Buscando anuncios con userIdFinal: '" + userIdFinal + "' (longitud: " + userIdFinal.length() + ")");
+        
+        // Obtener todos los anuncios primero para debug
+        List<Anuncio> todosLosAnuncios = anuncioRepository.findAll();
+        System.out.println("📊 Total de anuncios en BD: " + todosLosAnuncios.size());
+        todosLosAnuncios.forEach(a -> {
+            String idUsuarioBD = a.getIdUsuario();
+            boolean coincide = userIdFinal.equals(idUsuarioBD);
+            System.out.println("  - Anuncio ID: " + a.getIdAnuncio() + 
+                             ", idUsuario en BD: '" + idUsuarioBD + "'" +
+                             " (longitud: " + (idUsuarioBD != null ? idUsuarioBD.length() : 0) + ")" +
+                             ", Coincide: " + coincide);
+        });
+        
+        List<Anuncio> anuncios = anuncioRepository.findByIdUsuario(userIdFinal);
         
         System.out.println("Anuncios encontrados en repositorio: " + anuncios.size());
+        
         anuncios.forEach(anuncio -> {
-            System.out.println("  - Anuncio ID: " + anuncio.getIdAnuncio() + 
+            System.out.println("  ✅ Anuncio ID: " + anuncio.getIdAnuncio() + 
                              ", Usuario guardado: '" + anuncio.getIdUsuario() + "'" +
-                             ", Coincide: " + idUsuario.equals(anuncio.getIdUsuario()));
+                             ", Coincide: " + userIdFinal.equals(anuncio.getIdUsuario()));
         });
         
         return anuncios;
     }
     
     public List<Anuncio> obtenerTodosLosAnunciosActivos() {
-        return anuncioRepository.findAllActivos();
+        System.out.println("=== SERVICIO: obtenerTodosLosAnunciosActivos ===");
+        List<Anuncio> anuncios = anuncioRepository.findAllActivos();
+        System.out.println("Anuncios encontrados en BD: " + anuncios.size());
+        anuncios.forEach(anuncio -> {
+            System.out.println("  - ID: " + anuncio.getIdAnuncio() + 
+                             ", Modelo: " + anuncio.getModelo() + 
+                             ", Activo: " + anuncio.getActivo() +
+                             ", Imágenes: " + (anuncio.getImagenes() != null ? anuncio.getImagenes().size() : 0));
+        });
+        return anuncios;
     }
     
     public Anuncio obtenerAnuncioPorId(Long id) {
@@ -138,6 +172,7 @@ public class AnuncioService {
             .orElseThrow(() -> new IllegalArgumentException("Anuncio no encontrado"));
     }
     
+    @Transactional
     public void eliminarAnuncio(Long idAnuncio, String idUsuario) {
         Anuncio anuncio = anuncioRepository.findById(idAnuncio)
             .orElseThrow(() -> new IllegalArgumentException("Anuncio no encontrado"));
@@ -147,16 +182,28 @@ public class AnuncioService {
             throw new IllegalArgumentException("No tienes permiso para eliminar este anuncio");
         }
         
-        // Eliminar las imágenes físicas del sistema de archivos
-        if (anuncio.getImagenes() != null) {
-            for (Imagen imagen : anuncio.getImagenes()) {
+        // Cargar las imágenes explícitamente dentro de la transacción
+        // Esto fuerza a Hibernate a cargar la colección lazy antes de que se cierre la sesión
+        List<Imagen> imagenes = anuncio.getImagenes();
+        if (imagenes != null && !imagenes.isEmpty()) {
+            // Forzar la inicialización de la colección accediendo a su tamaño
+            int cantidadImagenes = imagenes.size();
+            System.out.println("Eliminando " + cantidadImagenes + " imágenes del anuncio " + idAnuncio);
+            
+            // Eliminar las imágenes físicas del sistema de archivos
+            for (Imagen imagen : imagenes) {
                 try {
-                    Path rutaImagen = Paths.get(uploadDir, imagen.getUrlImagen().replace("/uploads/", ""));
-                    if (Files.exists(rutaImagen)) {
-                        Files.delete(rutaImagen);
+                    String urlImagen = imagen.getUrlImagen();
+                    if (urlImagen != null && urlImagen.startsWith("/uploads/")) {
+                        String nombreArchivo = urlImagen.replace("/uploads/", "");
+                        Path rutaImagen = Paths.get(uploadDir, nombreArchivo);
+                        if (Files.exists(rutaImagen)) {
+                            Files.delete(rutaImagen);
+                            System.out.println("Imagen física eliminada: " + nombreArchivo);
+                        }
                     }
                 } catch (IOException e) {
-                    System.err.println("Error al eliminar imagen: " + e.getMessage());
+                    System.err.println("Error al eliminar imagen física: " + e.getMessage());
                     // Continuar aunque falle la eliminación de una imagen
                 }
             }
@@ -164,6 +211,7 @@ public class AnuncioService {
         
         // Eliminar el anuncio (las imágenes se eliminan automáticamente por cascade)
         anuncioRepository.delete(anuncio);
+        System.out.println("Anuncio " + idAnuncio + " eliminado exitosamente");
     }
     
     private String obtenerExtension(String nombreArchivo) {

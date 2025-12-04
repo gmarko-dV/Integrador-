@@ -11,6 +11,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 import java.util.Arrays;
 
@@ -37,9 +38,16 @@ public class SecurityConfig {
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/plate-search/**").permitAll()
-                .requestMatchers("/api/anuncios", "/api/anuncios/").permitAll() // GET: ver anuncios sin autenticación
-                .requestMatchers("/api/anuncios/{id}").permitAll() // GET: ver anuncio específico sin autenticación
-                .requestMatchers("/api/anuncios/**").authenticated() // POST, PUT, DELETE: requieren autenticación
+                // GET de anuncios: público (cualquiera puede ver anuncios)
+                .requestMatchers(HttpMethod.GET, "/api/anuncios").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/anuncios/").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/anuncios/{id}").permitAll()
+                // POST, PUT, DELETE de anuncios: requieren autenticación
+                .requestMatchers(HttpMethod.POST, "/api/anuncios/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/anuncios/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/anuncios/**").authenticated()
+                // Mis anuncios: requiere autenticación
+                .requestMatchers("/api/anuncios/mis-anuncios").authenticated()
                 .requestMatchers("/api/chat/**").permitAll() // Permitir acceso al chat de IA sin autenticación
                 .requestMatchers("/api/notificaciones/**").authenticated() // Notificaciones requieren autenticación
                 .requestMatchers("/login/oauth2/code/**").permitAll()

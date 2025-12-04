@@ -12,7 +12,7 @@ object ApiConfig {
     
     // API de placas de Perú (SOAP) - llamada directa sin backend
     const val PLACA_API_URL = "https://www.placaapi.pe/api/reg.asmx"
-    const val PLACA_API_USERNAME = "jhoncito" // API key/username para la API de placas
+    const val PLACA_API_USERNAME = "flacito" // API key/username para la API de placas
     
     // Para dispositivos físicos, usar la IP de tu máquina en lugar de 10.0.2.2
     // Ejemplo: const val BASE_URL = "http://192.168.1.X:8080/api/"

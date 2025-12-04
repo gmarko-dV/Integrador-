@@ -4,6 +4,7 @@ import { useAuth } from './AuthProvider';
 import anuncioService from '../services/anuncioApiService';
 import notificacionService from '../services/notificacionService';
 import { setupAuthInterceptor } from '../services/apiService';
+import { normalizeImageUrl } from '../utils/imageUtils';
 import './DetalleAnuncio.css';
 
 const DetalleAnuncio = () => {
@@ -139,7 +140,7 @@ const DetalleAnuncio = () => {
           {imagenMostrada ? (
             <div className="imagen-principal-container">
               <img
-                src={`http://localhost:8080${imagenMostrada}`}
+                src={normalizeImageUrl(imagenMostrada)}
                 alt={anuncio.modelo || 'Vehículo'}
                 className="imagen-principal"
                 onError={(e) => {
@@ -183,7 +184,7 @@ const DetalleAnuncio = () => {
               {anuncio.imagenes.slice(0, 4).map((imagen, index) => (
                 <img
                   key={index}
-                  src={`http://localhost:8080${imagen.urlImagen}`}
+                  src={normalizeImageUrl(imagen.urlImagen)}
                   alt={`Vista ${index + 1}`}
                   className={`miniatura ${index === imagenActual ? 'active' : ''}`}
                   onClick={() => setImagenActual(index)}

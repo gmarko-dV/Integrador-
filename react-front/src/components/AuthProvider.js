@@ -134,9 +134,33 @@ const AuthProvider = ({ children }) => {
   // Función para obtener token (compatibilidad con código existente)
   const getIdTokenClaims = async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    if (session?.access_token) {
+    if (session?.access_token && session?.user) {
+      // Decodificar el JWT para obtener el 'sub' real
+      // El access_token de Supabase es un JWT que contiene el 'sub' en el payload
+      try {
+        const tokenParts = session.access_token.split('.');
+        if (tokenParts.length === 3) {
+          // Decodificar el payload (segunda parte del JWT)
+          const payload = JSON.parse(atob(tokenParts[1]));
+          console.log('🔍 JWT Payload decodificado:', payload);
+          
+          return {
+            __raw: session.access_token,
+            sub: payload.sub || session.user.id, // Usar 'sub' del JWT o fallback a user.id
+            email: payload.email || session.user.email,
+            ...session.user,
+            ...payload // Incluir todos los claims del JWT
+          };
+        }
+      } catch (error) {
+        console.error('Error decodificando JWT:', error);
+      }
+      
+      // Fallback: usar user.id como sub
       return {
         __raw: session.access_token,
+        sub: session.user.id,
+        email: session.user.email,
         ...session.user
       };
     }

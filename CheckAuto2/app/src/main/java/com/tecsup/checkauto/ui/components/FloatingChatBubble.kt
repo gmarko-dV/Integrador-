@@ -16,11 +16,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.foundation.Image
+import com.tecsup.checkauto.R
 import com.tecsup.checkauto.service.DeepSeekService
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
@@ -69,6 +73,24 @@ fun FloatingChatBubble() {
             containerColor = MaterialTheme.colorScheme.primary,
             shape = CircleShape
         ) {
+            // Logo de la IA
+            // INSTRUCCIONES: 
+            // 1. Copia "LOGO IA.png" desde Descargas
+            // 2. Renómbralo a "logo_ia.png" (minúsculas, guión bajo)
+            // 3. Colócalo en: CheckAuto2/app/src/main/res/drawable/logo_ia.png
+            // 4. Descomenta las líneas de Image y comenta las de Icon
+            
+            // Usar logo (descomentar después de copiar el archivo):
+            // Image(
+            //     painter = painterResource(id = R.drawable.logo_ia),
+            //     contentDescription = "Chat IA",
+            //     modifier = Modifier
+            //         .size(40.dp)
+            //         .padding(8.dp),
+            //     contentScale = ContentScale.Fit
+            // )
+            
+            // Icono temporal (comentar después de agregar el logo):
             Icon(
                 Icons.Default.Info,
                 contentDescription = "Chat IA",

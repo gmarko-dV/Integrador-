@@ -51,7 +51,7 @@ public class Anuncio {
     @Column(name = "id_categoria")
     private Long idCategoria;
     
-    @OneToMany(mappedBy = "anuncio", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "anuncio", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Imagen> imagenes = new ArrayList<>();
     
     @Column(name = "fecha_creacion")

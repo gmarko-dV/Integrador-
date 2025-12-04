@@ -45,6 +45,24 @@ export const setupAuthInterceptor = (getIdTokenClaims) => {
         delete config.headers['Content-Type'];
       }
       
+      // Verificar si es un endpoint público GET de anuncios
+      // GET /api/anuncios, GET /api/anuncios/, GET /api/anuncios/{id} son públicos
+      // Pero GET /api/anuncios/mis-anuncios requiere autenticación
+      const urlPath = config.url?.split('?')[0]; // Obtener solo el path sin query params
+      const isPublicAnunciosGet = config.method === 'get' && 
+                                  urlPath?.startsWith('/anuncios') &&
+                                  !urlPath?.includes('/mis-anuncios') &&
+                                  (urlPath === '/anuncios' || 
+                                   urlPath === '/anuncios/' || 
+                                   /^\/anuncios\/\d+$/.test(urlPath)); // /anuncios/{id}
+      
+      // Si es un endpoint público GET, NO agregar token
+      if (isPublicAnunciosGet) {
+        console.log('ℹ️ Endpoint público de anuncios, no se agrega token:', config.url);
+        return config;
+      }
+      
+      // Para otros endpoints, agregar token si está disponible
       if (getIdTokenClaimsFn) {
         // Obtener access token de Supabase
         const claims = await getIdTokenClaimsFn();

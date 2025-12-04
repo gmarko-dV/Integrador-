@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import anuncioService from '../services/anuncioApiService';
 import { setupAuthInterceptor } from '../services/apiService';
 import { useAuth } from './AuthProvider';
+import { normalizeImageUrl } from '../utils/imageUtils';
 import './AnunciosPreview.css';
 
 const AnunciosPreview = ({ limite = 6 }) => {
@@ -72,7 +73,7 @@ const AnunciosPreview = ({ limite = 6 }) => {
                 <div className="anuncio-preview-image-container">
                   {imagenPrincipal ? (
                     <img
-                      src={`http://localhost:8080${imagenPrincipal}`}
+                      src={normalizeImageUrl(imagenPrincipal)}
                       alt={anuncio.modelo || 'Vehículo'}
                       className="anuncio-preview-image"
                       onError={(e) => {

@@ -179,8 +179,17 @@ public class AnuncioController {
                 System.out.println("Tipo: JwtAuthenticationToken");
                 Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
                 userId = jwt.getClaimAsString("sub");
-                System.out.println("User ID del JWT: " + userId);
-                System.out.println("JWT claims: " + jwt.getClaims());
+                System.out.println("=== OBTENER MIS ANUNCIOS - JWT DECODIFICADO ===");
+                System.out.println("User ID (sub) del JWT: '" + userId + "'");
+                System.out.println("Longitud del userId: " + (userId != null ? userId.length() : 0));
+                System.out.println("Todos los JWT claims: " + jwt.getClaims());
+                System.out.println("Email del JWT: " + jwt.getClaimAsString("email"));
+                
+                // Limpiar espacios si los hay
+                if (userId != null) {
+                    userId = userId.trim();
+                    System.out.println("User ID después de trim: '" + userId + "'");
+                }
             } else if (authentication.getPrincipal() instanceof OAuth2User) {
                 // Autenticación con OAuth2
                 System.out.println("Tipo: OAuth2User");
@@ -226,15 +235,29 @@ public class AnuncioController {
     @GetMapping
     public ResponseEntity<Map<String, Object>> obtenerTodosLosAnuncios() {
         try {
+            System.out.println("=== GET /api/anuncios ===");
+            System.out.println("Obteniendo todos los anuncios activos...");
+            
             List<Anuncio> anuncios = anuncioService.obtenerTodosLosAnunciosActivos();
+            
+            System.out.println("Anuncios encontrados: " + anuncios.size());
+            anuncios.forEach(anuncio -> {
+                System.out.println("  - Anuncio ID: " + anuncio.getIdAnuncio() + 
+                                 ", Modelo: " + anuncio.getModelo() + 
+                                 ", Usuario: " + anuncio.getIdUsuario() +
+                                 ", Imágenes: " + (anuncio.getImagenes() != null ? anuncio.getImagenes().size() : 0));
+            });
             
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("anuncios", anuncios);
             
+            System.out.println("✅ Respuesta enviada con " + anuncios.size() + " anuncios");
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
+            System.out.println("❌ Error al obtener anuncios: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(500)
                 .body(Map.of("error", "Error al obtener los anuncios: " + e.getMessage()));
         }

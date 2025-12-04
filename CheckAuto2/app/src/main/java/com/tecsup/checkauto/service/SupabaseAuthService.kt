@@ -100,6 +100,20 @@ object SupabaseAuthService {
         return client.auth.currentUserOrNull()?.email
     }
     
+    /**
+     * Obtener token de acceso del usuario actual (JWT)
+     * Este token se puede usar para autenticarse con el backend de Spring Boot
+     */
+    suspend fun getAccessToken(): String? {
+        return try {
+            val session = client.auth.currentSessionOrNull()
+            session?.accessToken
+        } catch (e: Exception) {
+            android.util.Log.e("SupabaseAuthService", "Error al obtener token: ${e.message}", e)
+            null
+        }
+    }
+    
     // ========================================
     // RECUPERACIÓN DE CONTRASEÑA
     // ========================================

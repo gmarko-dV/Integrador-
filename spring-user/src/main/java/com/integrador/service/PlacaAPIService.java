@@ -1,5 +1,6 @@
 package com.integrador.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -14,7 +15,9 @@ import org.xml.sax.InputSource;
 public class PlacaAPIService {
 
     private final String SOAP_URL = "https://www.placaapi.pe/api/reg.asmx";
-    private final String USERNAME = "jhoncito";
+    
+    @Value("${placa.api.username:flacito}")
+    private String username;
 
     private final RestTemplate restTemplate;
 
@@ -29,7 +32,7 @@ public class PlacaAPIService {
             System.out.println("=== CONSULTANDO PLACA: " + placaLimpia + " ===");
 
             // Crear XML SOAP request
-            String soapRequest = crearSOAPRequest(placaLimpia, USERNAME);
+            String soapRequest = crearSOAPRequest(placaLimpia, username);
 
             // Configurar headers para SOAP
             HttpHeaders headers = new HttpHeaders();
