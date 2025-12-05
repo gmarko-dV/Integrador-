@@ -16,6 +16,37 @@ const PlateSearch = () => {
     return plateRegex.test(plate.toUpperCase());
   };
 
+  // Datos de prueba para desarrollo
+  const getMockVehicleData = (plate) => {
+    const mockData = {
+      'ABC123': {
+        marca: 'Toyota',
+        modelo: 'Corolla',
+        anio_registro_api: '2020',
+        placa: 'ABC123',
+        vin: 'JT2BF28K304012345',
+        uso: 'Particular',
+        propietario: 'Juan Pérez',
+        fecha_registro_api: '2020-03-15',
+        descripcion_api: 'Vehículo en excelente estado, mantenimiento al día. Ideal para uso familiar.',
+        image_url_api: 'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=400'
+      },
+      'T3V213': {
+        marca: 'Nissan',
+        modelo: 'Sentra',
+        anio_registro_api: '2018',
+        placa: 'T3V213',
+        vin: '1N4AL3AP8JC123456',
+        uso: 'Particular',
+        propietario: 'María González',
+        fecha_registro_api: '2018-07-22',
+        descripcion_api: 'Sedán compacto, económico y confiable. Perfecto para ciudad.',
+        image_url_api: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=400'
+      }
+    };
+    return mockData[plate];
+  };
+
   const handleSearch = async (e) => {
     e.preventDefault();
     
@@ -38,6 +69,18 @@ const PlateSearch = () => {
     try {
       if (!isAuthenticated) {
         throw new Error('Debes iniciar sesión para buscar placas');
+      }
+
+      // Verificar si es una placa de prueba
+      const mockData = getMockVehicleData(formattedPlate);
+      if (mockData) {
+        // Usar datos de prueba
+        console.log('Usando datos de prueba para:', formattedPlate);
+        setTimeout(() => {
+          setSearchResult(mockData);
+          setIsLoading(false);
+        }, 500); // Simular un pequeño delay
+        return;
       }
 
       // Obtener el token de autenticación
@@ -105,7 +148,6 @@ const PlateSearch = () => {
       
     } catch (err) {
       setError(err.message);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -126,7 +168,7 @@ const PlateSearch = () => {
   }
 
   return (
-    <div>
+    <div className="plate-search-container">
       <div className="plate-search-form">
         <h3>🔍 Búsqueda de Placas</h3>
         

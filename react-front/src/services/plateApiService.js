@@ -2,7 +2,7 @@
 class PlateApiService {
   constructor() {
     this.baseUrl = 'https://www.placaapi.pe/api/reg.asmx';
-    this.username = process.env.REACT_APP_PLATE_API_USERNAME || 'jhon123';
+    this.username = process.env.REACT_APP_PLATE_API_USERNAME || 'jhom12';
   }
 
   // Método para consultar la API de placas usando HTTP POST

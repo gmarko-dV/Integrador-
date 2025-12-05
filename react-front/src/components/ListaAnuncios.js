@@ -491,16 +491,36 @@ const ListaAnuncios = () => {
                   Ver Detalles
                 </a>
                 {esMiAnuncio(anuncio) && (
-                  <button
-                    className="anuncio-delete-button-new"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleEliminar(anuncio.idAnuncio);
-                    }}
-                    disabled={eliminando === anuncio.idAnuncio}
-                  >
-                    {eliminando === anuncio.idAnuncio ? 'Eliminando...' : '🗑️ Eliminar'}
-                  </button>
+                  <>
+                    <button
+                      className="anuncio-edit-button-new"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate(`/?tab=publicar&editar=${anuncio.idAnuncio}`);
+                      }}
+                      style={{
+                        backgroundColor: '#4a90e2',
+                        color: 'white',
+                        border: 'none',
+                        padding: '8px 16px',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        marginRight: '8px'
+                      }}
+                    >
+                      ✏️ Editar
+                    </button>
+                    <button
+                      className="anuncio-delete-button-new"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleEliminar(anuncio.idAnuncio);
+                      }}
+                      disabled={eliminando === anuncio.idAnuncio}
+                    >
+                      {eliminando === anuncio.idAnuncio ? 'Eliminando...' : '🗑️ Eliminar'}
+                    </button>
+                  </>
                 )}
               </div>
             </div>

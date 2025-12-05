@@ -233,6 +233,9 @@ fun AppNavigation() {
                 onNavigateToChat = {
                     navController.navigate("chat")
                 },
+                onNavigateToConversaciones = {
+                    navController.navigate("conversaciones")
+                },
                 onNavigateToConfiguracion = {
                     navController.navigate("configuracion")
                 },
@@ -262,6 +265,9 @@ fun AppNavigation() {
                     // Navegar al detalle del anuncio para contactar
                     navController.navigate("detalle/${anuncio.idAnuncio}")
                 },
+                onEditar = { idAnuncio ->
+                    navController.navigate("editar/$idAnuncio")
+                },
                 onEliminar = { idAnuncio ->
                     // TODO: Implementar eliminación
                 },
@@ -281,6 +287,9 @@ fun AppNavigation() {
                 onContactar = { anuncio ->
                     // Navegar al detalle del anuncio para contactar
                     navController.navigate("detalle/${anuncio.idAnuncio}")
+                },
+                onEditar = { idAnuncio ->
+                    navController.navigate("editar/$idAnuncio")
                 },
                 onEliminar = { idAnuncio ->
                     // TODO: Implementar eliminación
@@ -302,9 +311,42 @@ fun AppNavigation() {
                 }
             )
         }
+        
+        composable("editar/{anuncioId}") { backStackEntry ->
+            val anuncioId = backStackEntry.arguments?.getString("anuncioId")?.toIntOrNull()
+            PublicarAutoScreen(
+                isAuthenticated = isAuthenticated,
+                anuncioIdEditar = anuncioId,
+                onSuccess = {
+                    navController.popBackStack()
+                }
+            )
+        }
 
         composable("chat") {
             ChatIAScreen()
+        }
+
+        composable("conversaciones") {
+            ListaConversacionesScreen(
+                onConversacionClick = { idConversacion ->
+                    navController.navigate("chat-conversacion/$idConversacion")
+                },
+                isAuthenticated = isAuthenticated,
+                userId = userId
+            )
+        }
+
+        composable("chat-conversacion/{idConversacion}") { backStackEntry ->
+            val idConversacion = backStackEntry.arguments?.getString("idConversacion")?.toLongOrNull() ?: 0L
+            ChatScreen(
+                idConversacion = idConversacion,
+                onBack = {
+                    navController.popBackStack()
+                },
+                isAuthenticated = isAuthenticated,
+                userId = userId
+            )
         }
 
         composable("configuracion") {
@@ -364,6 +406,9 @@ fun AppNavigation() {
                 onContactar = { anuncio ->
                     // No aplica en mis anuncios
                 },
+                onEditar = { idAnuncio ->
+                    navController.navigate("editar/$idAnuncio")
+                },
                 onEliminar = { idAnuncio ->
                     // TODO: Implementar eliminación
                 },
@@ -380,8 +425,8 @@ fun AppNavigation() {
                 onBack = {
                     navController.popBackStack()
                 },
-                onContactar = {
-                    // TODO: Implementar contacto con notificaciones
+                onContactar = { idConversacion ->
+                    navController.navigate("chat-conversacion/$idConversacion")
                 },
                 esPropietario = false, // Se calcula dentro de la pantalla
                 isAuthenticated = isAuthenticated,

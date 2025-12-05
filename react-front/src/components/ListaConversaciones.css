@@ -1,0 +1,237 @@
+.lista-conversaciones-container {
+  max-width: 1400px;
+  margin: var(--spacing-xxl) auto;
+  padding: 0;
+  min-height: calc(100vh - 80px);
+  background: transparent;
+  border-radius: 0;
+}
+
+.lista-conversaciones-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 0;
+  padding: 20px 24px;
+  background: rgba(26, 31, 46, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.btn-volver-lista {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-volver-lista:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+}
+
+.lista-conversaciones-header h2 {
+  margin: 0;
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.badge-no-leidos {
+  background-color: #ff4444;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(255, 68, 68, 0.3);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.lista-conversaciones-loading,
+.lista-conversaciones-message,
+.lista-conversaciones-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.lista-conversaciones-empty p {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+  margin: 10px 0;
+}
+
+.lista-conversaciones-error {
+  background-color: rgba(255, 235, 238, 0.1);
+  color: #ff6b6b;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.lista-conversaciones-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: rgba(26, 31, 46, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  overflow: hidden;
+}
+
+.conversacion-card {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0;
+  padding: 16px 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.conversacion-card:last-child {
+  border-bottom: none;
+}
+
+.conversacion-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.conversacion-card.active {
+  background: rgba(0, 102, 204, 0.15);
+  border-left: 3px solid #0066CC;
+}
+
+.conversacion-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0066CC 0%, #0052A3 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.conversacion-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.conversacion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.conversacion-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.conversacion-info h3 {
+  margin: 0;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conversacion-usuario {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+.badge-mensajes {
+  background: #0066CC;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+  min-width: 20px;
+  text-align: center;
+  margin-left: 8px;
+}
+
+.conversacion-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.conversacion-preview p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.conversacion-fecha {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .lista-conversaciones-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lista-conversaciones-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-content {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

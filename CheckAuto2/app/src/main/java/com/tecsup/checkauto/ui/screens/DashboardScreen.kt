@@ -37,6 +37,7 @@ fun DashboardScreen(
     onNavigateToBuscar: () -> Unit,
     onNavigateToPublicar: () -> Unit,
     onNavigateToChat: () -> Unit = {},
+    onNavigateToConversaciones: () -> Unit = {},
     onNavigateToConfiguracion: () -> Unit = {},
     onNavigateToNotificaciones: () -> Unit = {},
     onNavigateToDetalleAnuncio: (Long) -> Unit = {},
@@ -49,8 +50,9 @@ fun DashboardScreen(
     var showVehicleTypes by remember { mutableStateOf(true) }
     val context = LocalContext.current
     
-    // Cargar cantidad de notificaciones no leídas
+    // Cargar cantidad de notificaciones y mensajes no leídos
     var cantidadNoLeidas by remember { mutableStateOf(0) }
+    var mensajesNoLeidos by remember { mutableStateOf(0) }
     val scope = rememberCoroutineScope()
     
     LaunchedEffect(userId) {
@@ -59,6 +61,9 @@ fun DashboardScreen(
                 try {
                     val notificacionesNoLeidas = com.tecsup.checkauto.service.SupabaseService.getUnreadNotificaciones(userId)
                     cantidadNoLeidas = notificacionesNoLeidas.size
+                    
+                    // Cargar mensajes no leídos
+                    mensajesNoLeidos = com.tecsup.checkauto.service.SupabaseService.contarMensajesNoLeidos(userId)
                 } catch (e: Exception) {
                     // Error silencioso
                 }
@@ -129,6 +134,42 @@ fun DashboardScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             if (isAuthenticated) {
+                                // Conversaciones con badge
+                                Box {
+                                    IconButton(
+                                        onClick = onNavigateToConversaciones,
+                                        modifier = Modifier
+                                            .background(
+                                                Color(0xFF0066CC).copy(alpha = 0.2f),
+                                                RoundedCornerShape(12.dp)
+                                            )
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Email,
+                                            contentDescription = "Conversaciones",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(22.dp)
+                                        )
+                                    }
+                                    // Badge de mensajes no leídos
+                                    if (mensajesNoLeidos > 0) {
+                                        Surface(
+                                            color = Color(0xFFFF6B6B),
+                                            shape = RoundedCornerShape(10.dp),
+                                            modifier = Modifier
+                                                .align(Alignment.TopEnd)
+                                                .offset(x = 8.dp, y = (-8).dp)
+                                        ) {
+                                            Text(
+                                                text = if (mensajesNoLeidos > 99) "99+" else mensajesNoLeidos.toString(),
+                                                fontSize = 10.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White,
+                                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                                            )
+                                        }
+                                    }
+                                }
                                 // Notificaciones con badge
                                 Box {
                                     IconButton(
@@ -624,6 +665,7 @@ fun DashboardScreen(
                                 esMisAnuncios = false,
                                 onAnuncioClick = onNavigateToDetalleAnuncio,
                                 onContactar = {},
+                                onEditar = {},
                                 onEliminar = {},
                                 isAuthenticated = isAuthenticated,
                                 userId = null

@@ -16,7 +16,7 @@ public class PlacaAPIService {
 
     private final String SOAP_URL = "https://www.placaapi.pe/api/reg.asmx";
     
-    @Value("${placa.api.username:jhon123}")
+    @Value("${placa.api.username:jhom12}")
     private String username;
 
     private final RestTemplate restTemplate;

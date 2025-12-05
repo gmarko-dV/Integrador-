@@ -11,11 +11,15 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f5f5f5;
+  background: linear-gradient(180deg, #1A1F2E 0%, #0F1419 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  color: white;
 }
 
 .App {
   min-height: 100vh;
+  background: transparent;
 }
 
 /* Container */
@@ -49,22 +53,26 @@ body {
 
 /* Cards */
 .card {
-  background: white;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
   padding: 2rem;
   margin-bottom: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e5e7eb;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  color: white;
 }
 
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 102, 204, 0.3);
+  border-color: rgba(0, 102, 204, 0.5);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .card h2, .card h3 {
-  color: #374151;
+  color: white;
   margin-bottom: 1rem;
 }
 
@@ -522,9 +530,11 @@ body {
 }
 
 .vehicle-basic-info h4 {
-  color: #374151;
+  color: #4FC3F7;
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .vehicle-year, .vehicle-plate {
@@ -563,18 +573,21 @@ body {
 }
 
 .vehicle-description {
-  background: #f8fafc;
+  background: rgba(26, 31, 46, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
   padding: 1.5rem;
 }
 
 .vehicle-description h5 {
-  color: #374151;
+  color: white;
   margin-bottom: 0.75rem;
+  font-weight: 700;
 }
 
 .vehicle-description p {
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.95);
   line-height: 1.6;
   margin: 0;
 }

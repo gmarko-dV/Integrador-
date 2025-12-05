@@ -39,7 +39,8 @@ import java.io.InputStream
 @Composable
 fun PublicarAutoScreen(
     onSuccess: () -> Unit = {},
-    isAuthenticated: Boolean = true
+    isAuthenticated: Boolean = true,
+    anuncioIdEditar: Int? = null
 ) {
     val context = LocalContext.current
     
@@ -72,6 +73,45 @@ fun PublicarAutoScreen(
     var success by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+    var cargandoDatos by remember { mutableStateOf(false) }
+    
+    // Cargar datos del anuncio si estamos en modo edición
+    LaunchedEffect(anuncioIdEditar) {
+        if (anuncioIdEditar != null) {
+            cargandoDatos = true
+            error = null
+            try {
+                android.util.Log.d("PublicarAutoScreen", "Cargando anuncio para editar, ID: $anuncioIdEditar")
+                val anuncioSupabase = SupabaseService.getAnuncioById(anuncioIdEditar)
+                if (anuncioSupabase != null) {
+                    android.util.Log.d("PublicarAutoScreen", "Anuncio cargado: $anuncioSupabase")
+                    titulo = anuncioSupabase.titulo ?: ""
+                    modelo = anuncioSupabase.modelo ?: ""
+                    anio = anuncioSupabase.anio.toString()
+                    kilometraje = anuncioSupabase.kilometraje.toString()
+                    precio = anuncioSupabase.precio.toString()
+                    descripcion = anuncioSupabase.descripcion ?: ""
+                    emailContacto = anuncioSupabase.email_contacto ?: ""
+                    telefonoContacto = anuncioSupabase.telefono_contacto ?: ""
+                    tipoVehiculo = anuncioSupabase.tipo_vehiculo ?: ""
+                    
+                    // NO cargar imágenes existentes como URIs porque causan problemas
+                    // Las imágenes existentes se mostrarán en el preview pero no se pueden editar
+                    // El usuario debe seleccionar nuevas imágenes del dispositivo si quiere cambiarlas
+                    android.util.Log.d("PublicarAutoScreen", "Modo edición: el usuario puede seleccionar nuevas imágenes para reemplazar las actuales")
+                    
+                    android.util.Log.d("PublicarAutoScreen", "Formulario cargado con datos del anuncio")
+                } else {
+                    error = "No se pudo cargar el anuncio"
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("PublicarAutoScreen", "Error al cargar anuncio: ${e.message}", e)
+                error = "Error al cargar el anuncio: ${e.message}"
+            } finally {
+                cargandoDatos = false
+            }
+        }
+    }
     
     // Cargar categorías desde Supabase
     var categoriasVehiculos by remember { mutableStateOf<List<com.tecsup.checkauto.service.CategoriaVehiculoSupabase>>(emptyList()) }
@@ -213,7 +253,7 @@ fun PublicarAutoScreen(
         ) {
             Column {
                 Text(
-                    text = "Publicar Auto en Venta",
+                    text = if (anuncioIdEditar != null) "Editar Anuncio" else "Publicar Auto en Venta",
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -221,7 +261,10 @@ fun PublicarAutoScreen(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 Text(
-                    text = "Completa el formulario para publicar tu vehículo",
+                    text = if (anuncioIdEditar != null) 
+                        "Modifica los datos de tu vehículo. Las imágenes nuevas reemplazarán las actuales."
+                    else 
+                        "Completa el formulario para publicar tu vehículo",
                     fontSize = 15.sp,
                     color = Color.White.copy(alpha = 0.9f),
                     letterSpacing = 0.2.sp
@@ -553,7 +596,10 @@ fun PublicarAutoScreen(
                 modifier = Modifier.padding(bottom = 12.dp)
             )
             Text(
-                text = "Se requieren 2 imágenes",
+                text = if (anuncioIdEditar != null) 
+                    "Imágenes opcionales (las nuevas reemplazarán las actuales)"
+                else 
+                    "Se requieren 2 imágenes",
                 fontSize = 14.sp,
                 color = Color.White.copy(alpha = 0.7f),
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -588,6 +634,18 @@ fun PublicarAutoScreen(
                 )
             }
 
+            // Mostrar mensaje de carga si estamos cargando datos
+            if (cargandoDatos) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 20.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color(0xFF0066CC))
+                }
+            }
+            
             // Botón de envío mejorado
             Button(
                 onClick = {
@@ -607,7 +665,8 @@ fun PublicarAutoScreen(
                         error = "Debes proporcionar al menos un método de contacto (email o teléfono)"
                     emailContacto.isNotBlank() && !isValidEmail(emailContacto) -> 
                         error = "El formato del email no es válido"
-                    imagen1Uri == null || imagen2Uri == null -> error = "Se requieren 2 imágenes"
+                    anuncioIdEditar == null && (imagen1Uri == null || imagen2Uri == null) -> 
+                        error = "Se requieren 2 imágenes para crear un nuevo anuncio"
                     else -> {
                         isLoading = true
                         error = null
@@ -637,16 +696,48 @@ fun PublicarAutoScreen(
                                 )
                                 
                                 val anuncioSupabase = ModelConverter.anuncioToAnuncioSupabase(anuncio)
-                                val anuncioCreado = SupabaseService.createAnuncio(anuncioSupabase)
+                                val anuncioCreado = if (anuncioIdEditar != null) {
+                                    // Actualizar anuncio existente
+                                    SupabaseService.updateAnuncio(anuncioIdEditar, anuncioSupabase)
+                                } else {
+                                    // Crear nuevo anuncio
+                                    SupabaseService.createAnuncio(anuncioSupabase)
+                                }
                                 
-                                // Subir imágenes
-                                val imagenesUri = listOfNotNull(imagen1Uri, imagen2Uri)
+                                // Subir imágenes solo si se proporcionaron nuevas
+                                // En modo edición, solo procesar URIs que sean content:// (nuevas imágenes del dispositivo)
+                                // Las URLs http/https son imágenes existentes que no necesitan ser subidas
+                                val imagenesNuevas = if (anuncioIdEditar != null) {
+                                    listOfNotNull(
+                                        imagen1Uri?.takeIf { it.scheme == "content" },
+                                        imagen2Uri?.takeIf { it.scheme == "content" }
+                                    )
+                                } else {
+                                    listOfNotNull(imagen1Uri, imagen2Uri)
+                                }
+                                
+                                if (anuncioIdEditar != null && imagenesNuevas.isEmpty()) {
+                                    // Si estamos editando y no hay nuevas imágenes, solo actualizar el anuncio
+                                    android.util.Log.d("PublicarAutoScreen", "Editando anuncio sin nuevas imágenes")
+                                    success = true
+                                    isLoading = false
+                                    onSuccess()
+                                    return@launch
+                                }
+                                
+                                // Si estamos creando, necesitamos al menos 2 imágenes
+                                if (anuncioIdEditar == null && imagenesNuevas.size < 2) {
+                                    error = "Se requieren 2 imágenes para crear un nuevo anuncio"
+                                    isLoading = false
+                                    return@launch
+                                }
+                                
                                 val imagenesUrls = mutableListOf<String>()
                                 var imagenesGuardadas = 0
                                 
-                                imagenesUri.forEachIndexed { index, uri ->
+                                imagenesNuevas.forEachIndexed { index, uri ->
                                     try {
-                                        android.util.Log.d("PublicarAutoScreen", "Procesando imagen ${index + 1} de ${imagenesUri.size}")
+                                        android.util.Log.d("PublicarAutoScreen", "Procesando imagen ${index + 1} de ${imagenesNuevas.size}")
                                         val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
                                         val imageBytes = inputStream?.readBytes()
                                         
@@ -702,6 +793,23 @@ fun PublicarAutoScreen(
                                         imagenesUrls.add(imageUrl)
                                         android.util.Log.d("PublicarAutoScreen", "Imagen ${index + 1} subida exitosamente. URL: $imageUrl")
                                         
+                                        // Si estamos editando, eliminar imágenes antiguas primero
+                                        if (anuncioIdEditar != null && index == 0) {
+                                            try {
+                                                val imagenesAntiguas = SupabaseService.getImagenesByAnuncioId(anuncioIdEditar)
+                                                imagenesAntiguas.forEach { img ->
+                                                    try {
+                                                        SupabaseService.deleteImagen(img.id_imagen ?: 0)
+                                                        android.util.Log.d("PublicarAutoScreen", "Imagen antigua eliminada: ${img.id_imagen}")
+                                                    } catch (e: Exception) {
+                                                        android.util.Log.e("PublicarAutoScreen", "Error al eliminar imagen antigua: ${e.message}", e)
+                                                    }
+                                                }
+                                            } catch (e: Exception) {
+                                                android.util.Log.e("PublicarAutoScreen", "Error al obtener imágenes antiguas: ${e.message}", e)
+                                            }
+                                        }
+                                        
                                         // Guardar referencia en la tabla de imágenes con todos los campos
                                         android.util.Log.d("PublicarAutoScreen", "Guardando imagen ${index + 1} en BD para anuncio ${anuncioCreado.id_anuncio}")
                                         val imagenGuardada = SupabaseService.addImagen(
@@ -723,11 +831,12 @@ fun PublicarAutoScreen(
                                     }
                                 }
                                 
-                                if (imagenesGuardadas == 0) {
+                                // Solo validar imágenes guardadas si estamos creando un nuevo anuncio
+                                if (anuncioIdEditar == null && imagenesGuardadas == 0) {
                                     throw Exception("No se pudieron guardar las imágenes. Verifica los permisos del bucket en Supabase.")
                                 }
                                 
-                                android.util.Log.d("PublicarAutoScreen", "✅ Total de imágenes guardadas: $imagenesGuardadas de ${imagenesUri.size}")
+                                android.util.Log.d("PublicarAutoScreen", "✅ Total de imágenes guardadas: $imagenesGuardadas de ${imagenesNuevas.size}")
                                 
                                 success = true
                                 isLoading = false

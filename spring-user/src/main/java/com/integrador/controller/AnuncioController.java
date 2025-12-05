@@ -283,6 +283,91 @@ public class AnuncioController {
         }
     }
     
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    public ResponseEntity<Map<String, Object>> actualizarAnuncio(
+            @PathVariable Long id,
+            @RequestPart("modelo") String modelo,
+            @RequestPart("anio") String anio,
+            @RequestPart("kilometraje") String kilometraje,
+            @RequestPart("precio") String precio,
+            @RequestPart("descripcion") String descripcion,
+            @RequestPart("tipoVehiculo") String tipoVehiculo,
+            @RequestPart(value = "emailContacto", required = false) String emailContacto,
+            @RequestPart(value = "telefonoContacto", required = false) String telefonoContacto,
+            @RequestPart(value = "imagen1", required = false) MultipartFile imagen1,
+            @RequestPart(value = "imagen2", required = false) MultipartFile imagen2) {
+        
+        try {
+            System.out.println("=== INICIO ACTUALIZAR ANUNCIO ===");
+            
+            // Validar autenticación
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return ResponseEntity.status(401)
+                    .body(Map.of("error", "Usuario no autenticado"));
+            }
+            
+            // Obtener userId
+            String userId = null;
+            if (authentication instanceof JwtAuthenticationToken) {
+                Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
+                userId = jwt.getClaimAsString("sub");
+            } else if (authentication.getPrincipal() instanceof OAuth2User) {
+                OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+                userId = oauth2User.getAttribute("sub");
+            }
+            
+            if (userId == null || userId.isEmpty()) {
+                return ResponseEntity.status(401)
+                    .body(Map.of("error", "No se pudo obtener el ID del usuario"));
+            }
+            
+            // Crear el DTO
+            AnuncioRequest request = new AnuncioRequest();
+            request.setModelo(modelo);
+            request.setAnio(Integer.parseInt(anio));
+            request.setKilometraje(Integer.parseInt(kilometraje));
+            request.setPrecio(new java.math.BigDecimal(precio));
+            request.setDescripcion(descripcion);
+            request.setTipoVehiculo(tipoVehiculo);
+            request.setEmailContacto(emailContacto);
+            request.setTelefonoContacto(telefonoContacto);
+            
+            // Preparar lista de imágenes (pueden ser opcionales en actualización)
+            List<MultipartFile> imagenes = new java.util.ArrayList<>();
+            if (imagen1 != null && !imagen1.isEmpty()) {
+                imagenes.add(imagen1);
+            }
+            if (imagen2 != null && !imagen2.isEmpty()) {
+                imagenes.add(imagen2);
+            }
+            
+            // Actualizar el anuncio
+            Anuncio anuncio = anuncioService.actualizarAnuncio(id, userId, request, imagenes);
+            
+            System.out.println("Anuncio actualizado exitosamente con ID: " + anuncio.getIdAnuncio());
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Anuncio actualizado exitosamente");
+            response.put("anuncio", anuncio);
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", "Error en el formato de los datos numéricos: " + e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(400)
+                .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            System.out.println("ERROR al actualizar anuncio: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                .body(Map.of("error", "Error al actualizar el anuncio: " + e.getMessage()));
+        }
+    }
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Object>> eliminarAnuncio(@PathVariable Long id) {
         try {

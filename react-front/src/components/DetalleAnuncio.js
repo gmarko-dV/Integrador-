@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthProvider';
 import anuncioService from '../services/anuncioApiService';
-import notificacionService from '../services/notificacionService';
+import chatService from '../services/chatService';
 import { setupAuthInterceptor } from '../services/apiService';
 import { normalizeImageUrl } from '../utils/imageUtils';
 import './DetalleAnuncio.css';
@@ -68,7 +68,7 @@ const DetalleAnuncio = () => {
   };
 
   const handleContactar = async () => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !user) {
       // Si no está autenticado, redirigir al login
       navigate(`/login?returnTo=/anuncio/${idAnuncio}`);
       return;
@@ -81,22 +81,36 @@ const DetalleAnuncio = () => {
 
     try {
       setContactando(true);
-      const response = await notificacionService.contactarVendedor(
-        anuncio.idUsuario,
+      
+      // Crear o obtener conversación (pasar el mensaje para la notificación)
+      const conversacionResponse = await chatService.crearObtenerConversacion(
         anuncio.idAnuncio,
+        anuncio.idUsuario,
+        user.sub,
         mensajeContacto.trim()
       );
 
-      if (response.success) {
-        alert('¡Mensaje enviado exitosamente! El vendedor recibirá tu mensaje.');
-        setMostrarModalContacto(false);
-        setMensajeContacto('');
+      if (conversacionResponse.success) {
+        const idConversacion = conversacionResponse.conversacion.idConversacion;
+        
+        // Enviar el primer mensaje
+        const mensajeResponse = await chatService.enviarMensaje(
+          idConversacion,
+          mensajeContacto.trim()
+        );
+
+        if (mensajeResponse.success) {
+          // Redirigir a la conversación
+          navigate(`/chat/${idConversacion}`);
+        } else {
+          alert('Error al enviar el mensaje: ' + (mensajeResponse.error || 'Error desconocido'));
+        }
       } else {
-        alert('Error al enviar el mensaje: ' + (response.error || 'Error desconocido'));
+        alert('Error al crear conversación: ' + (conversacionResponse.error || 'Error desconocido'));
       }
     } catch (err) {
-      console.error('Error al enviar mensaje:', err);
-      alert('Error al enviar el mensaje. Por favor, intenta nuevamente.');
+      console.error('Error al contactar:', err);
+      alert('Error al contactar al vendedor. Por favor, intenta nuevamente.');
     } finally {
       setContactando(false);
     }

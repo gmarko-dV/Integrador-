@@ -1,5 +1,6 @@
 package com.integrador.controller;
 
+import com.integrador.dto.NotificacionDTO;
 import com.integrador.entity.Notificacion;
 import com.integrador.service.NotificacionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,27 +115,49 @@ public class NotificacionController {
     @GetMapping
     public ResponseEntity<Map<String, Object>> obtenerMisNotificaciones() {
         try {
+            System.out.println("=== OBTENIENDO NOTIFICACIONES (Controller) ===");
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication == null || !authentication.isAuthenticated()) {
+                System.out.println("Usuario no autenticado");
                 return ResponseEntity.status(401)
                     .body(Map.of("error", "Usuario no autenticado"));
             }
             
             String idVendedor = obtenerUserId(authentication);
+            System.out.println("ID Vendedor obtenido: " + idVendedor);
             if (idVendedor == null || idVendedor.isEmpty()) {
+                System.out.println("No se pudo obtener el ID del usuario");
                 return ResponseEntity.status(401)
                     .body(Map.of("error", "No se pudo obtener el ID del usuario"));
             }
             
             List<Notificacion> notificaciones = notificacionService.obtenerNotificacionesPorVendedor(idVendedor);
+            System.out.println("Notificaciones encontradas: " + notificaciones.size());
+            for (Notificacion n : notificaciones) {
+                System.out.println("  - ID: " + n.getIdNotificacion() + ", Vendedor: " + n.getIdVendedor() + 
+                    ", Comprador: " + n.getIdComprador() + ", Anuncio: " + n.getIdAnuncio() + 
+                    ", Leida: " + n.getLeida() + ", Leido: " + n.getLeido() +
+                    ", Titulo: " + n.getTitulo() + ", Mensaje: " + (n.getMensaje() != null ? n.getMensaje().substring(0, Math.min(50, n.getMensaje().length())) : "null"));
+            }
+            
+            // Convertir a DTOs para evitar problemas de serialización
+            List<NotificacionDTO> notificacionesDTO = notificaciones.stream()
+                .map(NotificacionDTO::fromEntity)
+                .collect(java.util.stream.Collectors.toList());
+            
+            System.out.println("Notificaciones DTO creadas: " + notificacionesDTO.size());
             
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("notificaciones", notificaciones);
+            response.put("notificaciones", notificacionesDTO);
+            
+            System.out.println("Tamaño de la lista en la respuesta: " + notificacionesDTO.size());
             
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
+            System.err.println("=== ERROR AL OBTENER NOTIFICACIONES ===");
+            System.err.println("Mensaje: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(500)
                 .body(Map.of("error", "Error al obtener las notificaciones: " + e.getMessage()));
@@ -165,9 +188,14 @@ public class NotificacionController {
             System.out.println("Notificaciones retornadas: " + notificaciones.size());
             System.out.println("Cantidad no leídas: " + cantidad);
             
+            // Convertir a DTOs
+            List<NotificacionDTO> notificacionesDTO = notificaciones.stream()
+                .map(NotificacionDTO::fromEntity)
+                .collect(java.util.stream.Collectors.toList());
+            
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("notificaciones", notificaciones);
+            response.put("notificaciones", notificacionesDTO);
             response.put("cantidadNoLeidas", cantidad);
             
             return ResponseEntity.ok(response);

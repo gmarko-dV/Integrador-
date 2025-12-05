@@ -118,7 +118,7 @@ const ListaAnunciosPage = () => {
       </header>
 
       {/* Content Section */}
-      <div className="content-section content-section-anuncios-page anuncios-page-white">
+      <div className="content-section content-section-anuncios-page">
         <ListaAnuncios />
       </div>
 

@@ -3,7 +3,7 @@
    ============================================ */
 .contacto-container {
   min-height: 100vh;
-  background-color: var(--color-bg-light);
+  background: transparent;
   position: relative;
 }
 
@@ -44,6 +44,7 @@
   padding: var(--spacing-xxl) var(--spacing-lg);
   max-width: var(--max-width-container);
   margin: 0 auto;
+  background: transparent;
 }
 
 .contacto-cards-container {
@@ -58,16 +59,18 @@
    ============================================ */
 .contacto-info-card,
 .contacto-form-card {
-  background: var(--color-white);
-  border-radius: var(--border-radius-md);
+  background: rgba(26, 31, 46, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
   padding: 2.5rem;
-  box-shadow: 0 2px 10px var(--color-shadow);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .contacto-card-title {
   font-size: 2rem;
   font-weight: 700;
-  color: var(--color-text);
+  color: white;
   margin: 0 0 var(--spacing-lg) 0;
 }
 
@@ -83,7 +86,7 @@
 .contacto-info-label {
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--color-primary);
+  color: #0066CC;
   margin: 0 0 var(--spacing-sm) 0;
 }
 
@@ -96,7 +99,7 @@
 
 .contacto-email-icon {
   font-size: 1.5rem;
-  color: var(--color-text);
+  color: rgba(255, 255, 255, 0.8);
   flex-shrink: 0;
   margin-top: 0.2rem;
 }
@@ -109,21 +112,21 @@
 
 .contacto-email-category {
   font-size: 0.9rem;
-  color: var(--color-text-light);
+  color: rgba(255, 255, 255, 0.7);
   margin: 0;
   font-weight: 500;
 }
 
 .contacto-email-link {
   font-size: 1rem;
-  color: var(--color-primary);
+  color: #0066CC;
   text-decoration: none;
   font-weight: 500;
   transition: color var(--transition-normal);
 }
 
 .contacto-email-link:hover {
-  color: var(--color-primary-hover);
+  color: #0052a3;
   text-decoration: underline;
 }
 
@@ -132,7 +135,7 @@
    ============================================ */
 .contacto-form-description {
   font-size: 1rem;
-  color: var(--color-text-light);
+  color: rgba(255, 255, 255, 0.8);
   line-height: 1.6;
   margin: 0 0 var(--spacing-lg) 0;
 }
@@ -162,31 +165,38 @@
 .contacto-form-label {
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--color-text);
+  color: white;
   margin: 0;
 }
 
 .contacto-required {
-  color: var(--color-error);
+  color: #ff4444;
 }
 
 .contacto-form-input,
 .contacto-form-textarea {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid var(--color-border);
+  background: rgba(15, 20, 25, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--border-radius-sm);
   font-size: 1rem;
   font-family: inherit;
+  color: white;
   transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
   box-sizing: border-box;
+}
+
+.contacto-form-input::placeholder,
+.contacto-form-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .contacto-form-input:focus,
 .contacto-form-textarea:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+  border-color: #0066CC;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.2);
 }
 
 .contacto-form-textarea {
@@ -195,8 +205,8 @@
 }
 
 .contacto-form-submit {
-  background: var(--color-primary);
-  color: var(--color-white);
+  background: #0066CC;
+  color: white;
   border: none;
   padding: var(--spacing-sm) var(--spacing-lg);
   font-size: 1.1rem;
@@ -209,9 +219,9 @@
 }
 
 .contacto-form-submit:hover:not(:disabled) {
-  background: var(--color-primary-hover);
+  background: #0052a3;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px var(--color-shadow-primary);
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.4);
 }
 
 .contacto-form-submit:disabled {

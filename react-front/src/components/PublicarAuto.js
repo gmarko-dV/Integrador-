@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './AuthProvider';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import anuncioService from '../services/anuncioApiService';
 import { setupAuthInterceptor } from '../services/apiService';
+import { normalizeImageUrl } from '../utils/imageUtils';
 import './PublicarAuto.css';
 
 const PublicarAuto = () => {
   const { isAuthenticated, getIdTokenClaims, loginWithRedirect } = useAuth();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const anuncioIdEditar = searchParams.get('editar');
+  const [esModoEdicion, setEsModoEdicion] = useState(false);
+  const [cargandoDatos, setCargandoDatos] = useState(false);
 
   // Asegurar que el interceptor esté configurado
   useEffect(() => {
@@ -13,6 +20,66 @@ const PublicarAuto = () => {
       setupAuthInterceptor(getIdTokenClaims);
     }
   }, [isAuthenticated, getIdTokenClaims]);
+
+  // Cargar datos del anuncio si estamos en modo edición
+  useEffect(() => {
+    if (anuncioIdEditar && isAuthenticated) {
+      setEsModoEdicion(true);
+      setCargandoDatos(true);
+      cargarAnuncioParaEditar(anuncioIdEditar);
+    } else {
+      setEsModoEdicion(false);
+    }
+  }, [anuncioIdEditar, isAuthenticated]);
+
+  const cargarAnuncioParaEditar = async (id) => {
+    try {
+      setCargandoDatos(true);
+      setError(null);
+      console.log('Cargando anuncio para editar, ID:', id);
+      const response = await anuncioService.obtenerAnuncioPorId(id);
+      console.log('Respuesta del servidor:', response);
+      
+      if (response.success && response.anuncio) {
+        const anuncio = response.anuncio;
+        console.log('Anuncio cargado:', anuncio);
+        
+        // Convertir números a strings para los inputs
+        setFormData({
+          modelo: anuncio.modelo || '',
+          anio: anuncio.anio ? String(anuncio.anio) : '',
+          kilometraje: anuncio.kilometraje ? String(anuncio.kilometraje) : '',
+          precio: anuncio.precio ? String(anuncio.precio) : '',
+          descripcion: anuncio.descripcion || '',
+          emailContacto: anuncio.emailContacto || '',
+          telefonoContacto: anuncio.telefonoContacto || '',
+          tipoVehiculo: anuncio.tipoVehiculo || '',
+        });
+        
+        // Cargar imágenes existentes como previews (solo para mostrar, no para editar)
+        if (anuncio.imagenes && anuncio.imagenes.length > 0) {
+          // Mostrar primera imagen como preview si existe
+          if (anuncio.imagenes[0] && anuncio.imagenes[0].urlImagen) {
+            setPreview1(normalizeImageUrl(anuncio.imagenes[0].urlImagen));
+          }
+          // Mostrar segunda imagen como preview si existe
+          if (anuncio.imagenes[1] && anuncio.imagenes[1].urlImagen) {
+            setPreview2(normalizeImageUrl(anuncio.imagenes[1].urlImagen));
+          }
+        }
+        
+        console.log('Formulario cargado con datos del anuncio');
+      } else {
+        console.error('Respuesta sin éxito o sin anuncio:', response);
+        setError('No se pudo cargar el anuncio para editar');
+      }
+    } catch (err) {
+      console.error('Error al cargar anuncio para editar:', err);
+      setError('Error al cargar el anuncio para editar: ' + (err.response?.data?.error || err.message));
+    } finally {
+      setCargandoDatos(false);
+    }
+  };
   const [formData, setFormData] = useState({
     modelo: '',
     anio: '',
@@ -109,8 +176,8 @@ const PublicarAuto = () => {
       setLoading(false);
       return;
     }
-    if (!imagen1 || !imagen2) {
-      setError('Se requieren 2 imágenes');
+    if (!esModoEdicion && (!imagen1 || !imagen2)) {
+      setError('Se requieren 2 imágenes para crear un nuevo anuncio');
       setLoading(false);
       return;
     }
@@ -178,31 +245,57 @@ const PublicarAuto = () => {
       if (telefonoContacto) {
         formDataToSend.append('telefonoContacto', telefonoContacto);
       }
-      formDataToSend.append('imagen1', imagen1);
-      formDataToSend.append('imagen2', imagen2);
+      // Solo agregar imágenes si se proporcionaron nuevas
+      if (imagen1) {
+        formDataToSend.append('imagen1', imagen1);
+      }
+      if (imagen2) {
+        formDataToSend.append('imagen2', imagen2);
+      }
 
-      const response = await anuncioService.crearAnuncio(formDataToSend);
+      let response;
+      if (esModoEdicion && anuncioIdEditar) {
+        // Actualizar anuncio existente
+        response = await anuncioService.actualizarAnuncio(anuncioIdEditar, formDataToSend);
+      } else {
+        // Crear nuevo anuncio
+        if (!imagen1 || !imagen2) {
+          setError('Se requieren 2 imágenes para crear un nuevo anuncio');
+          setLoading(false);
+          return;
+        }
+        response = await anuncioService.crearAnuncio(formDataToSend);
+      }
 
       if (response.success) {
         setSuccess(true);
-        // Limpiar formulario
-        setFormData({
-          modelo: '',
-          anio: '',
-          kilometraje: '',
-          precio: '',
-          descripcion: '',
-          emailContacto: '',
-          telefonoContacto: '',
-          tipoVehiculo: '',
-        });
-        setImagen1(null);
-        setImagen2(null);
-        setPreview1(null);
-        setPreview2(null);
-        // Limpiar inputs de archivo
-        document.getElementById('imagen1').value = '';
-        document.getElementById('imagen2').value = '';
+        if (esModoEdicion) {
+          // Redirigir a mis anuncios después de editar
+          setTimeout(() => {
+            navigate('/?tab=anuncios');
+          }, 2000);
+        } else {
+          // Limpiar formulario solo si es creación
+          setFormData({
+            modelo: '',
+            anio: '',
+            kilometraje: '',
+            precio: '',
+            descripcion: '',
+            emailContacto: '',
+            telefonoContacto: '',
+            tipoVehiculo: '',
+          });
+          setImagen1(null);
+          setImagen2(null);
+          setPreview1(null);
+          setPreview2(null);
+          // Limpiar inputs de archivo
+          const img1Input = document.getElementById('imagen1');
+          const img2Input = document.getElementById('imagen2');
+          if (img1Input) img1Input.value = '';
+          if (img2Input) img2Input.value = '';
+        }
       }
     } catch (err) {
       console.error('Error al crear anuncio:', err);
@@ -225,11 +318,23 @@ const PublicarAuto = () => {
     );
   }
 
+  if (cargandoDatos) {
+    return (
+      <div className="publicar-auto-container">
+        <div className="publicar-auto-message">
+          <p>Cargando datos del anuncio...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="publicar-auto-form">
-        <h2>Publicar Auto en Venta</h2>
+        <h2>{esModoEdicion ? 'Editar Anuncio' : 'Publicar Auto en Venta'}</h2>
         <p className="publicar-auto-subtitle">
-          Completa el formulario para publicar tu vehículo
+          {esModoEdicion 
+            ? 'Modifica los datos de tu vehículo. Las imágenes nuevas reemplazarán las actuales.'
+            : 'Completa el formulario para publicar tu vehículo'}
         </p>
 
         {error && (
@@ -266,7 +371,7 @@ const PublicarAuto = () => {
 
         {success && (
           <div className="publicar-auto-success">
-            <p>¡Anuncio publicado exitosamente!</p>
+            <p>{esModoEdicion ? '¡Anuncio actualizado exitosamente!' : '¡Anuncio publicado exitosamente!'}</p>
           </div>
         )}
           <div className="form-group">
@@ -336,14 +441,6 @@ const PublicarAuto = () => {
               value={formData.tipoVehiculo}
               onChange={handleInputChange}
               required
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                fontSize: '1rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                backgroundColor: 'white'
-              }}
             >
               <option value="">Selecciona una categoría</option>
               <option value="Hatchback">Hatchback</option>
@@ -393,7 +490,7 @@ const PublicarAuto = () => {
           </div>
 
           <div className="form-group">
-            <label>Imágenes * (2 imágenes requeridas)</label>
+            <label>Imágenes {esModoEdicion ? '(opcionales - las nuevas reemplazarán las actuales)' : '* (2 imágenes requeridas)'}</label>
             <div className="imagenes-container">
               <div className="imagen-input">
                 <label htmlFor="imagen1" className="imagen-label">
@@ -411,7 +508,7 @@ const PublicarAuto = () => {
                   id="imagen1"
                   accept="image/*"
                   onChange={(e) => handleImageChange(e, 1)}
-                  required
+                  required={!esModoEdicion}
                   style={{ display: 'none' }}
                 />
               </div>
@@ -432,7 +529,7 @@ const PublicarAuto = () => {
                   id="imagen2"
                   accept="image/*"
                   onChange={(e) => handleImageChange(e, 2)}
-                  required
+                  required={!esModoEdicion}
                   style={{ display: 'none' }}
                 />
               </div>
@@ -440,7 +537,9 @@ const PublicarAuto = () => {
           </div>
 
           <button type="submit" className="submit-button" disabled={loading}>
-            {loading ? 'Publicando...' : 'Publicar Anuncio'}
+            {loading 
+              ? (esModoEdicion ? 'Actualizando...' : 'Publicando...') 
+              : (esModoEdicion ? 'Actualizar Anuncio' : 'Publicar Anuncio')}
           </button>
     </form>
   );

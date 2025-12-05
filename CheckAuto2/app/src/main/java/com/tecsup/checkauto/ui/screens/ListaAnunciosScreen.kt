@@ -40,6 +40,7 @@ fun ListaAnunciosScreen(
     esMisAnuncios: Boolean = false,
     onAnuncioClick: (Long) -> Unit = {},
     onContactar: (Anuncio) -> Unit = {},
+    onEditar: (Long) -> Unit = {},
     onEliminar: (Long) -> Unit = {},
     isAuthenticated: Boolean = false,
     userId: String? = null
@@ -283,6 +284,7 @@ fun ListaAnunciosScreen(
                             },
                             onAnuncioClick = { onAnuncioClick(anuncio.idAnuncio ?: 0) },
                             onContactar = { onContactar(anuncio) },
+                            onEditar = { onEditar(anuncio.idAnuncio ?: 0) },
                             onEliminar = { 
                                 scope.launch {
                                     try {
@@ -364,6 +366,7 @@ fun AnuncioCard(
     onImagenChange: (Long, Int) -> Unit,
     onAnuncioClick: () -> Unit,
     onContactar: () -> Unit,
+    onEditar: () -> Unit = {},
     onEliminar: () -> Unit,
     esMiAnuncio: Boolean,
     isAuthenticated: Boolean
@@ -645,6 +648,29 @@ fun AnuncioCard(
                     }
                     
                     if (esMiAnuncio) {
+                        Surface(
+                            onClick = onEditar,
+                            modifier = Modifier.size(52.dp),
+                            color = Color(0xFF4CAF50).copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(14.dp),
+                            border = androidx.compose.foundation.BorderStroke(
+                                1.dp,
+                                Color(0xFF4CAF50).copy(alpha = 0.4f)
+                            )
+                        ) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Icon(
+                                    Icons.Default.Edit,
+                                    contentDescription = "Editar",
+                                    tint = Color(0xFF4CAF50),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+                        
                         Surface(
                             onClick = onEliminar,
                             modifier = Modifier.size(52.dp),

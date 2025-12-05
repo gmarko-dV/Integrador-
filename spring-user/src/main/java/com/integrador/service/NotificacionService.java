@@ -37,6 +37,10 @@ public class NotificacionService {
         notificacion.setNombreComprador(nombreComprador);
         notificacion.setEmailComprador(emailComprador);
         
+        // Asegurar explícitamente que la notificación esté como no leída
+        notificacion.setLeida(false);
+        notificacion.setLeido(false);
+        
         // Establecer idUsuario - convertir el hash del idVendedor a Integer
         // Como id_usuario es NOT NULL en la BD y es Integer, usamos un hash del string
         int idUsuarioHash = Math.abs(idVendedor.hashCode());
@@ -65,7 +69,20 @@ public class NotificacionService {
     }
     
     public List<Notificacion> obtenerNotificacionesPorVendedor(String idVendedor) {
-        return notificacionRepository.findByIdVendedorOrderByFechaCreacionDesc(idVendedor);
+        System.out.println("=== OBTENIENDO NOTIFICACIONES POR VENDEDOR (Service) ===");
+        System.out.println("ID Vendedor: " + idVendedor);
+        
+        List<Notificacion> todas = notificacionRepository.findAll();
+        System.out.println("Total de notificaciones en BD: " + todas.size());
+        for (Notificacion n : todas) {
+            System.out.println("  - ID: " + n.getIdNotificacion() + ", Vendedor: " + n.getIdVendedor() + 
+                ", Comprador: " + n.getIdComprador() + ", Anuncio: " + n.getIdAnuncio());
+        }
+        
+        List<Notificacion> resultado = notificacionRepository.findByIdVendedorOrderByFechaCreacionDesc(idVendedor);
+        System.out.println("Notificaciones encontradas para vendedor " + idVendedor + ": " + resultado.size());
+        
+        return resultado;
     }
     
     public List<Notificacion> obtenerNotificacionesNoLeidasPorVendedor(String idVendedor) {

@@ -27,6 +27,12 @@ const anuncioService = {
     return response.data;
   },
 
+  // Actualizar un anuncio
+  async actualizarAnuncio(id, formData) {
+    const response = await springApi.put(`/anuncios/${id}`, formData);
+    return response.data;
+  },
+
   // Eliminar un anuncio
   async eliminarAnuncio(id) {
     const response = await springApi.delete(`/anuncios/${id}`);

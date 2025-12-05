@@ -167,9 +167,123 @@ public class AnuncioService {
         return anuncios;
     }
     
+    @Transactional(readOnly = true)
     public Anuncio obtenerAnuncioPorId(Long id) {
-        return anuncioRepository.findById(id)
+        // Usar el método que carga las imágenes con JOIN FETCH para evitar problemas de lazy loading
+        return anuncioRepository.findByIdWithImagenes(id)
             .orElseThrow(() -> new IllegalArgumentException("Anuncio no encontrado"));
+    }
+    
+    @Transactional
+    public Anuncio actualizarAnuncio(Long idAnuncio, String idUsuario, AnuncioRequest request, List<MultipartFile> imagenes) {
+        // Obtener el anuncio existente con sus imágenes cargadas
+        Anuncio anuncio = anuncioRepository.findByIdWithImagenes(idAnuncio)
+            .orElseThrow(() -> new IllegalArgumentException("Anuncio no encontrado"));
+        
+        // Verificar que el usuario sea el dueño del anuncio
+        if (!anuncio.getIdUsuario().equals(idUsuario)) {
+            throw new IllegalArgumentException("No tienes permiso para editar este anuncio");
+        }
+        
+        // Validaciones
+        if (request.getModelo() == null || request.getModelo().trim().isEmpty()) {
+            throw new IllegalArgumentException("El modelo es requerido");
+        }
+        if (request.getAnio() == null || request.getAnio() < 1900 || request.getAnio() > 2100) {
+            throw new IllegalArgumentException("El año debe ser válido");
+        }
+        if (request.getKilometraje() == null || request.getKilometraje() < 0) {
+            throw new IllegalArgumentException("El kilometraje debe ser mayor o igual a 0");
+        }
+        if (request.getPrecio() == null || request.getPrecio().compareTo(java.math.BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("El precio debe ser mayor a 0");
+        }
+        if (request.getDescripcion() == null || request.getDescripcion().trim().isEmpty()) {
+            throw new IllegalArgumentException("La descripción es requerida");
+        }
+        
+        // Actualizar los campos del anuncio
+        anuncio.setModelo(request.getModelo());
+        anuncio.setAnio(request.getAnio());
+        anuncio.setKilometraje(request.getKilometraje());
+        anuncio.setPrecio(request.getPrecio());
+        anuncio.setDescripcion(request.getDescripcion());
+        anuncio.setTipoVehiculo(request.getTipoVehiculo());
+        anuncio.setEmailContacto(request.getEmailContacto());
+        anuncio.setTelefonoContacto(request.getTelefonoContacto());
+        // Actualizar título automáticamente
+        String titulo = request.getModelo() + " " + request.getAnio();
+        anuncio.setTitulo(titulo);
+        
+        // Si se proporcionan nuevas imágenes, reemplazar las existentes
+        if (imagenes != null && !imagenes.isEmpty()) {
+            // Eliminar imágenes antiguas del sistema de archivos
+            List<Imagen> imagenesAntiguas = anuncio.getImagenes();
+            if (imagenesAntiguas != null && !imagenesAntiguas.isEmpty()) {
+                for (Imagen imagen : imagenesAntiguas) {
+                    try {
+                        String urlImagen = imagen.getUrlImagen();
+                        if (urlImagen != null && urlImagen.startsWith("/uploads/")) {
+                            String nombreArchivo = urlImagen.replace("/uploads/", "");
+                            Path rutaImagen = Paths.get(uploadDir, nombreArchivo);
+                            if (Files.exists(rutaImagen)) {
+                                Files.delete(rutaImagen);
+                            }
+                        }
+                    } catch (IOException e) {
+                        System.err.println("Error al eliminar imagen antigua: " + e.getMessage());
+                    }
+                }
+                // Limpiar la colección de imágenes
+                anuncio.getImagenes().clear();
+            }
+            
+            // Crear directorio de uploads si no existe
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                try {
+                    Files.createDirectories(uploadPath);
+                } catch (IOException e) {
+                    throw new RuntimeException("Error al crear directorio de uploads", e);
+                }
+            }
+            
+            // Guardar las nuevas imágenes
+            for (int i = 0; i < imagenes.size(); i++) {
+                MultipartFile archivo = imagenes.get(i);
+                if (archivo != null && !archivo.isEmpty()) {
+                    try {
+                        // Generar nombre único para el archivo
+                        String extension = obtenerExtension(archivo.getOriginalFilename());
+                        String nombreArchivo = UUID.randomUUID().toString() + extension;
+                        Path rutaArchivo = uploadPath.resolve(nombreArchivo);
+                        
+                        // Guardar el archivo
+                        Files.copy(archivo.getInputStream(), rutaArchivo, StandardCopyOption.REPLACE_EXISTING);
+                        
+                        // Crear entidad Imagen
+                        Imagen imagen = new Imagen();
+                        imagen.setUrlImagen("/uploads/" + nombreArchivo);
+                        imagen.setNombreArchivo(archivo.getOriginalFilename());
+                        imagen.setTipoArchivo(archivo.getContentType());
+                        imagen.setTamanoArchivo(archivo.getSize());
+                        imagen.setOrden(i + 1);
+                        
+                        // Agregar la imagen al anuncio
+                        anuncio.addImagen(imagen);
+                    } catch (IOException e) {
+                        throw new RuntimeException("Error al guardar la imagen: " + e.getMessage(), e);
+                    }
+                }
+            }
+        }
+        
+        // Guardar el anuncio actualizado
+        Anuncio anuncioGuardado = anuncioRepository.save(anuncio);
+        
+        // Recargar el anuncio con las imágenes para evitar problemas de lazy loading en la serialización
+        return anuncioRepository.findByIdWithImagenes(idAnuncio)
+            .orElse(anuncioGuardado);
     }
     
     @Transactional

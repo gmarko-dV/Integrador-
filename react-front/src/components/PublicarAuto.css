@@ -5,24 +5,32 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-  background: var(--color-white);
-  border-radius: var(--border-radius-lg);
+  background: rgba(26, 31, 46, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
   padding: var(--spacing-xl);
-  box-shadow: 0 4px 6px var(--color-shadow);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(20px);
   max-width: var(--max-width-form);
   margin: var(--spacing-xl) auto;
   width: calc(100% - var(--spacing-xl));
   box-sizing: border-box;
+  color: white;
 }
 
 .publicar-auto-form h2 {
-  color: var(--color-text);
+  color: white;
   margin-bottom: var(--spacing-xs);
   font-size: 1.8rem;
+  font-weight: bold;
+  background: linear-gradient(135deg, #0066CC 0%, #0052A3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .publicar-auto-subtitle {
-  color: var(--color-text-light);
+  color: rgba(255, 255, 255, 0.7);
   margin-bottom: var(--spacing-xl);
   font-size: 0.95rem;
 }
@@ -38,24 +46,72 @@
 
 .form-group label {
   font-weight: 600;
-  color: var(--color-text);
+  color: white;
   font-size: 0.9rem;
 }
 
 .form-group input,
 .form-group textarea {
-  padding: var(--spacing-sm);
-  border: 2px solid var(--color-border);
-  border-radius: var(--border-radius-md);
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
   font-size: 1rem;
-  transition: border-color var(--transition-normal);
+  transition: all 0.3s ease;
   font-family: inherit;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  backdrop-filter: blur(10px);
+}
+
+.form-group select {
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  background: rgba(26, 31, 46, 0.9);
+  color: white;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+.form-group select option {
+  background: rgba(26, 31, 46, 0.95);
+  color: white;
+  padding: 12px;
+}
+
+.form-group select:focus {
+  outline: none;
+  border-color: #0066CC;
+  background: rgba(26, 31, 46, 0.95);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.2);
+}
+
+.form-group select:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(26, 31, 46, 0.95);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .form-group input:focus,
-.form-group textarea:focus {
+.form-group textarea:focus,
+.form-group select:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: #0066CC;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.2);
 }
 
 .form-group textarea {
@@ -86,14 +142,19 @@
 .imagen-label {
   display: block;
   cursor: pointer;
-  border: 2px dashed var(--color-border);
-  border-radius: var(--border-radius-md);
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
   overflow: hidden;
-  transition: border-color var(--transition-normal);
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
 }
 
 .imagen-label:hover {
-  border-color: var(--color-primary);
+  border-color: #0066CC;
+  background: rgba(0, 102, 204, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.2);
 }
 
 .imagen-placeholder {
@@ -102,76 +163,85 @@
   align-items: center;
   justify-content: center;
   padding: var(--spacing-xl);
-  background: var(--color-bg-light);
-  color: #999;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
   font-size: 0.9rem;
 }
 
 .imagen-placeholder span:first-child {
   font-size: 2rem;
   margin-bottom: var(--spacing-xs);
+  opacity: 0.7;
 }
 
 .imagen-preview {
   width: 100%;
   height: 200px;
   object-fit: cover;
+  border-radius: 12px;
 }
 
 /* ============================================
    BOTONES
    ============================================ */
 .submit-button {
-  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
-  color: var(--color-white);
+  background: linear-gradient(135deg, #0066CC 0%, #0052A3 100%);
+  color: white;
   border: none;
-  padding: var(--spacing-md) var(--spacing-xl);
-  border-radius: var(--border-radius-md);
+  padding: 14px 28px;
+  border-radius: 12px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition: all 0.3s ease;
   margin-top: var(--spacing-md);
+  box-shadow: 0 4px 16px rgba(0, 102, 204, 0.3);
 }
 
 .submit-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
+  box-shadow: 0 6px 20px rgba(0, 102, 204, 0.4);
+  background: linear-gradient(135deg, #0052A3 0%, #004080 100%);
 }
 
 .submit-button:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 /* ============================================
    MENSAJES
    ============================================ */
 .publicar-auto-error {
-  background: var(--color-error-bg);
-  border: 1px solid var(--color-error-border);
-  color: var(--color-error-text);
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #f87171;
   padding: var(--spacing-md);
-  border-radius: var(--border-radius-md);
+  border-radius: 12px;
   margin-bottom: var(--spacing-md);
+  backdrop-filter: blur(10px);
 }
 
 .publicar-auto-success {
-  background: var(--color-success-bg);
-  border: 1px solid var(--color-success-border);
-  color: var(--color-success-text);
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  color: #10b981;
   padding: var(--spacing-md);
-  border-radius: var(--border-radius-md);
+  border-radius: 12px;
   margin-bottom: var(--spacing-md);
+  backdrop-filter: blur(10px);
 }
 
 .publicar-auto-message {
   text-align: center;
   padding: var(--spacing-xl);
-  background: var(--color-white);
-  border-radius: var(--border-radius-lg);
-  box-shadow: 0 4px 6px var(--color-shadow);
-  color: var(--color-text-light);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
 }
 
 /* ============================================

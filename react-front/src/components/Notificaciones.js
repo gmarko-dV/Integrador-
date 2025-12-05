@@ -16,12 +16,18 @@ export const useNotificaciones = () => {
     try {
       setLoading(true);
       setError(null);
+      console.log('=== CARGANDO NOTIFICACIONES (Frontend) ===');
       const response = await notificacionService.obtenerMisNotificaciones();
+      
+      console.log('Respuesta del servidor:', response);
       
       if (response.success) {
         const todas = response.notificaciones || [];
+        console.log('Total de notificaciones recibidas:', todas.length);
         const noLeidas = todas.filter(n => !n.leida && !n.leido);
         const cantidad = noLeidas.length;
+        console.log('Notificaciones no leídas:', cantidad);
+        console.log('Notificaciones:', todas);
         setNotificaciones(todas);
         setCantidadNoLeidas(cantidad);
       } else {
@@ -30,6 +36,7 @@ export const useNotificaciones = () => {
       }
     } catch (err) {
       console.error('Error al cargar notificaciones:', err);
+      console.error('Detalles del error:', err.response?.data);
       setError('Error al cargar las notificaciones: ' + (err.response?.data?.error || err.message));
     } finally {
       setLoading(false);
@@ -80,12 +87,27 @@ export const NotificationDropdown = () => {
 
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      // Recargar notificaciones cuando se abre el dropdown
+      console.log('Dropdown abierto, recargando notificaciones...');
+      cargarNotificaciones();
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen, cargarNotificaciones]);
+  
+  // Recargar notificaciones periódicamente cuando el dropdown está abierto
+  useEffect(() => {
+    if (isOpen) {
+      const interval = setInterval(() => {
+        console.log('Recargando notificaciones automáticamente...');
+        cargarNotificaciones();
+      }, 5000); // Cada 5 segundos
+      
+      return () => clearInterval(interval);
+    }
+  }, [isOpen, cargarNotificaciones]);
 
   const marcarComoLeida = async (idNotificacion) => {
     try {

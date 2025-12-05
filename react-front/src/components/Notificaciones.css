@@ -54,9 +54,11 @@
   top: 100%;
   right: 0;
   margin-top: var(--spacing-md);
-  background-color: var(--color-white);
-  border-radius: var(--border-radius-lg);
-  box-shadow: 0 4px 12px var(--color-shadow);
+  background: rgba(26, 31, 46, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   min-width: 320px;
   max-width: 400px;
   max-height: 500px;
@@ -65,12 +67,31 @@
   padding: var(--spacing-xl);
 }
 
+.notification-dropdown::-webkit-scrollbar {
+  width: 8px;
+}
+
+.notification-dropdown::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.notification-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.notification-dropdown::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
 .notificaciones-container {
-  background: var(--color-white);
-  border-radius: var(--border-radius-lg);
+  background: rgba(26, 31, 46, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
   padding: var(--spacing-xl);
   margin: 0;
-  box-shadow: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   max-height: 400px;
   overflow-y: auto;
 }
@@ -84,13 +105,13 @@
   justify-content: space-between;
   margin-bottom: var(--spacing-lg);
   padding-bottom: var(--spacing-lg);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .notificaciones-header h3 {
   margin: 0;
   font-size: 1rem;
-  color: var(--color-text);
+  color: white;
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
@@ -114,19 +135,21 @@
 }
 
 .marcar-todas-leidas-btn {
-  background: var(--color-primary);
-  color: var(--color-white);
+  background: #0066CC;
+  color: white;
   border: none;
   padding: var(--spacing-sm) var(--spacing-lg);
-  border-radius: var(--border-radius-sm);
+  border-radius: 8px;
   cursor: pointer;
   font-size: 0.8rem;
   font-weight: 600;
-  transition: background var(--transition-normal);
+  transition: all 0.3s ease;
 }
 
 .marcar-todas-leidas-btn:hover {
-  background: var(--color-primary-hover);
+  background: #0052A3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
 }
 
 /* ============================================
@@ -136,27 +159,35 @@
 .notificaciones-empty {
   text-align: center;
   padding: var(--spacing-xl);
-  color: var(--color-text-light);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 0.9rem;
 }
 
 .notificaciones-error {
-  background: #ffebee;
-  color: #c62828;
+  background: rgba(255, 107, 107, 0.15);
+  color: #ff6b6b;
   padding: var(--spacing-xl);
-  border-radius: var(--border-radius-sm);
+  border-radius: 8px;
   margin-bottom: var(--spacing-xl);
   text-align: center;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  backdrop-filter: blur(10px);
 }
 
 .notificaciones-error button {
   margin-top: var(--spacing-xs);
-  background: #c62828;
-  color: var(--color-white);
+  background: #ff6b6b;
+  color: white;
   border: none;
   padding: var(--spacing-xs) var(--spacing-xl);
-  border-radius: var(--border-radius-sm);
+  border-radius: 8px;
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.notificaciones-error button:hover {
+  background: #ff5252;
+  transform: translateY(-1px);
 }
 
 /* ============================================
@@ -173,22 +204,25 @@
   align-items: flex-start;
   justify-content: space-between;
   padding: var(--spacing-lg);
-  border-radius: var(--border-radius-md);
-  border-left: 3px solid var(--color-primary);
-  background: var(--color-bg-light);
-  transition: all var(--transition-normal);
+  border-radius: 12px;
+  border-left: 3px solid #0066CC;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
   margin-bottom: var(--spacing-xs);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .notificacion-item.no-leida {
-  background: var(--color-bg-unread);
-  border-left-color: var(--color-border-primary);
-  box-shadow: 0 2px 4px var(--color-shadow-primary);
+  background: rgba(0, 102, 204, 0.2);
+  border-left-color: #0066CC;
+  box-shadow: 0 2px 8px rgba(0, 102, 204, 0.3);
+  border-color: rgba(0, 102, 204, 0.3);
 }
 
 .notificacion-item.leida {
-  background: var(--color-bg-lighter);
-  border-left-color: #9e9e9e;
+  background: rgba(255, 255, 255, 0.05);
+  border-left-color: rgba(255, 255, 255, 0.3);
   opacity: 0.8;
 }
 
@@ -199,64 +233,66 @@
 .notificacion-titulo {
   margin: 0 0 var(--spacing-sm) 0;
   font-size: 0.95rem;
-  color: var(--color-primary);
+  color: #0066CC;
   font-weight: 600;
 }
 
 .notificacion-item.no-leida .notificacion-titulo {
-  color: var(--color-border-primary);
+  color: #4da6ff;
 }
 
 .notificacion-comprador {
   margin: var(--spacing-sm) 0;
   padding: var(--spacing-sm);
-  background: rgba(0, 102, 204, 0.1);
-  border-radius: var(--border-radius-sm);
+  background: rgba(0, 102, 204, 0.2);
+  border-radius: 8px;
   font-size: 0.85rem;
+  border: 1px solid rgba(0, 102, 204, 0.3);
 }
 
 .comprador-label {
   font-weight: 600;
-  color: var(--color-primary);
+  color: #4da6ff;
 }
 
 .comprador-info {
-  color: var(--color-text);
+  color: white;
 }
 
 .comprador-email {
-  color: var(--color-text-light);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 0.85rem;
 }
 
 .notificacion-mensaje {
   margin: var(--spacing-sm) 0;
   font-size: 0.9rem;
-  color: var(--color-text);
+  color: white;
   font-weight: 500;
   line-height: 1.4;
 }
 
 .notificacion-item.no-leida .notificacion-mensaje {
   font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .notificacion-fecha {
   margin: var(--spacing-xs) 0 0 0;
   font-size: 0.75rem;
-  color: var(--color-text-light);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .marcar-leida-btn {
-  background: var(--color-success);
-  color: var(--color-white);
+  background: #4caf50;
+  color: white;
   border: none;
   padding: var(--spacing-sm) var(--spacing-xs);
-  border-radius: var(--border-radius-sm);
+  border-radius: 8px;
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: bold;
-  transition: background var(--transition-normal);
+  transition: all 0.3s ease;
   margin-left: var(--spacing-xs);
   min-width: 32px;
   height: 32px;
@@ -264,7 +300,9 @@
 }
 
 .marcar-leida-btn:hover {
-  background: var(--color-success-hover);
+  background: #45a049;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
 }
 
 /* ============================================

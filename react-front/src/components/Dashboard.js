@@ -177,6 +177,16 @@ const Dashboard = () => {
                   Mis Anuncios
                 </a>
                 <a 
+                  href="#conversaciones" 
+                  className="nav-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate('/conversaciones');
+                  }}
+                >
+                  Conversaciones
+                </a>
+                <a 
                   href="#buscar-placa" 
                   className={`nav-link ${activeTab === 'buscar' ? 'active' : ''}`}
                   onClick={(e) => {
@@ -365,13 +375,13 @@ const Dashboard = () => {
           {activeTab === 'contacto' ? (
             <Contacto />
           ) : isAuthenticated ? (
-            <div className={`authenticated-content ${activeTab === 'publicar' ? 'publicar-content' : ''}`}>
+            <>
               {activeTab === 'anuncios' && <ListaAnuncios />}
               {activeTab === 'buscar' && <PlateSearch />}
               {activeTab === 'publicar' && <PublicarAuto />}
-            </div>
+            </>
           ) : (
-            <div className="unauthenticated-content">
+            <>
               {activeTab === 'buscar' ? (
                 // Mostrar PlateSearch incluso si no está autenticado
                 <PlateSearch />
@@ -384,7 +394,7 @@ const Dashboard = () => {
                   <LoginButton />
                 </div>
               )}
-            </div>
+            </>
           )}
         </div>
       )}

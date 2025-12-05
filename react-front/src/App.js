@@ -7,6 +7,8 @@ import Callback from './components/Callback';
 import ListaAnunciosPage from './components/ListaAnunciosPage';
 import DetalleAnuncio from './components/DetalleAnuncio';
 import UserSettingsPage from './components/UserSettingsPage';
+import ListaConversaciones from './components/ListaConversaciones';
+import ChatScreen from './components/ChatScreen';
 import { setupAuthInterceptor } from './services/apiService';
 import './App.css';
 
@@ -31,6 +33,8 @@ const AppContent = () => {
           <Route path="/anuncios" element={<ListaAnunciosPage />} />
           <Route path="/anuncio/:idAnuncio" element={<DetalleAnuncio />} />
           <Route path="/configuracion" element={<UserSettingsPage />} />
+          <Route path="/conversaciones" element={<ListaConversaciones />} />
+          <Route path="/chat/:idConversacion" element={<ChatScreen />} />
         </Routes>
       </div>
     </Router>

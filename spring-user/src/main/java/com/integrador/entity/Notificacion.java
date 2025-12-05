@@ -1,5 +1,8 @@
 package com.integrador.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -10,6 +13,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notificaciones")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Notificacion {
     
     @Id
@@ -49,15 +53,17 @@ public class Notificacion {
     
     @Column(name = "fecha_creacion")
     @CreationTimestamp
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime fechaCreacion;
     
     @Column(name = "metadata", columnDefinition = "JSONB")
     @JdbcTypeCode(SqlTypes.JSON)
+    @JsonIgnore
     private JsonNode metadata;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_anuncio", referencedColumnName = "id_anuncio", insertable = false, updatable = false)
-    @com.fasterxml.jackson.annotation.JsonIgnore
+    @JsonIgnore
     private Anuncio anuncio;
     
     // Constructores
@@ -81,6 +87,9 @@ public class Notificacion {
         this.mensaje = mensaje;
         this.leida = false;
         this.leido = false;
+        // Asegurar que ambos campos estén en false explícitamente
+        if (this.leida == null) this.leida = false;
+        if (this.leido == null) this.leido = false;
     }
     
     // Getters y Setters

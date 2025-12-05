@@ -3,6 +3,7 @@
    ============================================ */
 .peruautos-homepage {
   min-height: 100vh;
+  background: linear-gradient(180deg, #1A1F2E 0%, #0F1419 100%);
   background-attachment: fixed;
   color: var(--color-white);
   position: relative;
@@ -14,7 +15,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background: url('https://images.unsplash.com/photo-1449824913935-59a10b8d2000?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover no-repeat;
+  background: linear-gradient(180deg, #1A1F2E 0%, #0F1419 100%);
   background-attachment: fixed;
   z-index: -1;
   will-change: transform;
@@ -255,7 +256,7 @@
    VEHICLE TYPES SECTION
    ============================================ */
 .vehicle-types-section {
-  background: var(--color-white);
+  background: linear-gradient(180deg, rgba(26, 31, 46, 0.95) 0%, rgba(15, 20, 25, 0.95) 100%);
   padding: var(--spacing-xxl) var(--spacing-lg);
   position: relative;
   z-index: 1;
@@ -270,10 +271,11 @@
   text-align: center;
   font-size: 2rem;
   font-weight: 700;
-  color: var(--color-text);
+  color: white;
   margin-bottom: var(--spacing-xl);
   position: relative;
   padding: 0 var(--spacing-lg);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
 }
 
 .vehicle-types-title::before,
@@ -283,7 +285,7 @@
   top: 50%;
   width: 100%;
   height: 1px;
-  background: var(--color-border);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .vehicle-types-title::before {
@@ -310,8 +312,9 @@
   align-items: center;
   justify-content: center;
   padding: var(--spacing-md);
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
+  background: rgba(26, 31, 46, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--border-radius-lg);
   cursor: pointer;
   transition: all var(--transition-normal) ease;
@@ -321,8 +324,8 @@
 
 .vehicle-type-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 20px var(--color-shadow-primary);
-  border-color: var(--color-primary);
+  box-shadow: 0 8px 20px rgba(0, 102, 204, 0.4);
+  border-color: #0066CC;
 }
 
 .vehicle-type-image {
@@ -331,13 +334,13 @@
   height: auto;
   object-fit: contain;
   margin-bottom: var(--spacing-sm);
-  background: var(--color-white);
+  background: transparent;
 }
 
 .vehicle-type-name {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-text);
+  color: white;
   margin: 0;
   text-align: center;
 }
@@ -348,17 +351,21 @@
 .content-section {
   background: transparent;
   color: var(--color-text);
-  padding: var(--spacing-xl) var(--spacing-lg);
+  padding: 0;
   position: relative;
   z-index: 1;
   border: none !important;
 }
 
 .content-section-anuncios-page {
-  background: var(--color-white);
+  background: transparent;
 }
 
 .anuncios-section {
+  background: transparent;
+}
+
+.buscar-section {
   background: transparent;
 }
 
@@ -380,13 +387,25 @@
   max-width: var(--max-width-content);
   margin: 0 auto;
   border: none !important;
+  background: transparent;
+  width: 100%;
+  padding: var(--spacing-xl) var(--spacing-lg);
+}
+
+.unauthenticated-content {
+  background: transparent;
+  max-width: none;
+  width: 100%;
+  margin: 0;
 }
 
 /* ============================================
    DASHBOARD COMPONENTS
    ============================================ */
 .dashboard-welcome {
-  background-color: var(--color-bg-light);
+  background: rgba(26, 31, 46, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 15px;
   border-radius: var(--border-radius-md);
   margin-bottom: 20px;
@@ -396,15 +415,17 @@
 .dashboard-welcome p {
   margin: 0;
   font-size: 16px;
-  color: var(--color-text);
+  color: white;
 }
 
 .dashboard-login-card,
 .dashboard-services {
-  background-color: var(--color-white);
+  background: rgba(26, 31, 46, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 30px 20px;
   border-radius: var(--border-radius-lg);
-  box-shadow: 0 2px 10px var(--color-shadow);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   text-align: center;
   margin-bottom: 30px;
   max-width: var(--max-width-content);
@@ -415,11 +436,11 @@
 .dashboard-login-card h3,
 .dashboard-services h3 {
   margin-top: 0;
-  color: var(--color-text);
+  color: white;
 }
 
 .dashboard-login-card p {
-  color: var(--color-text-light);
+  color: rgba(255, 255, 255, 0.8);
   margin-bottom: 20px;
 }
 
@@ -434,26 +455,29 @@
 }
 
 .dashboard-feature-card {
-  background-color: var(--color-white);
+  background: rgba(26, 31, 46, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 20px;
   border-radius: var(--border-radius-lg);
-  box-shadow: 0 2px 5px var(--color-shadow);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   text-align: center;
 }
 
 .dashboard-feature-icon {
   font-size: 32px;
   margin-bottom: 10px;
+  color: #0066CC;
 }
 
 .dashboard-feature-card h4 {
   margin: 10px 0;
-  color: var(--color-text);
+  color: white;
 }
 
 .dashboard-feature-card p {
   font-size: 14px;
-  color: var(--color-text-light);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .dashboard-footer {
@@ -491,7 +515,7 @@
   padding: var(--spacing-sm) var(--spacing-lg);
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-text-light);
+  color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
   border-bottom: 3px solid transparent;
   transition: all var(--transition-normal);
@@ -501,11 +525,11 @@
 
 .tab-button:hover,
 .tab-button.active {
-  color: var(--color-primary);
+  color: #0066CC;
 }
 
 .tab-button.active {
-  border-bottom-color: var(--color-primary);
+  border-bottom-color: #0066CC;
 }
 
 /* ============================================

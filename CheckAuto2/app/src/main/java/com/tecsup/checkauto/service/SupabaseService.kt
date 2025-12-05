@@ -102,6 +102,27 @@ data class CategoriaVehiculoSupabase(
     val imagen_url: String? = null
 )
 
+@Serializable
+data class ConversacionSupabase(
+    val id_conversacion: Int? = null,
+    val id_anuncio: Int,
+    val id_vendedor: String,
+    val id_comprador: String,
+    val fecha_creacion: String? = null,
+    val fecha_ultimo_mensaje: String? = null,
+    val activa: Boolean = true
+)
+
+@Serializable
+data class MensajeSupabase(
+    val id_mensaje: Int? = null,
+    val id_conversacion: Int,
+    val id_remitente: String,
+    val mensaje: String,
+    val leido: Boolean = false,
+    val fecha_envio: String? = null
+)
+
 // ========================================
 // SERVICIO DE SUPABASE
 // ========================================
@@ -438,6 +459,145 @@ object SupabaseService {
                 }
             }
             .decodeSingleOrNull<CategoriaVehiculoSupabase>()
+    }
+    
+    // ========================================
+    // CONVERSACIONES Y MENSAJES
+    // ========================================
+    
+    /**
+     * Obtener todas las conversaciones de un usuario
+     */
+    suspend fun getConversacionesByUsuario(userId: String): List<ConversacionSupabase> {
+        return client.from("conversaciones")
+            .select {
+                filter {
+                    or {
+                        eq("id_vendedor", userId)
+                        eq("id_comprador", userId)
+                    }
+                    eq("activa", true)
+                }
+                order("fecha_ultimo_mensaje", Order.DESCENDING, nullsFirst = false)
+                order("fecha_creacion", Order.DESCENDING)
+            }
+            .decodeList<ConversacionSupabase>()
+    }
+    
+    /**
+     * Obtener una conversación por ID
+     */
+    suspend fun getConversacionById(idConversacion: Int): ConversacionSupabase? {
+        return client.from("conversaciones")
+            .select {
+                filter {
+                    eq("id_conversacion", idConversacion)
+                }
+            }
+            .decodeSingleOrNull<ConversacionSupabase>()
+    }
+    
+    /**
+     * Buscar conversación existente entre vendedor y comprador sobre un anuncio
+     */
+    suspend fun findConversacionExistente(
+        idAnuncio: Int,
+        idVendedor: String,
+        idComprador: String
+    ): ConversacionSupabase? {
+        return client.from("conversaciones")
+            .select {
+                filter {
+                    eq("id_anuncio", idAnuncio)
+                    eq("id_vendedor", idVendedor)
+                    eq("id_comprador", idComprador)
+                }
+            }
+            .decodeSingleOrNull<ConversacionSupabase>()
+    }
+    
+    /**
+     * Crear una nueva conversación
+     */
+    suspend fun createConversacion(conversacion: ConversacionSupabase): ConversacionSupabase {
+        return client.from("conversaciones")
+            .insert(conversacion) {
+                select()
+            }
+            .decodeSingle<ConversacionSupabase>()
+    }
+    
+    /**
+     * Actualizar una conversación
+     */
+    suspend fun updateConversacion(conversacion: ConversacionSupabase): ConversacionSupabase {
+        val id = conversacion.id_conversacion ?: throw IllegalArgumentException("ID de conversación requerido")
+        return client.from("conversaciones")
+            .update(conversacion) {
+                filter {
+                    eq("id_conversacion", id)
+                }
+                select()
+            }
+            .decodeSingle<ConversacionSupabase>()
+    }
+    
+    /**
+     * Obtener todos los mensajes de una conversación
+     */
+    suspend fun getMensajesByConversacion(idConversacion: Int): List<MensajeSupabase> {
+        return client.from("mensajes")
+            .select {
+                filter {
+                    eq("id_conversacion", idConversacion)
+                }
+                order("fecha_envio", Order.ASCENDING)
+            }
+            .decodeList<MensajeSupabase>()
+    }
+    
+    /**
+     * Enviar un mensaje
+     */
+    suspend fun enviarMensaje(mensaje: MensajeSupabase): MensajeSupabase {
+        return client.from("mensajes")
+            .insert(mensaje) {
+                select()
+            }
+            .decodeSingle<MensajeSupabase>()
+    }
+    
+    /**
+     * Marcar mensajes como leídos
+     */
+    suspend fun marcarMensajesComoLeidos(idConversacion: Int, userId: String) {
+        client.from("mensajes")
+            .update(mapOf("leido" to true)) {
+                filter {
+                    eq("id_conversacion", idConversacion)
+                    neq("id_remitente", userId)
+                    eq("leido", false)
+                }
+            }
+    }
+    
+    /**
+     * Contar mensajes no leídos de un usuario
+     */
+    suspend fun contarMensajesNoLeidos(userId: String): Int {
+        // Obtener todas las conversaciones del usuario
+        val conversaciones = getConversacionesByUsuario(userId)
+        var totalNoLeidos = 0
+        
+        for (conversacion in conversaciones) {
+            val idConv = conversacion.id_conversacion ?: continue
+            val mensajes = getMensajesByConversacion(idConv)
+            totalNoLeidos += mensajes.count { 
+                !it.leido && it.id_remitente != userId 
+            }
+        }
+        
+        return totalNoLeidos
     }
 }
 

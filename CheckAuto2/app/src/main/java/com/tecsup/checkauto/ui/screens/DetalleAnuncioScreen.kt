@@ -35,10 +35,45 @@ import java.text.NumberFormat
 import java.util.*
 
 @Composable
+fun SpecRow(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Surface(
+                color = Color(0xFF0066CC).copy(alpha = 0.1f),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = label,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF0066CC),
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                )
+            }
+        }
+        Text(
+            text = value,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White.copy(alpha = 0.9f)
+        )
+    }
+}
+
+@Composable
 fun DetalleAnuncioScreen(
     anuncioId: Long,
     onBack: () -> Unit,
-    onContactar: () -> Unit = {},
+    onContactar: (Long) -> Unit = {}, // Cambiado para recibir idConversacion
     esPropietario: Boolean = false,
     isAuthenticated: Boolean = false,
     userId: String? = null
@@ -78,14 +113,6 @@ fun DetalleAnuncioScreen(
             CircularProgressIndicator()
         }
         return
-    }
-    
-    // Mostrar mensaje de éxito
-    if (mensajeExito != null) {
-        LaunchedEffect(mensajeExito) {
-            kotlinx.coroutines.delay(3000)
-            mensajeExito = null
-        }
     }
     
     if (errorMessage != null || anuncio == null) {
@@ -534,206 +561,197 @@ fun DetalleAnuncioScreen(
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
-            }
-            } // Cierre del Column principal
+            } // Cierre del Column interno (padding)
+        } // Cierre del Column principal (scroll)
     
             // Modal de contacto mejorado
             if (mostrarModalContacto) {
-        AlertDialog(
-            onDismissRequest = { mostrarModalContacto = false },
-            title = { 
-                Text(
-                    "💬 Enviar Mensaje",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1A1A1A),
-                    letterSpacing = 0.5.sp
-                ) 
-            },
-            text = {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFFF0F4F8)
-                        )
-                    ) {
+                AlertDialog(
+                    onDismissRequest = { mostrarModalContacto = false },
+                    title = { 
+                        Text(
+                            "💬 Enviar Mensaje",
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1A1A1A),
+                            letterSpacing = 0.5.sp
+                        ) 
+                    },
+                    text = {
                         Column(
-                            modifier = Modifier.padding(12.dp)
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            Text(
-                                text = anuncioData.titulo ?: "${anuncioData.modelo} ${anuncioData.anio}",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp,
-                                color = Color(0xFF1A1A1A),
-                                modifier = Modifier.padding(bottom = 4.dp)
-                            )
-                            Text(
-                                text = formatter.format(anuncioData.precio),
-                                color = Color(0xFF0066CC),
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                    OutlinedTextField(
-                        value = mensajeContacto,
-                        onValueChange = { mensajeContacto = it },
-                        label = { Text("Tu mensaje") },
-                        modifier = Modifier.fillMaxWidth(),
-                        minLines = 4,
-                        maxLines = 6,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFF0066CC),
-                            focusedLabelColor = Color(0xFF0066CC)
-                        )
-                    )
-                    Surface(
-                        color = Color(0xFFE0F2FE),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text("ℹ️", fontSize = 16.sp)
-                            Text(
-                                text = "El vendedor recibirá una notificación",
-                                fontSize = 12.sp,
-                                color = Color(0xFF0369A1),
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
-                }
-            },
-            shape = RoundedCornerShape(24.dp),
-            containerColor = Color.White,
-            confirmButton = {
-                Button(
-                    onClick = {
-                        contactando = true
-                        scope.launch {
-                            try {
-                                val compradorId = com.tecsup.checkauto.service.SupabaseAuthService.getCurrentUserId()
-                                val compradorEmail = com.tecsup.checkauto.service.SupabaseAuthService.getCurrentUserEmail()
-                                val compradorNombre = com.tecsup.checkauto.service.SupabaseAuthService.getCurrentUser()?.userMetadata?.get("nombre")?.toString()
-                                
-                                if (compradorId != null && anuncioData.idUsuario != null) {
-                                    // Crear notificación
-                                    SupabaseService.createNotificacion(
-                                        com.tecsup.checkauto.service.NotificacionSupabase(
-                                            id_vendedor = anuncioData.idUsuario,
-                                            id_comprador = compradorId,
-                                            nombre_comprador = compradorNombre,
-                                            email_comprador = compradorEmail,
-                                            id_anuncio = anuncioData.idAnuncio?.toInt(),
-                                            titulo = "Nuevo mensaje sobre tu vehículo",
-                                            mensaje = mensajeContacto,
-                                            tipo = "interes"
-                                        )
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Color(0xFFF0F4F8)
+                                )
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(12.dp)
+                                ) {
+                                    Text(
+                                        text = anuncioData.titulo ?: "${anuncioData.modelo} ${anuncioData.anio}",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 16.sp,
+                                        color = Color(0xFF1A1A1A),
+                                        modifier = Modifier.padding(bottom = 4.dp)
+                                    )
+                                    Text(
+                                        text = formatter.format(anuncioData.precio),
+                                        color = Color(0xFF0066CC),
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold
                                     )
                                 }
-                                
-                                contactando = false
-                                mostrarModalContacto = false
-                                mensajeContacto = "" // Limpiar el mensaje
-                                mensajeExito = "¡Mensaje enviado exitosamente! El vendedor recibirá una notificación."
-                            } catch (e: Exception) {
-                                contactando = false
-                                errorMessage = "Error al enviar mensaje: ${e.message}"
+                            }
+                            OutlinedTextField(
+                                value = mensajeContacto,
+                                onValueChange = { mensajeContacto = it },
+                                label = { Text("Tu mensaje") },
+                                modifier = Modifier.fillMaxWidth(),
+                                minLines = 4,
+                                maxLines = 6,
+                                shape = RoundedCornerShape(12.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color(0xFF0066CC),
+                                    focusedLabelColor = Color(0xFF0066CC)
+                                )
+                            )
+                            Surface(
+                                color = Color(0xFFE0F2FE),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text("ℹ️", fontSize = 16.sp)
+                                    Text(
+                                        text = "El vendedor recibirá una notificación",
+                                        fontSize = 12.sp,
+                                        color = Color(0xFF0369A1),
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
                             }
                         }
                     },
-                    enabled = mensajeContacto.isNotBlank() && !contactando,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF0066CC)
-                    ),
-                    shape = RoundedCornerShape(12.dp),
-                    elevation = ButtonDefaults.buttonElevation(
-                        defaultElevation = 4.dp,
-                        pressedElevation = 2.dp
-                    )
-                ) {
-                    if (contactando) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            color = Color.White
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            "Enviando...",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    } else {
-                        Text(
-                            "📤 Enviar Mensaje",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.3.sp
-                        )
+                    shape = RoundedCornerShape(24.dp),
+                    containerColor = Color.White,
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                contactando = true
+                                scope.launch {
+                                    try {
+                                        val compradorId = com.tecsup.checkauto.service.SupabaseAuthService.getCurrentUserId()
+                                        
+                                        if (compradorId != null && anuncioData.idUsuario != null && anuncioData.idAnuncio != null) {
+                                            // Buscar conversación existente o crear nueva
+                                            var conversacion = SupabaseService.findConversacionExistente(
+                                                anuncioData.idAnuncio.toInt(),
+                                                anuncioData.idUsuario,
+                                                compradorId
+                                            )
+                                            
+                                            if (conversacion == null) {
+                                                // Crear nueva conversación
+                                                val nuevaConversacion = com.tecsup.checkauto.service.ConversacionSupabase(
+                                                    id_conversacion = null,
+                                                    id_anuncio = anuncioData.idAnuncio.toInt(),
+                                                    id_vendedor = anuncioData.idUsuario,
+                                                    id_comprador = compradorId,
+                                                    fecha_creacion = null,
+                                                    fecha_ultimo_mensaje = null,
+                                                    activa = true
+                                                )
+                                                conversacion = SupabaseService.createConversacion(nuevaConversacion)
+                                            }
+                                            
+                                            // Enviar el mensaje
+                                            if (conversacion != null && conversacion.id_conversacion != null) {
+                                                val mensajeSupabase = com.tecsup.checkauto.service.MensajeSupabase(
+                                                    id_mensaje = null,
+                                                    id_conversacion = conversacion.id_conversacion,
+                                                    id_remitente = compradorId,
+                                                    mensaje = mensajeContacto.trim(),
+                                                    leido = false,
+                                                    fecha_envio = null
+                                                )
+                                                SupabaseService.enviarMensaje(mensajeSupabase)
+                                                
+                                                // Navegar al chat
+                                                mostrarModalContacto = false
+                                                mensajeContacto = ""
+                                                contactando = false
+                                                onContactar(conversacion.id_conversacion.toLong())
+                                            } else {
+                                                mensajeExito = "Error al crear la conversación"
+                                                contactando = false
+                                            }
+                                        } else {
+                                            mensajeExito = "Error: No se pudo obtener la información del usuario"
+                                            contactando = false
+                                        }
+                                    } catch (e: Exception) {
+                                        android.util.Log.e("DetalleAnuncio", "Error al contactar: ${e.message}", e)
+                                        mensajeExito = "Error al enviar el mensaje: ${e.message}"
+                                        contactando = false
+                                    }
+                                }
+                            },
+                            enabled = mensajeContacto.isNotBlank() && !contactando,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF0066CC)
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            elevation = ButtonDefaults.buttonElevation(
+                                defaultElevation = 4.dp,
+                                pressedElevation = 2.dp
+                            )
+                        ) {
+                            if (contactando) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    color = Color.White
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(
+                                    "Enviando...",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            } else {
+                                Text(
+                                    "📤 Enviar Mensaje",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 0.3.sp
+                                )
+                            }
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { mostrarModalContacto = false },
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = Color(0xFF6B7280)
+                            )
+                        ) {
+                            Text(
+                                "Cancelar",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
                     }
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { mostrarModalContacto = false },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = Color(0xFF6B7280)
-                    )
-                ) {
-                    Text(
-                        "Cancelar",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-            }
-        )
-    }
-        } // Cierre del Box
-    } // Cierre del contenido del Scaffold
-}
-
-@Composable
-fun SpecRow(label: String, value: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Surface(
-                color = Color(0xFF0066CC).copy(alpha = 0.1f),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(
-                    text = label,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF0066CC),
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                 )
             }
-        }
-        Text(
-            text = value,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White.copy(alpha = 0.9f)
-        )
-    }
-}
+        } // Cierre del Box
+    } // Cierre del contenido del Scaffold
+} // Cierre de la función DetalleAnuncioScreen
 
