@@ -71,12 +71,14 @@ object ModelConverter {
     }
     
     /**
-     * Normaliza la URL de la imagen para usar Supabase Storage:
+     * Normaliza la URL de la imagen:
      * - Si es una URL completa (http/https), la devuelve tal cual
-     * - Si es una ruta relativa (empieza con /uploads/), la convierte a Supabase Storage
+     * - Si es una ruta relativa /uploads/..., la convierte a URL completa del servidor Spring Boot
+     * - Si es una ruta relativa sin /uploads/, puede ser un path de Supabase Storage
      * 
-     * La app móvil es independiente y usa Supabase Storage para todas las imágenes.
-     * Las URLs relativas /uploads/... se convierten a Supabase Storage.
+     * Las imágenes pueden venir de dos fuentes:
+     * 1. Supabase Storage: URLs completas o paths relativos del bucket
+     * 2. Servidor Spring Boot: rutas /uploads/... que se convierten a URLs del servidor
      */
     private fun normalizarUrlImagen(url: String): String {
         if (url.isBlank()) {
@@ -87,31 +89,19 @@ object ModelConverter {
         android.util.Log.d("ModelConverter", "Normalizando URL de imagen original: $url")
         
         val urlNormalizada = when {
-            // Si ya es una URL completa (http/https), verificar si es de Supabase Storage
+            // Si ya es una URL completa (http/https), usarla tal cual
             url.startsWith("http://") || url.startsWith("https://") -> {
-                // Si ya es una URL de Supabase Storage, usarla tal cual
-                if (url.contains("supabase.co/storage")) {
-                    android.util.Log.d("ModelConverter", "URL ya es de Supabase Storage, usando tal cual")
-                    url
-                } else {
-                    // Si es una URL de otro servidor (Spring Boot, Django), intentar convertirla
-                    // Extraer el nombre del archivo de la URL
-                    val fileName = url.substringAfterLast("/")
-                    val supabaseUrl = "${SupabaseConfig.SUPABASE_URL}/storage/v1/object/public/${SupabaseConfig.STORAGE_BUCKET_ANUNCIOS}/$fileName"
-                    android.util.Log.d("ModelConverter", "URL externa convertida a Supabase Storage: $supabaseUrl")
-                    supabaseUrl
-                }
+                android.util.Log.d("ModelConverter", "URL ya es completa, usando tal cual")
+                url
             }
-            // Si es una ruta relativa que empieza con /uploads/, convertirla a Supabase Storage
+            // Si es una ruta relativa que empieza con /uploads/, viene del servidor Spring Boot
             url.startsWith("/uploads/") -> {
-                // Extraer el path después de /uploads/
-                val path = url.removePrefix("/uploads/")
-                // Construir URL completa de Supabase Storage
-                val supabaseUrl = "${SupabaseConfig.SUPABASE_URL}/storage/v1/object/public/${SupabaseConfig.STORAGE_BUCKET_ANUNCIOS}/$path"
-                android.util.Log.d("ModelConverter", "URL relativa /uploads/ convertida a Supabase Storage: $supabaseUrl")
-                supabaseUrl
+                // Construir URL completa del servidor Spring Boot
+                val springUrl = "${ApiConfig.SPRING_BACKEND_BASE_URL}$url"
+                android.util.Log.d("ModelConverter", "URL relativa /uploads/ convertida a Spring Boot: $springUrl")
+                springUrl
             }
-            // Si es una ruta relativa sin /uploads/, puede ser un path directo del bucket
+            // Si es una ruta relativa sin /uploads/, puede ser un path directo de Supabase Storage
             url.startsWith("/") -> {
                 val path = url.removePrefix("/")
                 val supabaseUrl = "${SupabaseConfig.SUPABASE_URL}/storage/v1/object/public/${SupabaseConfig.STORAGE_BUCKET_ANUNCIOS}/$path"
@@ -121,8 +111,7 @@ object ModelConverter {
             // Si no empieza con /, puede ser un path relativo del bucket (sin / inicial)
             // También puede ser un UUID o nombre de archivo sin path
             else -> {
-                // Si parece un UUID o nombre de archivo, intentar buscarlo directamente en el bucket
-                // Primero intentar como path directo
+                // Intentar como path directo de Supabase Storage
                 val supabaseUrl = "${SupabaseConfig.SUPABASE_URL}/storage/v1/object/public/${SupabaseConfig.STORAGE_BUCKET_ANUNCIOS}/$url"
                 android.util.Log.d("ModelConverter", "Path relativo convertido a Supabase Storage: $supabaseUrl")
                 supabaseUrl

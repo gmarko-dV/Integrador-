@@ -61,6 +61,7 @@ fun RegisterScreen(
                 ImageRequest.Builder(context)
                     .data(backgroundImageUrl)
                     .crossfade(true)
+                    .allowHardware(false) // Permitir todos los formatos de imagen
                     .build()
             ),
             contentDescription = null,

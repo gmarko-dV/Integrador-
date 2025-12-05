@@ -5,7 +5,7 @@ import { API_ENDPOINTS } from '../config/api';
 import './PlateSearch.css';
 
 const PlateSearch = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, getIdTokenClaims } = useAuth();
   const [plateNumber, setPlateNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [searchResult, setSearchResult] = useState(null);
@@ -40,10 +40,24 @@ const PlateSearch = () => {
         throw new Error('Debes iniciar sesión para buscar placas');
       }
 
+      // Obtener el token de autenticación
+      let authHeader = {};
+      if (getIdTokenClaims) {
+        try {
+          const claims = await getIdTokenClaims();
+          if (claims && claims.__raw) {
+            authHeader['Authorization'] = `Bearer ${claims.__raw}`;
+          }
+        } catch (tokenError) {
+          console.warn('No se pudo obtener el token:', tokenError);
+        }
+      }
+
       const response = await fetch(API_ENDPOINTS.PLATE_SEARCH, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...authHeader
         },
         credentials: 'include',
         body: JSON.stringify({
@@ -61,12 +75,33 @@ const PlateSearch = () => {
       }
 
       const data = await response.json();
+      
+      console.log('Respuesta del servidor:', data);
+      console.log('Status OK:', response.ok);
+      console.log('Status code:', response.status);
 
       if (!response.ok) {
-        throw new Error(data.message || 'Error al buscar la placa');
+        // El backend puede devolver 'error' o 'message'
+        const errorMessage = data.error || data.message || 'Error al buscar la placa';
+        console.error('Error en respuesta:', errorMessage);
+        throw new Error(errorMessage);
       }
 
-      setSearchResult(data.vehicle);
+      // Verificar si la respuesta tiene éxito
+      if (data.success && data.vehicle) {
+        console.log('Datos del vehículo recibidos:', data.vehicle);
+        setSearchResult(data.vehicle);
+      } else if (data.vehicle) {
+        // Si hay vehicle aunque no tenga success, intentar mostrarlo
+        console.log('Datos del vehículo recibidos (sin success):', data.vehicle);
+        setSearchResult(data.vehicle);
+      } else if (data.error) {
+        console.error('Error en datos:', data.error);
+        throw new Error(data.error);
+      } else {
+        console.error('Respuesta sin datos válidos:', data);
+        throw new Error('No se pudo obtener información de la placa');
+      }
       
     } catch (err) {
       setError(err.message);

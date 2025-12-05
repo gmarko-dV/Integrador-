@@ -78,6 +78,7 @@ fun DashboardScreen(
                 ImageRequest.Builder(context)
                     .data(backgroundImageUrl)
                     .crossfade(true)
+                    .allowHardware(false) // Permitir todos los formatos de imagen
                     .build()
             ),
             contentDescription = null,
@@ -509,6 +510,7 @@ fun DashboardScreen(
                                                         ImageRequest.Builder(context)
                                                             .data(vehicleInfo.imagenUrl)
                                                             .crossfade(true)
+                                                            .allowHardware(false) // Permitir todos los formatos de imagen
                                                             .build()
                                                     ),
                                                     contentDescription = vehicleInfo.nombre,

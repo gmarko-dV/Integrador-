@@ -405,6 +405,7 @@ fun AnuncioCard(
                             ImageRequest.Builder(context)
                                 .data(imagenMostrada)
                                 .crossfade(true)
+                                .allowHardware(false) // Permitir todos los formatos de imagen
                                 .error(android.R.drawable.ic_menu_report_image)
                                 .placeholder(android.R.drawable.ic_menu_gallery)
                                 .listener(

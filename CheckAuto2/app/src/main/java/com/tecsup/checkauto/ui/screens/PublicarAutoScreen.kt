@@ -656,8 +656,27 @@ fun PublicarAutoScreen(
                                         
                                         android.util.Log.d("PublicarAutoScreen", "Imagen ${index + 1} leída: ${imageBytes.size} bytes")
                                         
+                                        // Obtener MIME type y extensión, soportando todos los tipos de imágenes
                                         val mimeType = context.contentResolver.getType(uri) ?: "image/jpeg"
-                                        val extension = mimeType.split("/").lastOrNull() ?: "jpg"
+                                        val extension = when {
+                                            mimeType.contains("jpeg") || mimeType.contains("jpg") -> "jpg"
+                                            mimeType.contains("png") -> "png"
+                                            mimeType.contains("webp") -> "webp"
+                                            mimeType.contains("gif") -> "gif"
+                                            mimeType.contains("bmp") -> "bmp"
+                                            mimeType.contains("heic") || mimeType.contains("heif") -> "heic"
+                                            mimeType.contains("svg") -> "svg"
+                                            else -> {
+                                                // Intentar extraer extensión del MIME type
+                                                val mimeExtension = mimeType.split("/").lastOrNull() ?: "jpg"
+                                                // Si el MIME type no tiene extensión válida, usar jpg por defecto
+                                                if (mimeExtension in listOf("jpg", "jpeg", "png", "webp", "gif", "bmp")) {
+                                                    mimeExtension
+                                                } else {
+                                                    "jpg"
+                                                }
+                                            }
+                                        }
                                         val fileName = "${anuncioCreado.id_anuncio}/imagen${index + 1}.${extension}"
                                         
                                         // Obtener nombre del archivo original si está disponible
@@ -814,6 +833,7 @@ fun ImageSelector(
                         ImageRequest.Builder(context)
                             .data(imageUri)
                             .crossfade(true)
+                            .allowHardware(false) // Permitir todos los formatos de imagen
                             .build()
                     ),
                     contentDescription = label,

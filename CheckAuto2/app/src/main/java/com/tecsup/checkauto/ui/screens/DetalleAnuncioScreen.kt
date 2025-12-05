@@ -216,6 +216,7 @@ fun DetalleAnuncioScreen(
                         ImageRequest.Builder(context)
                             .data(imagenes[imagenActual].urlImagen)
                             .crossfade(true)
+                            .allowHardware(false) // Permitir todos los formatos de imagen
                             .build()
                     ),
                     contentDescription = anuncioData.modelo,
@@ -306,6 +307,7 @@ fun DetalleAnuncioScreen(
                                     ImageRequest.Builder(context)
                                         .data(imagen.urlImagen)
                                         .crossfade(true)
+                                        .allowHardware(false) // Permitir todos los formatos de imagen
                                         .build()
                                 ),
                                 contentDescription = "Miniatura ${index + 1}",

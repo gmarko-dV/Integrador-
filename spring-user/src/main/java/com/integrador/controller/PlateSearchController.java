@@ -33,16 +33,18 @@ public class PlateSearchController {
                     .body(Map.of("error", "El número de placa es requerido"));
             }
             
+            // Si no hay userId, usar un valor por defecto (permite búsquedas sin autenticación)
             if (userId == null || userId.trim().isEmpty()) {
-                return ResponseEntity.badRequest()
-                    .body(Map.of("error", "El ID de usuario es requerido"));
-            }
-            
-            // Validar autenticación
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated()) {
-                return ResponseEntity.status(401)
-                    .body(Map.of("error", "Usuario no autenticado"));
+                // Intentar obtener userId del usuario autenticado si existe
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof OAuth2User) {
+                    OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+                    userId = oauth2User.getAttribute("sub");
+                }
+                // Si aún no hay userId, usar "guest" para permitir búsquedas sin autenticación
+                if (userId == null || userId.trim().isEmpty()) {
+                    userId = "guest";
+                }
             }
             
             Map<String, Object> result = plateSearchService.searchPlate(plateNumber.toUpperCase(), userId);
@@ -56,10 +58,23 @@ public class PlateSearchController {
             
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
-                .body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
+                .body(Map.of("error", e.getMessage(), "message", e.getMessage()));
+        } catch (RuntimeException e) {
+            // Errores de la API de placas o validaciones
+            String errorMessage = e.getMessage();
+            if (errorMessage != null && errorMessage.contains("No se pudo obtener información")) {
+                return ResponseEntity.status(400)
+                    .body(Map.of("error", errorMessage, "message", errorMessage));
+            }
             return ResponseEntity.status(500)
-                .body(Map.of("error", "Error interno del servidor: " + e.getMessage()));
+                .body(Map.of("error", errorMessage != null ? errorMessage : "Error al buscar la placa", 
+                             "message", errorMessage != null ? errorMessage : "Error al buscar la placa"));
+        } catch (Exception e) {
+            System.err.println("Error en búsqueda de placa: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                .body(Map.of("error", "Error interno del servidor. Por favor, intenta nuevamente.", 
+                             "message", "Error interno del servidor. Por favor, intenta nuevamente."));
         }
     }
     
